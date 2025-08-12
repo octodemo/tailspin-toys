@@ -22,6 +22,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - Use SQLAlchemy models for database interactions
 - Use Flask blueprints for organizing routes
 - Follow RESTful API design principles
+- Tests are written using unittest
 
 ### Svelte and Astro Patterns
 

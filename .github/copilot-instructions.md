@@ -4,6 +4,10 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ## Code standards
 
+### Scripts and tasks
+
+- Always use scripts to perform tasks; do not run tasks manually if a script exists
+
 ### Required Before Each Commit
 
 - Run Python tests to ensure backend functionality
@@ -13,16 +17,13 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - When adding new functionality, make sure you update the README
 - Make sure all guidance in the Copilot Instructions file is updated with any relevant changes, including to project structure and scripts, and programming guidance
 
-### Code formatting requirements
-
-- When writing Python, you must use type hints for return values and function parameters.
-
 ### Python and Flask Patterns
 
 - Use SQLAlchemy models for database interactions
 - Use Flask blueprints for organizing routes
 - Follow RESTful API design principles
 - Tests are written using unittest
+- Use type hints for return values and function parameters
 
 ### Svelte and Astro Patterns
 
@@ -46,8 +47,8 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ## Scripts
 
-- Several scripts exist in the `scripts` folder
 - Always use existing scripts to perform tasks rather than performing them manually
+- Several scripts exist in the `scripts` folder
 - Existing scripts:
     - `scripts/setup-env.sh`: Performs installation of all Python and Node dependencies
     - `scripts/run-server-tests.sh`: Calls setup-env, then runs all Python tests

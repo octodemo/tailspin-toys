@@ -47,7 +47,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 ## Scripts
 
 - Several scripts exist in the `scripts` folder
-- Use existing scripts to perform tasks rather than performing them manually
+- Always use existing scripts to perform tasks rather than performing them manually
 - Existing scripts:
     - `scripts/setup-env.sh`: Performs installation of all Python and Node dependencies
     - `scripts/run-server-tests.sh`: Calls setup-env, then runs all Python tests

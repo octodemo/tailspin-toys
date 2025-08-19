@@ -52,6 +52,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
     - `scripts/setup-env.sh`: Performs installation of all Python and Node dependencies
     - `scripts/run-server-tests.sh`: Calls setup-env, then runs all Python tests
     - `scripts/start-app.sh`: Calls setup-env, then starts both backend and frontend servers
+    - `scripts/run-e2e-tests.sh`: Calls setup-env, starts both servers, then runs end-to-end tests using Playwright
 
 ## Repository Structure
 

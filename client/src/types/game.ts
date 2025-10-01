@@ -31,7 +31,12 @@ export interface Category {
 
 /**
  * Represents a game as returned by the API
+ * 
+ * @remarks
+ * Publisher, category, and starRating fields can be null if not available.
+ * 
  * @example
+ * // Game with full metadata
  * const game: Game = {
  *   id: 1,
  *   title: "DevOps Dominion",
@@ -41,7 +46,8 @@ export interface Category {
  *   starRating: 4.7
  * };
  * 
- * // Publisher and category can be null
+ * @example
+ * // Game with null metadata
  * const gameWithoutMetadata: Game = {
  *   id: 2,
  *   title: "Indie Game",

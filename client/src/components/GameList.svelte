@@ -1,6 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
+    // TODO: Our interfaces should be centralized for all components
+    // Let's get an interface file and ensure the components use the same definitions
     interface Game {
         id: number;
         title: string;

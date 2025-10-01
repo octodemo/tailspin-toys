@@ -189,8 +189,15 @@ test.describe('Accessibility Tests', () => {
     const menuButtonSvg = page.locator('#menu-toggle svg');
     await expect(menuButtonSvg).toHaveAttribute('aria-hidden', 'true');
     
-    // Check game card arrow SVGs have aria-hidden
-    const gameCardSvg = page.locator('[data-testid="game-card"] svg').first();
-    await expect(gameCardSvg).toHaveAttribute('aria-hidden', 'true');
+    // Check game card arrow SVGs have aria-hidden (scope to first card to avoid strict mode violation)
+    const firstGameCard = page.locator('[data-testid="game-card"]').first();
+    const gameCardSvgs = firstGameCard.locator('svg');
+    const count = await gameCardSvgs.count();
+    
+    // Verify at least one SVG exists and all have aria-hidden
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      await expect(gameCardSvgs.nth(i)).toHaveAttribute('aria-hidden', 'true');
+    }
   });
 });

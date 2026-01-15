@@ -1,43 +1,49 @@
 # Tailspin Toys Crowd Funding Development Guidelines
 
-This is a crowdfunding platform for games with a developer theme. The application uses a Flask backend API with SQLAlchemy ORM for database interactions, and an Astro/Svelte frontend with Tailwind CSS for styling. Follow these guidelines when contributing:
+This is a crowdfunding platform for games with a developer theme. The application uses a Flask backend API with SQLAlchemy ORM for database interactions, and an Astro/Svelte frontend with Tailwind CSS for styling. Please follow these guidelines when contributing:
 
-## Project standards
+## Agent notes
 
-### Scripts and tasks
+- Explore the project before beginning code generation
+- Create todo lists for long operations
+  - Before each step in a todo list, reread the instructions to ensure you always have the right directions
+- Always use instructions files when available, reviewing before generating code
+- Do not generate summary markdown files upon completion of a task
+- Always use absolute paths when running scripts and BASH commands
 
-- Always use scripts to perform tasks; do not run tasks manually if a script exists
+## Code standards
 
 ### Required Before Each Commit
 
 - Run Python tests to ensure backend functionality
-- For frontend changes, run the end to end tests created in Playwright
-- When making API changes, update and run the corresponding unit tests to ensure everything works correctly
+- For frontend changes, run builds in the client directory to verify build success and the end-to-end tests, to ensure everything works correctly
+- When making API changes, update and run the corresponding tests to ensure everything works correctly
 - When updating models, ensure database migrations are included if needed
-- When adding new functionality, update the README
-- Updated guidance in the Copilot Instructions file is with any relevant changes, including to project structure and scripts, and programming guidance
+- When adding new functionality, make sure you update the README
+- Make sure all guidance in the Copilot Instructions file is updated with any relevant changes, including to project structure and scripts, and programming guidance
+
+### Code formatting requirements
+
+- When writing Python, you must use type hints for return values and function parameters.
 
 ### Python and Flask Patterns
 
 - Use SQLAlchemy models for database interactions
 - Use Flask blueprints for organizing routes
 - Follow RESTful API design principles
-- Tests are written using `unittest`
-- Use type hints for return values and function parameters
 
 ### Svelte and Astro Patterns
 
-- Use Svelte for interactive components, following Svelte's reactive programming model
-- Create reusable components when functionality is used in multiple places
-- Use Astro for page routing and static content
-- End to end tests are written in Playwright to confirm functionality
-- Use centralized TypeScript interfaces from `client/src/types/` for type safety across components
+- **Svelte 5 Components**: Use runes-based reactivity (`$state`, `$derived`, `$effect`, `$props`) - see `svelte.instructions.md`
+- **Astro Pages**: Use Astro for routing, layouts, and static content - see `astro.instructions.md`
+- Create reusable Svelte components when functionality is used in multiple places
+- Use `client:only="svelte"` directive when embedding Svelte in Astro pages
 
 ### Styling
 
-- Use Tailwind CSS classes for styling
-- Maintain dark mode theme throughout the application
-- Use rounded corners for UI elements
+- Use Tailwind CSS utility classes exclusively - see `tailwindcss.instructions.md`
+- Dark theme colors: slate palette (`bg-slate-800`, `text-slate-100`, etc.)
+- Rounded corners and modern UI patterns
 - Follow modern UI/UX principles with clean, accessible interfaces
 
 ### GitHub Actions workflows
@@ -48,19 +54,12 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ## Scripts
 
-- Always use existing scripts to perform tasks rather than performing them manually
 - Several scripts exist in the `scripts` folder
+- Always use available scripts to perform tasks rather than performing operations manually
 - Existing scripts:
     - `scripts/setup-env.sh`: Performs installation of all Python and Node dependencies
     - `scripts/run-server-tests.sh`: Calls setup-env, then runs all Python tests
     - `scripts/start-app.sh`: Calls setup-env, then starts both backend and frontend servers
-    - `scripts/start-app-silent.sh`: Silent version of start-app.sh for e2e tests (suppresses server output)
-    - `scripts/run-e2e-tests.sh`: Uses Playwright's webServer config to automatically start servers, then runs end-to-end tests using Playwright
-
-## MCP servers
-
-- GitHub MCP server for interacting with the repository
-- Playwright MCP server for creating Playwright tests and interacting with a browser
 
 ## Repository Structure
 
@@ -74,8 +73,6 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
   - `src/layouts/`: Astro layout templates
   - `src/pages/`: Astro page routes
   - `src/styles/`: CSS and Tailwind configuration
-  - `src/types/`: Centralized TypeScript interface definitions
 - `scripts/`: Development and deployment scripts
 - `data/`: Database files
-- `docs/`: Project documentation
 - `README.md`: Project documentation

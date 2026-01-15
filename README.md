@@ -1,6 +1,12 @@
 # Tailspin Toys
 
-The project is a website for a fictional game crowd-funding company named Tailspin Toys, with a [Flask](https://flask.palletsprojects.com/en/stable/) backend using [SQLAlchemy](https://www.sqlalchemy.org/) and [Astro](https://astro.build/) frontend using [Svelte](https://svelte.dev/) for dynamic pages.
+This repository contains the project for a 1 hour guided workshop to explore GitHub Copilot Agent Mode and related features in Visual Studio Code. The project is a website for a fictional game crowd-funding company, with a [Flask](https://flask.palletsprojects.com/en/stable/) backend using [SQLAlchemy](https://www.sqlalchemy.org/) and [Astro](https://astro.build/) frontend using [Svelte](https://svelte.dev/) for dynamic pages.
+
+## Start the workshop
+
+**To begin the workshop, start at [workshop-content/README.md](./workshop-content/README.md)**
+
+Or, if just want to run the app...
 
 ## Launch the site
 
@@ -11,30 +17,6 @@ A script file has been created to launch the site. You can run it by:
 ```
 
 Then navigate to the [website](http://localhost:4321) to see the site!
-
-## Accessibility
-
-Tailspin Toys is committed to being accessible to all users. We follow WCAG 2.1 Level AA standards and include automated accessibility testing in our CI/CD pipeline.
-
-For detailed information about our accessibility standards and guidelines, see [docs/ACCESSIBILITY.md](./docs/ACCESSIBILITY.md).
-
-## Testing
-
-### Backend Tests
-
-Run Python unit tests:
-
-```bash
-./scripts/run-server-tests.sh
-```
-
-### Frontend E2E Tests
-
-Run Playwright end-to-end tests (includes accessibility tests):
-
-```bash
-./scripts/run-e2e-tests.sh
-```
 
 ## License 
 

@@ -1,14 +1,26 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { Game } from "../types/game";
-
-    // Accept either a game object or a gameId
-    export let game: Game | undefined = undefined;
-    export let gameId = 0;
     
-    let loading = true;
-    let error: string | null = null;
-    let gameData: Game | null = null;
+    interface Game {
+        id: number;
+        title: string;
+        description: string;
+        publisher: {
+            id: number;
+            name: string;
+        } | null;
+        category: {
+            id: number;
+            name: string;
+        } | null;
+        starRating: number | null;
+    }
+
+    let { game = undefined, gameId = 0 }: { game?: Game, gameId?: number } = $props();
+    
+    let loading = $state(true);
+    let error = $state<string | null>(null);
+    let gameData = $state<Game | null>(null);
     
     onMount(async () => {
         // If game object is provided directly, use it
@@ -38,7 +50,6 @@
         }
     });
 
-    // Function to render stars based on rating
     function renderStarRating(rating: number | null): string {
         if (rating === null) return "Not yet rated";
         
@@ -98,8 +109,8 @@
             </div>
             
             <div class="mt-8">
-                <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900" data-testid="back-game-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center" data-testid="back-game-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
                     </svg>
                     Support This Game

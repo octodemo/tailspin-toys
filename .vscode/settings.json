@@ -6,18 +6,20 @@
         "Codespaces",
         "containerapp",
         "creds",
+        "deprioritized",
         "devcontainer",
         "devcontainers",
         "docstrings",
+        "dotnettools",
         "isouter",
         "prebuild",
-        "SDLC"
+        "pylance",
+        "schlich",
+        "SDLC",
+        "WCAG"
     ],
     "github.copilot.nextEditSuggestions.enabled": true,
     "editor.tabSize": 4,
     "chat.agent.enabled": true,
-    "chat.tools.autoApprove": true,
     "chat.agent.maxRequests": 100,
-    "terminal.integrated.shellIntegration.enabled": true,
-    "github.copilot.chat.advanced.welcomePageHint.enabled": false
 }

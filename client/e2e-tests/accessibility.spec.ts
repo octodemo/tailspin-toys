@@ -26,7 +26,7 @@ test.describe('Accessibility Tests', () => {
 
   test('about page should not have accessibility violations', async ({ page }) => {
     await page.goto('/about');
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('[data-testid="about-section"]', { timeout: 10000 });
     
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

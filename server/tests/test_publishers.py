@@ -2,7 +2,7 @@ import unittest
 import json
 from typing import Dict, List, Any
 from flask import Flask, Response
-from models import Publisher, db, init_db
+from models import Publisher, db
 from routes.publishers import publishers_bp
 
 class TestPublishersRoutes(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestPublishersRoutes(unittest.TestCase):
         self.client = self.app.test_client()
         
         # Initialize in-memory database for testing
-        init_db(self.app, testing=True)
+        db.init_app(self.app)
         
         # Create tables and seed data
         with self.app.app_context():

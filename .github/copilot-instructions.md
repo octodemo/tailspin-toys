@@ -59,6 +59,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - Existing scripts:
     - `scripts/setup-env.sh`: Performs installation of all Python and Node dependencies
     - `scripts/run-server-tests.sh`: Calls setup-env, then runs all Python tests
+    - `scripts/run-e2e-tests.sh`: Runs Playwright E2E tests for frontend
     - `scripts/start-app.sh`: Calls setup-env, then starts both backend and frontend servers
 
 ## Repository Structure
@@ -73,6 +74,21 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
   - `src/layouts/`: Astro layout templates
   - `src/pages/`: Astro page routes
   - `src/styles/`: CSS and Tailwind configuration
+  - `e2e-tests/`: Playwright E2E tests (home, games, filtering, accessibility)
 - `scripts/`: Development and deployment scripts
 - `data/`: Database files
 - `README.md`: Project documentation
+
+## Existing Test Coverage
+
+### Backend Tests (`server/tests/`)
+- `test_games.py` - Game API endpoint tests
+- `test_models.py` - SQLAlchemy model tests
+- `test_categories.py` - Category API tests
+- `test_publishers.py` - Publisher API tests
+
+### Frontend E2E Tests (`client/e2e-tests/`)
+- `home.spec.ts` - Homepage display and content
+- `games.spec.ts` - Game listing, navigation, and details pages
+- `filtering.spec.ts` - Game filtering functionality
+- `accessibility.spec.ts` - Accessibility compliance tests

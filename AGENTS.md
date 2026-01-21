@@ -48,7 +48,7 @@ tailspin-toys/
 │   │   ├── pages/         # Astro page routes (file-based routing)
 │   │   ├── styles/        # CSS and Tailwind config
 │   │   └── types/         # TypeScript types
-│   └── tests/             # Playwright E2E tests
+│   └── e2e-tests/         # Playwright E2E tests (*.spec.ts)
 ├── scripts/               # Development automation scripts
 ├── data/                  # SQLite database files
 └── .github/
@@ -174,7 +174,17 @@ def tearDown(self) -> None:
 
 ### Frontend Tests
 
-**Playwright Patterns** (`client/tests/*.spec.ts`)
+**Existing E2E Tests** (`client/e2e-tests/*.spec.ts`)
+
+The project already includes comprehensive Playwright E2E tests:
+- `home.spec.ts` - Homepage display and content
+- `games.spec.ts` - Game listing, navigation, and details pages
+- `filtering.spec.ts` - Game filtering functionality
+- `accessibility.spec.ts` - Accessibility compliance tests
+
+**Before creating new E2E tests**, check existing coverage in `client/e2e-tests/`.
+
+**Playwright Patterns** (`client/e2e-tests/*.spec.ts`)
 - Use role-based locators: `getByRole`, `getByLabel`, `getByText`
 - Use `test.step()` for grouping
 - Auto-retrying assertions: `await expect(locator).toHaveText()`

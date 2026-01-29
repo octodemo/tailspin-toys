@@ -5,6 +5,11 @@ from sqlalchemy.orm import Query
 # Create a Blueprint for games routes
 games_bp = Blueprint('games', __name__)
 
+# TODO: Add Create, Update, Delete endpoints to complete CRUD functionality
+# - POST /api/games - Create a new game
+# - PUT /api/games/<id> - Update an existing game
+# - DELETE /api/games/<id> - Delete a game
+
 def get_games_base_query() -> Query:
     return db.session.query(Game).join(
         Publisher, 

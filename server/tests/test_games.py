@@ -22,20 +22,25 @@ class TestGamesRoutes(unittest.TestCase):
                 "description": "Build your DevOps pipeline before chaos ensues",
                 "publisher_index": 0,
                 "category_index": 0,
-                "star_rating": 4.5
+                "star_rating": 4.5,
+                "is_featured": True,
+                "featured_priority": 100
             },
             {
                 "title": "Agile Adventures",
                 "description": "Navigate your team through sprints and releases",
                 "publisher_index": 1,
                 "category_index": 1,
-                "star_rating": 4.2
+                "star_rating": 4.2,
+                "is_featured": False,
+                "featured_priority": None
             }
         ]
     }
     
     # API paths
     GAMES_API_PATH: str = '/api/games'
+    FEATURED_GAME_API_PATH: str = '/api/games/featured'
 
     def setUp(self) -> None:
         """Set up test database and seed data"""
@@ -192,6 +197,73 @@ class TestGamesRoutes(unittest.TestCase):
         # Assert
         # Flask should return 404 for routes that don't match the <int:id> pattern
         self.assertEqual(response.status_code, 404)
+
+    def test_get_featured_game_success(self) -> None:
+        """Test successful retrieval of featured game"""
+        # Act
+        response = self.client.get(self.FEATURED_GAME_API_PATH)
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['title'], "Pipeline Panic")
+        self.assertTrue(data['isFeatured'])
+        self.assertEqual(data['featuredPriority'], 100)
+        
+    def test_get_featured_game_structure(self) -> None:
+        """Test the response structure for featured game"""
+        # Act
+        response = self.client.get(self.FEATURED_GAME_API_PATH)
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        required_fields = ['id', 'title', 'description', 'publisher', 'category', 'starRating', 'isFeatured', 'featuredPriority']
+        for field in required_fields:
+            self.assertIn(field, data)
+    
+    def test_get_featured_game_not_found(self) -> None:
+        """Test retrieval when no featured game exists"""
+        # Clear featured status from all games
+        with self.app.app_context():
+            db.session.query(Game).update({'is_featured': False})
+            db.session.commit()
+        
+        # Act
+        response = self.client.get(self.FEATURED_GAME_API_PATH)
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['error'], "No featured game available")
+    
+    def test_get_featured_game_highest_priority(self) -> None:
+        """Test that featured game with highest priority is returned"""
+        # Add another featured game with lower priority
+        with self.app.app_context():
+            publishers = db.session.query(Publisher).all()
+            categories = db.session.query(Category).all()
+            
+            high_priority_game = Game(
+                title="High Priority Featured",
+                description="This should be returned as the featured game",
+                publisher_id=publishers[0].id,
+                category_id=categories[0].id,
+                star_rating=4.8,
+                is_featured=True,
+                featured_priority=200
+            )
+            db.session.add(high_priority_game)
+            db.session.commit()
+        
+        # Act
+        response = self.client.get(self.FEATURED_GAME_API_PATH)
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['title'], "High Priority Featured")
+        self.assertEqual(data['featuredPriority'], 200)
 
 if __name__ == '__main__':
     unittest.main()

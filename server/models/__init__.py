@@ -6,3 +6,4 @@ db = SQLAlchemy()
 from .category import Category
 from .game import Game
 from .publisher import Publisher
+from .stretch_goal import StretchGoal

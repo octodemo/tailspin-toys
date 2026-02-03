@@ -18,6 +18,9 @@ class Game(BaseModel):
     # One-to-many relationships (many games belong to one category/publisher)
     category = relationship("Category", back_populates="games")
     publisher = relationship("Publisher", back_populates="games")
+
+    # One-to-many relationship: one game has many stretch goals
+    stretch_goals = relationship("StretchGoal", back_populates="game", cascade="all, delete-orphan")
     
     @validates('title')
     def validate_name(self, key, name):
@@ -39,5 +42,6 @@ class Game(BaseModel):
             'description': self.description,
             'publisher': {'id': self.publisher.id, 'name': self.publisher.name} if self.publisher else None,
             'category': {'id': self.category.id, 'name': self.category.name} if self.category else None,
-            'starRating': self.star_rating  # Changed from star_rating to starRating
+            'starRating': self.star_rating,  # Changed from star_rating to starRating
+            'stretchGoals': [goal.to_dict() for goal in self.stretch_goals] if self.stretch_goals else []
         }

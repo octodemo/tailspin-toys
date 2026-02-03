@@ -25,7 +25,7 @@ def get_games_base_query() -> Query:
 def get_featured_game() -> tuple[Response, int] | Response:
     # Get the featured game with the highest priority
     featured_game = get_games_base_query().filter(
-        Game.is_featured == True
+        Game.is_featured
     ).order_by(
         Game.featured_priority.desc()
     ).first()

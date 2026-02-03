@@ -13,7 +13,7 @@ const {
   title = "Tailspin Toys - Crowdfund Developer-Themed Board Games", 
   description = "Discover and back innovative board games inspired by DevOps, software development, and tech culture. Join the Tailspin Toys crowdfunding community today.",
   ogImage = "/og-image.png",
-  canonicalURL = new URL(Astro.url.pathname, Astro.site)
+  canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : new URL(Astro.url.pathname, `http://localhost:4321`)
 } = Astro.props;
 ---
 

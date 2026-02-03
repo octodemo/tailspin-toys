@@ -2,6 +2,7 @@ export const prerender = false;
 
 export async function GET() {
   const baseUrl = 'https://tailspin-toys.example.com'; // Update with actual domain
+  const currentDate = new Date().toISOString();
   
   // Fetch all games from the API
   let games = [];
@@ -20,7 +21,7 @@ export async function GET() {
   <!-- Homepage -->
   <url>
     <loc>${baseUrl}/</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -28,7 +29,7 @@ export async function GET() {
   <!-- About Page -->
   <url>
     <loc>${baseUrl}/about</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -37,7 +38,7 @@ export async function GET() {
   ${games.map(game => `
   <url>
     <loc>${baseUrl}/game/${game.id}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>`).join('')}

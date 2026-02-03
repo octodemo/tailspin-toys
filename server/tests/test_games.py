@@ -2,7 +2,7 @@ import unittest
 import json
 from typing import Dict, Any
 from flask import Flask, Response
-from models import Game, Publisher, Category, db
+from models import Game, Publisher, Category, Subscription, db
 from routes.games import games_bp
 
 class TestGamesRoutes(unittest.TestCase):
@@ -36,6 +36,7 @@ class TestGamesRoutes(unittest.TestCase):
     
     # API paths
     GAMES_API_PATH: str = '/api/games'
+    SUBSCRIPTIONS_API_PATH: str = '/api/subscriptions'
 
     def setUp(self) -> None:
         """Set up test database and seed data"""
@@ -192,6 +193,76 @@ class TestGamesRoutes(unittest.TestCase):
         # Assert
         # Flask should return 404 for routes that don't match the <int:id> pattern
         self.assertEqual(response.status_code, 404)
+
+    def test_create_subscription_success(self) -> None:
+        """Test creating a subscription for a game"""
+        # Arrange
+        response = self.client.get(self.GAMES_API_PATH)
+        game_id = self._get_response_data(response)[0]['id']
+        payload = {"email": "player@example.com", "frequency": "daily"}
+
+        # Act
+        response = self.client.post(f'{self.GAMES_API_PATH}/{game_id}/subscriptions', json=payload)
+        data = self._get_response_data(response)
+
+        # Assert
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['email'], payload['email'])
+        self.assertEqual(data['frequency'], payload['frequency'])
+        self.assertTrue(data['isActive'])
+        self.assertEqual(data['gameId'], game_id)
+
+    def test_create_subscription_invalid_frequency(self) -> None:
+        """Test subscription creation with invalid frequency"""
+        response = self.client.get(self.GAMES_API_PATH)
+        game_id = self._get_response_data(response)[0]['id']
+
+        response = self.client.post(
+            f'{self.GAMES_API_PATH}/{game_id}/subscriptions',
+            json={"email": "player@example.com", "frequency": "yearly"}
+        )
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['error'], "Frequency must be one of immediate, daily, weekly")
+
+    def test_update_subscription_frequency(self) -> None:
+        """Test updating subscription frequency"""
+        game_id = self._get_response_data(self.client.get(self.GAMES_API_PATH))[0]['id']
+        create_resp = self.client.post(
+            f'{self.GAMES_API_PATH}/{game_id}/subscriptions',
+            json={"email": "player@example.com", "frequency": "weekly"}
+        )
+        subscription = self._get_response_data(create_resp)
+
+        update_resp = self.client.patch(
+            f'{self.SUBSCRIPTIONS_API_PATH}/{subscription["id"]}',
+            json={"frequency": "immediate"}
+        )
+        updated = self._get_response_data(update_resp)
+
+        self.assertEqual(update_resp.status_code, 200)
+        self.assertEqual(updated['frequency'], "immediate")
+
+    def test_unsubscribe(self) -> None:
+        """Test unsubscribing from updates"""
+        game_id = self._get_response_data(self.client.get(self.GAMES_API_PATH))[0]['id']
+        create_resp = self.client.post(
+            f'{self.GAMES_API_PATH}/{game_id}/subscriptions',
+            json={"email": "player@example.com", "frequency": "weekly"}
+        )
+        subscription = self._get_response_data(create_resp)
+
+        delete_resp = self.client.delete(f'{self.SUBSCRIPTIONS_API_PATH}/{subscription["id"]}')
+        data = self._get_response_data(delete_resp)
+
+        self.assertEqual(delete_resp.status_code, 200)
+        self.assertEqual(data['message'], "Unsubscribed successfully")
+
+        # Verify is_active flag set to False in DB
+        with self.app.app_context():
+            sub = db.session.get(Subscription, subscription["id"])
+            self.assertFalse(sub.is_active)
 
 if __name__ == '__main__':
     unittest.main()

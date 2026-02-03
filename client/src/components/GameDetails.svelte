@@ -1,6 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
     
+    import type { Subscription } from "../types/game";
+
     interface Game {
         id: number;
         title: string;
@@ -21,6 +23,11 @@
     let loading = $state(true);
     let error = $state<string | null>(null);
     let gameData = $state<Game | null>(null);
+    let subscription = $state<Subscription | null>(null);
+    let email = $state("");
+    let frequency = $state<Subscription["frequency"]>("weekly");
+    let submitting = $state(false);
+    let successMessage = $state<string | null>(null);
     
     onMount(async () => {
         // If game object is provided directly, use it
@@ -36,6 +43,7 @@
                 const response = await fetch(`/api/games/${gameId}`);
                 if (response.ok) {
                     gameData = await response.json();
+                    await loadExistingSubscription();
                 } else {
                     error = `Failed to fetch game: ${response.status} ${response.statusText}`;
                 }
@@ -49,6 +57,97 @@
             loading = false;
         }
     });
+
+    const loadExistingSubscription = async (): Promise<void> => {
+        if (!gameId) return;
+        try {
+            const resp = await fetch(`/api/games/${gameId}/subscriptions`, { method: "GET" });
+            if (resp.ok) {
+                const subs: Subscription[] = await resp.json();
+                if (subs.length > 0) {
+                    subscription = subs[0];
+                    email = subscription.email;
+                    frequency = subscription.frequency;
+                }
+            }
+        } catch (err) {
+            // Swallow errors to avoid blocking main flow
+            console.error("Failed to load subscription", err);
+        }
+    };
+
+    const handleSubscribe = async (): Promise<void> => {
+        if (!gameId) return;
+        submitting = true;
+        successMessage = null;
+        error = null;
+        try {
+            const resp = await fetch(`/api/games/${gameId}/subscriptions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, frequency })
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                error = data.error ?? "Failed to subscribe";
+                return;
+            }
+            subscription = data;
+            successMessage = "Subscription saved";
+        } catch (err) {
+            error = err instanceof Error ? err.message : String(err);
+        } finally {
+            submitting = false;
+        }
+    };
+
+    const handleUpdate = async (): Promise<void> => {
+        if (!subscription) return handleSubscribe();
+        submitting = true;
+        successMessage = null;
+        error = null;
+        try {
+            const resp = await fetch(`/api/subscriptions/${subscription.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ frequency })
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                error = data.error ?? "Failed to update subscription";
+                return;
+            }
+            subscription = data;
+            successMessage = "Frequency updated";
+        } catch (err) {
+            error = err instanceof Error ? err.message : String(err);
+        } finally {
+            submitting = false;
+        }
+    };
+
+    const handleUnsubscribe = async (): Promise<void> => {
+        if (!subscription) return;
+        submitting = true;
+        successMessage = null;
+        error = null;
+        try {
+            const resp = await fetch(`/api/subscriptions/${subscription.id}`, {
+                method: "DELETE"
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                error = data.error ?? "Failed to unsubscribe";
+                return;
+            }
+            subscription = { ...subscription, isActive: false };
+            successMessage = "Unsubscribed";
+        } catch (err) {
+            error = err instanceof Error ? err.message : String(err);
+        } finally {
+            submitting = false;
+        }
+    };
 
     function renderStarRating(rating: number | null): string {
         if (rating === null) return "Not yet rated";
@@ -108,13 +207,70 @@
                 </div>
             </div>
             
-            <div class="mt-8">
-                <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center" data-testid="back-game-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
-                    </svg>
-                    Support This Game
-                </button>
+            <div class="mt-8 space-y-4">
+                <div class="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-100">Get updates</h3>
+                            <p class="text-sm text-slate-400">Subscribe to product updates for this game.</p>
+                        </div>
+                        {#if subscription && subscription.isActive}
+                            <span class="text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300">Subscribed</span>
+                        {/if}
+                    </div>
+                    <div class="grid gap-3 md:grid-cols-2">
+                        <label class="flex flex-col gap-2 text-slate-200 text-sm">
+                            Email
+                            <input
+                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                type="email"
+                                value={email}
+                                oninput={(event) => email = (event.target as HTMLInputElement).value}
+                                placeholder="you@example.com"
+                                data-testid="subscription-email-input"
+                            />
+                        </label>
+                        <label class="flex flex-col gap-2 text-slate-200 text-sm">
+                            Frequency
+                            <select
+                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={frequency}
+                                oninput={(event) => frequency = (event.target as HTMLSelectElement).value as Subscription['frequency']}
+                                data-testid="subscription-frequency-select"
+                            >
+                                <option value="immediate">Immediate</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                            </select>
+                        </label>
+                    </div>
+                    {#if error}
+                        <p class="text-red-400 text-sm mt-2" data-testid="subscription-error">{error}</p>
+                    {/if}
+                    {#if successMessage}
+                        <p class="text-emerald-300 text-sm mt-2" data-testid="subscription-success">{successMessage}</p>
+                    {/if}
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <button
+                            class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-60"
+                            onclick={subscription && subscription.isActive ? handleUpdate : handleSubscribe}
+                            disabled={submitting}
+                            data-testid="subscription-submit-button"
+                        >
+                            {subscription && subscription.isActive ? 'Update preferences' : 'Subscribe'}
+                        </button>
+                        {#if subscription && subscription.isActive}
+                            <button
+                                class="py-2 px-4 rounded-lg border border-slate-700 text-slate-200 hover:border-red-500 hover:text-red-300 transition-colors disabled:opacity-60"
+                                onclick={handleUnsubscribe}
+                                disabled={submitting}
+                                data-testid="subscription-unsubscribe-button"
+                            >
+                                Unsubscribe
+                            </button>
+                        {/if}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

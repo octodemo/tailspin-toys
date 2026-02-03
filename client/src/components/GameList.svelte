@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import GameCard from "./GameCard.svelte";
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
@@ -39,7 +38,7 @@
         }
     };
 
-    // Re-fetch games when category changes
+    // Re-fetch games when category changes (Svelte 5 $effect auto-tracks selectedCategory)
     $effect(() => {
         fetchGames(selectedCategory);
     });

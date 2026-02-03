@@ -44,3 +44,17 @@ def get_game(id: int) -> tuple[Response, int] | Response:
     game = game_query.to_dict()
     
     return jsonify(game)
+
+@games_bp.route('/api/games/featured', methods=['GET'])
+def get_featured_game() -> tuple[Response, int] | Response:
+    # Use the base query and filter for featured game
+    featured_game = get_games_base_query().filter(Game.is_featured == True).first()
+    
+    # Return 404 if no featured game found
+    if not featured_game:
+        return jsonify({"error": "No featured game available"}), 404
+    
+    # Convert the result using the model's to_dict method
+    game = featured_game.to_dict()
+    
+    return jsonify(game)

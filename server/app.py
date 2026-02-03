@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from flask_cors import CORS
 from routes.games import games_bp
 from models import db
 from utils.database import get_connection_string
@@ -8,6 +9,9 @@ from utils.database import get_connection_string
 base_dir: str = os.path.abspath(os.path.dirname(__file__))
 
 app: Flask = Flask(__name__)
+
+# Enable CORS for all routes
+CORS(app)
 
 # Configure and initialize the database
 app.config['SQLALCHEMY_DATABASE_URI'] = get_connection_string()

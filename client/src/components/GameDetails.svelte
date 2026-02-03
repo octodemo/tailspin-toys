@@ -1,27 +1,14 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    
-    interface Game {
-        id: number;
-        title: string;
-        description: string;
-        publisher: {
-            id: number;
-            name: string;
-        } | null;
-        category: {
-            id: number;
-            name: string;
-        } | null;
-        starRating: number | null;
-    }
+    import type { Game } from '../types/game';
+    import StretchGoals from './StretchGoals.svelte';
 
     let { game = undefined, gameId = 0 }: { game?: Game, gameId?: number } = $props();
-    
+
     let loading = $state(true);
     let error = $state<string | null>(null);
     let gameData = $state<Game | null>(null);
-    
+
     onMount(async () => {
         // If game object is provided directly, use it
         if (game) {
@@ -29,7 +16,7 @@
             loading = false;
             return;
         }
-        
+
         // Otherwise fetch data using gameId
         if (gameId) {
             try {
@@ -52,11 +39,11 @@
 
     function renderStarRating(rating: number | null): string {
         if (rating === null) return "Not yet rated";
-        
+
         const fullStars = Math.floor(rating);
         const halfStar = rating % 1 >= 0.5;
         const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-        
+
         return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
     }
 </script>
@@ -107,6 +94,13 @@
                     <p data-testid="game-details-description">{gameData.description}</p>
                 </div>
             </div>
+
+            <!-- Stretch Goals Section -->
+            {#if gameData.stretchGoals && gameData.stretchGoals.length > 0}
+                <div class="mt-8">
+                    <StretchGoals stretchGoals={gameData.stretchGoals} />
+                </div>
+            {/if}
             
             <div class="mt-8">
                 <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center" data-testid="back-game-button">

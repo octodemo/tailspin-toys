@@ -20,6 +20,21 @@ export interface Category {
 }
 
 /**
+ * Represents a stretch goal for a game
+ */
+export interface StretchGoal {
+    id: number;
+    title: string;
+    description: string;
+    goalType: 'pledge_total' | 'pledge_count';
+    targetAmount: number;
+    currentAmount: number;
+    progressPercentage: number;
+    isAchieved: boolean;
+    gameId: number;
+}
+
+/**
  * Represents a game as returned by the API
  */
 export interface Game {
@@ -29,4 +44,5 @@ export interface Game {
     publisher: Publisher | null;
     category: Category | null;
     starRating: number | null;
+    stretchGoals?: StretchGoal[];
 }

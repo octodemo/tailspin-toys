@@ -6,8 +6,8 @@ test.describe('Home Page', () => {
   });
 
   test('should display the correct title', async ({ page }) => {
-    // Check that the page title is correct
-    await expect(page).toHaveTitle('Tailspin Toys - Crowdfunding your new favorite game!');
+    // Check that the page title is correct with SEO-optimized title
+    await expect(page).toHaveTitle('Tailspin Toys - Crowdfund Developer-Themed Board Games');
   });
 
   test('should display the main heading', async ({ page }) => {

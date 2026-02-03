@@ -21,6 +21,24 @@ def get_games_base_query() -> Query:
         isouter=True
     )
 
+@games_bp.route('/api/games/featured', methods=['GET'])
+def get_featured_game() -> tuple[Response, int] | Response:
+    # Get the featured game with the highest priority
+    featured_game = get_games_base_query().filter(
+        Game.is_featured == True
+    ).order_by(
+        Game.featured_priority.desc()
+    ).first()
+    
+    # Return 404 if no featured game found
+    if not featured_game:
+        return jsonify({"error": "No featured game available"}), 404
+    
+    # Convert the result using the model's to_dict method
+    game = featured_game.to_dict()
+    
+    return jsonify(game)
+
 @games_bp.route('/api/games', methods=['GET'])
 def get_games() -> Response:
     # Use the base query for all games

@@ -41,6 +41,19 @@
 <div>
     <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
     
+    <!-- Status announcement for screen readers -->
+    <div role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+        {#if loading}
+            Loading games...
+        {:else if error}
+            Error loading games: {error}
+        {:else if games.length === 0}
+            No games available
+        {:else}
+            {games.length} games loaded
+        {/if}
+    </div>
+    
     {#if loading}
         <LoadingSkeleton count={6} />
     {:else if error}

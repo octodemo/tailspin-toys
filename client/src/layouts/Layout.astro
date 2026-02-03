@@ -23,8 +23,12 @@ const { title = "Tailspin Toys" } = Astro.props;
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     </head>
     <body class="min-h-screen bg-slate-900 text-white transition-colors duration-300 m-0 w-full h-full font-sans">
+        <!-- Skip to main content link for keyboard users -->
+        <a href="#main-content" class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600">
+            Skip to main content
+        </a>
         <Header />
-        <main class="container mx-auto py-6 h-full max-w-7xl">
+        <main id="main-content" class="container mx-auto py-6 h-full max-w-7xl" tabindex="-1">
             <div class="px-4 sm:px-6 lg:px-8">
                 <slot />
             </div>

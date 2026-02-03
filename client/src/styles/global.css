@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+/* Screen reader only utility class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Global focus styles for accessibility - WCAG 2.4.7 Focus Visible */
+*:focus {
+  outline: 2px solid #3b82f6; /* blue-500 */
+  outline-offset: 2px;
+}
+
+/* Modern focus-visible support (only show focus for keyboard navigation) */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid #3b82f6; /* blue-500 */
+  outline-offset: 2px;
+}
+
+/* Specific focus styles for buttons and interactive elements */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Enhanced focus for interactive elements on dark backgrounds */
+.bg-slate-800 a:focus-visible,
+.bg-slate-900 a:focus-visible,
+.dark a:focus-visible {
+  outline-color: #60a5fa; /* blue-400 for better contrast on dark */
+}
+
+/* Preserve custom focus rings where explicitly defined */
+.focus\:ring-2:focus,
+.focus\:ring-2:focus-visible {
+  outline: none;
+}

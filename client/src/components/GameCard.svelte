@@ -37,7 +37,7 @@
                 </div>
             {/if}
             
-            <p class="text-slate-400 mb-4 text-sm line-clamp-2" data-testid="game-description">{game.description}</p>
+            <p class="text-slate-300 mb-4 text-sm line-clamp-2" data-testid="game-description">{game.description}</p>
             
             <div class="mt-4 text-sm text-blue-400 font-medium flex items-center">
                 <span>View details</span>

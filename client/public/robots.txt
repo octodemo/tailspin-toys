@@ -1,0 +1,11 @@
+# Tailspin Toys - Robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://tailspin-toys.example.com/sitemap.xml
+
+# Crawl-delay to be respectful of server resources
+Crawl-delay: 1

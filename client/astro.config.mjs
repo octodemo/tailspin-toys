@@ -7,6 +7,7 @@ import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://tailspin-toys.example.com', // Update with actual production domain
   output: 'server',
   integrations: [
     svelte(),

@@ -4,6 +4,7 @@
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
     import EmptyState from "./EmptyState.svelte";
+    import CategoryFilter from "./CategoryFilter.svelte";
 
     interface Game {
         id: number;
@@ -16,11 +17,16 @@
     let { games = $bindable([]) }: { games?: Game[] } = $props();
     let loading = $state(true);
     let error = $state<string | null>(null);
+    let selectedCategory = $state<number | null>(null);
 
-    const fetchGames = async () => {
+    const fetchGames = async (categoryId: number | null = null) => {
         loading = true;
         try {
-            const response = await fetch('/api/games');
+            let url = '/api/games';
+            if (categoryId !== null) {
+                url += `?category=${categoryId}`;
+            }
+            const response = await fetch(url);
             if(response.ok) {
                 games = await response.json();
             } else {
@@ -33,13 +39,18 @@
         }
     };
 
-    onMount(() => {
-        fetchGames();
+    // Re-fetch games when category changes
+    $effect(() => {
+        fetchGames(selectedCategory);
     });
 </script>
 
 <div>
-    <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
+    <CategoryFilter bind:selectedCategory />
+    
+    <h2 class="text-2xl font-medium mb-6 text-slate-100">
+        {selectedCategory === null ? 'Featured Games' : 'Filtered Games'}
+    </h2>
     
     {#if loading}
         <LoadingSkeleton count={6} />

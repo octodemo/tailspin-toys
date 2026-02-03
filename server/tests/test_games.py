@@ -193,5 +193,47 @@ class TestGamesRoutes(unittest.TestCase):
         # Flask should return 404 for routes that don't match the <int:id> pattern
         self.assertEqual(response.status_code, 404)
 
+    def test_filter_games_by_category(self) -> None:
+        """Test filtering games by category ID"""
+        # Arrange - get the first category ID
+        response = self.client.get(self.GAMES_API_PATH)
+        all_games = self._get_response_data(response)
+        category_id = all_games[0]['category']['id']
+        expected_category_name = all_games[0]['category']['name']
+        
+        # Act
+        response = self.client.get(f'{self.GAMES_API_PATH}?category={category_id}')
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(data, list)
+        self.assertGreater(len(data), 0)
+        # All returned games should have the filtered category
+        for game in data:
+            self.assertEqual(game['category']['id'], category_id)
+            self.assertEqual(game['category']['name'], expected_category_name)
+
+    def test_filter_games_by_category_no_results(self) -> None:
+        """Test filtering games by non-existent category ID returns empty list"""
+        # Act
+        response = self.client.get(f'{self.GAMES_API_PATH}?category=999')
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 0)
+
+    def test_filter_games_by_invalid_category(self) -> None:
+        """Test filtering games with invalid category parameter is ignored"""
+        # Act - passing non-integer should be ignored and return all games
+        response = self.client.get(f'{self.GAMES_API_PATH}?category=invalid')
+        data = self._get_response_data(response)
+        
+        # Assert - should return all games since invalid parameter is ignored
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), len(self.TEST_DATA["games"]))
+
 if __name__ == '__main__':
     unittest.main()

@@ -26,10 +26,10 @@ test.describe('Featured Game', () => {
     });
 
     await test.step('Verify featured game description is present', async () => {
-      // Check that description is visible
+      // Check that description is visible and contains expected content
       const description = page.getByTestId('featured-game-description');
       await expect(description).toBeVisible();
-      await expect(description).toContainText('DevOps Dominion');
+      await expect(description).toContainText('strategic planning meets advanced deployment tactics');
     });
 
     await test.step('Verify View Details button is present and accessible', async () => {

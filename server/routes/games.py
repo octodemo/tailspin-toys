@@ -48,7 +48,7 @@ def get_game(id: int) -> tuple[Response, int] | Response:
 @games_bp.route('/api/games/featured', methods=['GET'])
 def get_featured_game() -> tuple[Response, int] | Response:
     # Use the base query and filter for featured game
-    featured_game = get_games_base_query().filter(Game.is_featured == True).first()
+    featured_game = get_games_base_query().filter(Game.is_featured.is_(True)).first()
     
     # Return 404 if no featured game found
     if not featured_game:

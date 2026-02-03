@@ -73,7 +73,7 @@
                     Show:
                     <select 
                         class="ml-2 bg-slate-800 text-slate-100 border border-slate-700 rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        value={pageSize}
+                        bind:value={pageSize}
                         onchange={(e) => changePageSize(Number(e.currentTarget.value))}
                         data-testid="page-size-selector"
                     >

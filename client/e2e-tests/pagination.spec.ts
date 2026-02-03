@@ -195,11 +195,6 @@ test.describe('Game List Pagination', () => {
       await nextButton.click();
     });
 
-    await test.step('Verify still on page size 5 after navigation', async () => {
-      const gameCards = page.getByTestId('game-card');
-      await expect(gameCards).toHaveCount(5);
-    });
-
     await test.step('Verify 5 games are displayed on page 2', async () => {
       const gameCards = page.getByTestId('game-card');
       await expect(gameCards).toHaveCount(5);

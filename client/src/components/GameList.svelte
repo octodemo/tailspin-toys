@@ -73,12 +73,11 @@
                     Show:
                     <select 
                         class="ml-2 bg-slate-800 text-slate-100 border border-slate-700 rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        bind:value={pageSize}
                         onchange={(e) => changePageSize(Number(e.currentTarget.value))}
                         data-testid="page-size-selector"
                     >
                         <option value="5">5 per page</option>
-                        <option value="10">10 per page</option>
+                        <option value="10" selected>10 per page</option>
                         <option value="20">20 per page</option>
                         <option value="50">50 per page</option>
                     </select>

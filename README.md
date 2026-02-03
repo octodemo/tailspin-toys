@@ -2,6 +2,13 @@
 
 This repository contains the project for a 1 hour guided workshop to explore GitHub Copilot Agent Mode and related features in Visual Studio Code. The project is a website for a fictional game crowd-funding company, with a [Flask](https://flask.palletsprojects.com/en/stable/) backend using [SQLAlchemy](https://www.sqlalchemy.org/) and [Astro](https://astro.build/) frontend using [Svelte](https://svelte.dev/) for dynamic pages.
 
+## Features
+
+- **Game Catalog**: Browse a collection of developer-themed games seeking crowdfunding
+- **Game Details**: View detailed information about each game including publisher and category
+- **Category Filtering**: Filter games by category (Strategy, Puzzle, Simulation, Adventure, Action) using the dropdown filter
+- **Responsive Design**: Dark-themed UI built with Tailwind CSS that works across all devices
+
 ## Start the workshop
 
 **To begin the workshop, start at [workshop-content/README.md](./workshop-content/README.md)**

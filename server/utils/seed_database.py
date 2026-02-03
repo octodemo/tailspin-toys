@@ -68,6 +68,9 @@ def create_games():
                 # Generate random star rating between 3.0 and 5.0 (one decimal place)
                 star_rating = round(random.uniform(3.0, 5.0), 1)
                 
+                # Mark the first game as featured
+                is_featured = (game_count == 1)
+                
                 # Create the game with enhanced description for crowdfunding context
                 game = Game(
                     title=row['Title'],
@@ -75,6 +78,7 @@ def create_games():
                     category_id=categories[category_name].id,
                     publisher_id=publishers[publisher_name].id,
                     star_rating=star_rating,
+                    is_featured=is_featured,
                 )
                 db.session.add(game)
             

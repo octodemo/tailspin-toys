@@ -22,14 +22,16 @@ class TestGamesRoutes(unittest.TestCase):
                 "description": "Build your DevOps pipeline before chaos ensues",
                 "publisher_index": 0,
                 "category_index": 0,
-                "star_rating": 4.5
+                "star_rating": 4.5,
+                "is_featured": True
             },
             {
                 "title": "Agile Adventures",
                 "description": "Navigate your team through sprints and releases",
                 "publisher_index": 1,
                 "category_index": 1,
-                "star_rating": 4.2
+                "star_rating": 4.2,
+                "is_featured": False
             }
         ]
     }
@@ -135,7 +137,7 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertIsInstance(data, list)
         self.assertEqual(len(data), len(self.TEST_DATA["games"]))
         
-        required_fields = ['id', 'title', 'description', 'publisher', 'category', 'starRating']
+        required_fields = ['id', 'title', 'description', 'publisher', 'category', 'starRating', 'isFeatured']
         for field in required_fields:
             self.assertIn(field, data[0])
 
@@ -192,6 +194,48 @@ class TestGamesRoutes(unittest.TestCase):
         # Assert
         # Flask should return 404 for routes that don't match the <int:id> pattern
         self.assertEqual(response.status_code, 404)
+
+    def test_get_featured_game_success(self) -> None:
+        """Test successful retrieval of featured game"""
+        # Act
+        response = self.client.get(f'{self.GAMES_API_PATH}/featured')
+        data = self._get_response_data(response)
+        
+        # Assert
+        featured_game = self.TEST_DATA["games"][0]
+        featured_publisher = self.TEST_DATA["publishers"][featured_game["publisher_index"]]
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['title'], featured_game["title"])
+        self.assertEqual(data['publisher']['name'], featured_publisher["name"])
+        self.assertTrue(data['isFeatured'])
+
+    def test_get_featured_game_structure(self) -> None:
+        """Test the response structure for featured game"""
+        # Act
+        response = self.client.get(f'{self.GAMES_API_PATH}/featured')
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        required_fields = ['id', 'title', 'description', 'publisher', 'category', 'starRating', 'isFeatured']
+        for field in required_fields:
+            self.assertIn(field, data)
+
+    def test_get_featured_game_not_found(self) -> None:
+        """Test retrieval when no game is featured"""
+        # Clear featured status from all games
+        with self.app.app_context():
+            db.session.query(Game).update({Game.is_featured: False})
+            db.session.commit()
+        
+        # Act
+        response = self.client.get(f'{self.GAMES_API_PATH}/featured')
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['error'], "No featured game available")
 
 if __name__ == '__main__':
     unittest.main()

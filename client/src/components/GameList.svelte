@@ -4,6 +4,7 @@
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
     import EmptyState from "./EmptyState.svelte";
+    import CategoryFilter from "./CategoryFilter.svelte";
 
     interface Game {
         id: number;
@@ -13,14 +14,37 @@
         category_name?: string;
     }
 
+    interface Category {
+        id: number;
+        name: string;
+        description: string;
+        game_count: number;
+    }
+
     let { games = $bindable([]) }: { games?: Game[] } = $props();
     let loading = $state(true);
     let error = $state<string | null>(null);
+    let categories = $state<Category[]>([]);
+    let selectedCategory = $state<number | null>(null);
+
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch('/api/categories');
+            if(response.ok) {
+                categories = await response.json();
+            }
+        } catch (err) {
+            console.error('Failed to fetch categories:', err);
+        }
+    };
 
     const fetchGames = async () => {
         loading = true;
         try {
-            const response = await fetch('/api/games');
+            const url = selectedCategory 
+                ? `/api/games?category=${selectedCategory}`
+                : '/api/games';
+            const response = await fetch(url);
             if(response.ok) {
                 games = await response.json();
             } else {
@@ -33,13 +57,25 @@
         }
     };
 
+    const handleCategoryChange = (categoryId: number | null) => {
+        selectedCategory = categoryId;
+        fetchGames();
+    };
+
     onMount(() => {
+        fetchCategories();
         fetchGames();
     });
 </script>
 
 <div>
     <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
+    
+    <CategoryFilter 
+        bind:categories={categories}
+        bind:selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+    />
     
     {#if loading}
         <LoadingSkeleton count={6} />

@@ -1,4 +1,4 @@
-from flask import jsonify, Response, Blueprint
+from flask import jsonify, Response, Blueprint, request
 from models import db, Game, Publisher, Category
 from sqlalchemy.orm import Query
 
@@ -23,13 +23,44 @@ def get_games_base_query() -> Query:
 
 @games_bp.route('/api/games', methods=['GET'])
 def get_games() -> Response:
+    # Get pagination parameters from query string
+    page = request.args.get('page', 1, type=int)
+    page_size = request.args.get('pageSize', 10, type=int)
+    
+    # Validate pagination parameters
+    if page < 1:
+        page = 1
+    if page_size < 1:
+        page_size = 10
+    if page_size > 100:
+        page_size = 100
+    
     # Use the base query for all games
-    games_query = get_games_base_query().all()
+    base_query = get_games_base_query()
+    
+    # Get total count
+    total_count = base_query.count()
+    
+    # Calculate pagination values
+    total_pages = (total_count + page_size - 1) // page_size
+    offset = (page - 1) * page_size
+    
+    # Apply pagination
+    games_query = base_query.limit(page_size).offset(offset).all()
     
     # Convert the results using the model's to_dict method
     games_list = [game.to_dict() for game in games_query]
     
-    return jsonify(games_list)
+    # Return paginated response with metadata
+    return jsonify({
+        'games': games_list,
+        'pagination': {
+            'page': page,
+            'pageSize': page_size,
+            'totalCount': total_count,
+            'totalPages': total_pages
+        }
+    })
 
 @games_bp.route('/api/games/<int:id>', methods=['GET'])
 def get_game(id: int) -> tuple[Response, int] | Response:

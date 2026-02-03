@@ -30,3 +30,11 @@ export interface Game {
     category: Category | null;
     starRating: number | null;
 }
+
+export interface Subscription {
+    id: number;
+    email: string;
+    frequency: 'immediate' | 'daily' | 'weekly';
+    isActive: boolean;
+    gameId: number;
+}

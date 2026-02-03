@@ -2,6 +2,7 @@ from typing import Any
 from . import db
 from .base import BaseModel
 from sqlalchemy.orm import validates, relationship
+from typing import List
 
 class Game(BaseModel):
     __tablename__ = 'games'
@@ -18,6 +19,7 @@ class Game(BaseModel):
     # One-to-many relationships (many games belong to one category/publisher)
     category = relationship("Category", back_populates="games")
     publisher = relationship("Publisher", back_populates="games")
+    subscriptions = relationship("Subscription", back_populates="game", cascade="all, delete-orphan")
     
     @validates('title')
     def validate_name(self, key, name):

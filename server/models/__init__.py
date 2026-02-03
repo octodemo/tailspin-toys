@@ -6,3 +6,4 @@ db = SQLAlchemy()
 from .category import Category
 from .game import Game
 from .publisher import Publisher
+from .subscription import Subscription

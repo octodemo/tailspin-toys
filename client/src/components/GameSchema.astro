@@ -1,0 +1,45 @@
+---
+interface Props {
+  game: {
+    id: number;
+    title: string;
+    description: string;
+    publisher: { name: string } | null;
+    category: { name: string } | null;
+    starRating: number | null;
+  };
+}
+
+const { game } = Astro.props;
+const baseUrl = Astro.site || 'http://localhost:4321';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": game.title,
+  "description": game.description,
+  "category": game.category?.name || "Board Game",
+  "brand": {
+    "@type": "Brand",
+    "name": game.publisher?.name || "Tailspin Toys"
+  },
+  "offers": {
+    "@type": "Offer",
+    "availability": "https://schema.org/PreOrder",
+    "priceCurrency": "USD",
+    "url": `${baseUrl}/game/${game.id}`
+  }
+};
+
+// Add aggregateRating if available
+if (game.starRating !== null) {
+  schema["aggregateRating"] = {
+    "@type": "AggregateRating",
+    "ratingValue": game.starRating,
+    "bestRating": "5",
+    "worstRating": "1"
+  };
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

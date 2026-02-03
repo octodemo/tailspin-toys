@@ -4,9 +4,17 @@ import "../styles/global.css"
 
 interface Props {
   title?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalURL?: string;
 }
 
-const { title = "Tailspin Toys" } = Astro.props;
+const { 
+  title = "Tailspin Toys - Crowdfund Developer-Themed Board Games", 
+  description = "Discover and back innovative board games inspired by DevOps, software development, and tech culture. Join the Tailspin Toys crowdfunding community today.",
+  ogImage = "/og-image.png",
+  canonicalURL = new URL(Astro.url.pathname, Astro.site)
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -16,7 +24,26 @@ const { title = "Tailspin Toys" } = Astro.props;
         <meta name="viewport" content="width=device-width" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="generator" content={Astro.generator} />
+        
+        <!-- SEO Meta Tags -->
         <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalURL} />
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalURL} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+        
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={canonicalURL} />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+        
         <!-- Preconnect to improve font loading -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

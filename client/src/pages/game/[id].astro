@@ -2,13 +2,36 @@
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import GameDetails from '../../components/GameDetails.svelte';
+import GameSchema from '../../components/GameSchema.astro';
 
 const { id } = Astro.params;
 const gameId = parseInt(id || '0');
 
+// Fetch game data for SEO metadata
+let gameData = null;
+let pageTitle = "Game Details - Tailspin Toys";
+let pageDescription = "Discover an exciting developer-themed board game on Tailspin Toys crowdfunding platform.";
+
+try {
+  const response = await fetch(`http://localhost:5100/api/games/${gameId}`);
+  if (response.ok) {
+    gameData = await response.json();
+    // Create SEO-optimized title and description
+    pageTitle = `${gameData.title} - Developer Board Game | Tailspin Toys`;
+    pageDescription = `Back ${gameData.title} on Tailspin Toys. ${gameData.description.substring(0, 140)}...`;
+  }
+} catch (error) {
+  console.error('Error fetching game data for SEO:', error);
+}
+
 ---
 
-<Layout title="Game Details - Tailspin Toys">
+<Layout 
+  title={pageTitle}
+  description={pageDescription}
+>
+  {gameData && <GameSchema game={gameData} />}
+  
   <div class="py-8">
     <GameDetails client:load gameId={gameId} />
     

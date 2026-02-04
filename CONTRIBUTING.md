@@ -12,6 +12,10 @@ Please note that this project is released with a [Contributor Code of Conduct][c
 
 ## Getting Started
 
+### Issues
+
+All change requests should start with an issue. You're welcome to file the issue alongside the PR, but an issue must always be created.
+
 ### Prerequisites
 
 Before you can run and test the application locally, you'll need to install:
@@ -55,6 +59,7 @@ Before you can run and test the application locally, you'll need to install:
 - Use type hints for all function parameters and return values
 - Add or update tests in `server/tests/` for any API changes
 - Run tests before submitting: `./scripts/run-server-tests.sh`
+   - All tests must pass
 
 ### Frontend (Astro/Svelte)
 
@@ -62,6 +67,7 @@ Before you can run and test the application locally, you'll need to install:
 - Follow the dark theme using Tailwind CSS utility classes
 - Add `data-testid` attributes to interactive elements for testing
 - Run E2E tests before submitting: `./scripts/run-e2e-tests.sh`
+   - All tests must pass
 
 ## Submitting a Pull Request
 

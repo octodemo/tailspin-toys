@@ -1,14 +1,9 @@
-from flask import jsonify, Response, Blueprint
+from flask import jsonify, request, Response, Blueprint
 from models import db, Game, Publisher, Category
 from sqlalchemy.orm import Query
 
 # Create a Blueprint for games routes
 games_bp = Blueprint('games', __name__)
-
-# TODO: Add Create, Update, Delete endpoints to complete CRUD functionality
-# - POST /api/games - Create a new game
-# - PUT /api/games/<id> - Update an existing game
-# - DELETE /api/games/<id> - Delete a game
 
 def get_games_base_query() -> Query:
     return db.session.query(Game).join(
@@ -44,3 +39,95 @@ def get_game(id: int) -> tuple[Response, int] | Response:
     game = game_query.to_dict()
     
     return jsonify(game)
+
+
+@games_bp.route('/api/games', methods=['POST'])
+def create_game() -> tuple[Response, int]:
+    """Create a new game."""
+    data = request.get_json()
+    
+    # Validate required fields
+    required_fields = ['title', 'description', 'category_id', 'publisher_id']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    
+    # Validate category exists
+    category = db.session.query(Category).filter(Category.id == data['category_id']).first()
+    if not category:
+        return jsonify({"error": "Category not found"}), 404
+    
+    # Validate publisher exists
+    publisher = db.session.query(Publisher).filter(Publisher.id == data['publisher_id']).first()
+    if not publisher:
+        return jsonify({"error": "Publisher not found"}), 404
+    
+    # Create new game
+    try:
+        game = Game(
+            title=data['title'],
+            description=data['description'],
+            category_id=data['category_id'],
+            publisher_id=data['publisher_id'],
+            star_rating=data.get('star_rating')
+        )
+        db.session.add(game)
+        db.session.commit()
+        
+        return jsonify(game.to_dict()), 201
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
+
+
+@games_bp.route('/api/games/<int:id>', methods=['PUT'])
+def update_game(id: int) -> tuple[Response, int] | Response:
+    """Update an existing game."""
+    game = db.session.query(Game).filter(Game.id == id).first()
+    
+    if not game:
+        return jsonify({"error": "Game not found"}), 404
+    
+    data = request.get_json()
+    
+    try:
+        # Update fields if provided
+        if 'title' in data:
+            game.title = data['title']
+        if 'description' in data:
+            game.description = data['description']
+        if 'star_rating' in data:
+            game.star_rating = data['star_rating']
+        if 'category_id' in data:
+            category = db.session.query(Category).filter(Category.id == data['category_id']).first()
+            if not category:
+                return jsonify({"error": "Category not found"}), 404
+            game.category_id = data['category_id']
+        if 'publisher_id' in data:
+            publisher = db.session.query(Publisher).filter(Publisher.id == data['publisher_id']).first()
+            if not publisher:
+                return jsonify({"error": "Publisher not found"}), 404
+            game.publisher_id = data['publisher_id']
+        
+        db.session.commit()
+        
+        # Refresh to get related objects
+        db.session.refresh(game)
+        return jsonify(game.to_dict())
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
+
+
+@games_bp.route('/api/games/<int:id>', methods=['DELETE'])
+def delete_game(id: int) -> tuple[Response, int]:
+    """Delete a game."""
+    game = db.session.query(Game).filter(Game.id == id).first()
+    
+    if not game:
+        return jsonify({"error": "Game not found"}), 404
+    
+    db.session.delete(game)
+    db.session.commit()
+    
+    return jsonify({"message": "Game deleted successfully"}), 200

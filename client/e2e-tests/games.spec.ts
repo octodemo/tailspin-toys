@@ -92,11 +92,11 @@ test.describe('Game Listing and Navigation', () => {
       await expect(page.getByTestId('game-details')).toBeVisible();
     });
 
-    await test.step('Verify back game button is visible and enabled', async () => {
-      const backButton = page.getByTestId('back-game-button');
-      await expect(backButton).toBeVisible();
-      await expect(backButton).toContainText('Support This Game');
-      await expect(backButton).toBeEnabled();
+    await test.step('Verify support game button is visible and enabled', async () => {
+      const supportButton = page.getByTestId('support-game-button');
+      await expect(supportButton).toBeVisible();
+      await expect(supportButton).toContainText('Support This Game');
+      await expect(supportButton).toBeEnabled();
     });
   });
 

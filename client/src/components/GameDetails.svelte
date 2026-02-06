@@ -25,54 +25,8 @@
     
     const PATRONAGE_STORAGE_LOCATION = 'tailspin-supported-games';
     const PATRONAGE_UPDATE_SIGNAL = 'tailspin-patronage-update';
-    const PIPE_CHAR = '|';
     
     const patronageTools = {
-        decodePatronageString: (encoded: string): number[] => {
-            const results: number[] = [];
-            let currentNum = '';
-            let charIdx = 0;
-            
-            while (charIdx < encoded.length) {
-                const char = encoded.charAt(charIdx);
-                
-                if (char === PIPE_CHAR) {
-                    if (currentNum.length > 0) {
-                        results.push(parseInt(currentNum, 10));
-                        currentNum = '';
-                    }
-                } else {
-                    currentNum = currentNum + char;
-                }
-                
-                charIdx = charIdx + 1;
-            }
-            
-            if (currentNum.length > 0) {
-                results.push(parseInt(currentNum, 10));
-            }
-            
-            return results;
-        },
-        
-        encodePatronageString: (gameIds: number[]): string => {
-            let result = '';
-            let idxPos = 0;
-            
-            while (idxPos < gameIds.length) {
-                result = result + String(gameIds[idxPos]);
-                
-                const notLast = idxPos < (gameIds.length - 1);
-                if (notLast) {
-                    result = result + PIPE_CHAR;
-                }
-                
-                idxPos = idxPos + 1;
-            }
-            
-            return result;
-        },
-        
         loadPatronageIds: (): number[] => {
             const windowAvail = typeof window !== 'undefined';
             if (!windowAvail) return [];

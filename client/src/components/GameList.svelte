@@ -16,6 +16,9 @@
     let { games = $bindable([]) }: { games?: Game[] } = $props();
     let loading = $state(true);
     let error = $state<string | null>(null);
+    let refreshKey = $state(0);
+    
+    const PATRONAGE_UPDATE_SIGNAL = 'tailspin-patronage-update';
 
     const fetchGames = async () => {
         loading = true;
@@ -35,6 +38,16 @@
 
     onMount(() => {
         fetchGames();
+        
+        const handlePatronageUpdate = () => {
+            refreshKey = refreshKey + 1;
+        };
+        
+        window.addEventListener(PATRONAGE_UPDATE_SIGNAL, handlePatronageUpdate);
+        
+        return () => {
+            window.removeEventListener(PATRONAGE_UPDATE_SIGNAL, handlePatronageUpdate);
+        };
     });
 </script>
 
@@ -49,7 +62,7 @@
         <EmptyState message="No games available at the moment." />
     {:else}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="games-grid">
-            {#each games as game (game.id)}
+            {#each games as game (game.id + '-' + refreshKey)}
                 <GameCard {game} />
             {/each}
         </div>

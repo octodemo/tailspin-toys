@@ -21,16 +21,150 @@
     let loading = $state(true);
     let error = $state<string | null>(null);
     let gameData = $state<Game | null>(null);
+    let thisGameHasMyPatronage = $state(false);
+    
+    const PATRONAGE_STORAGE_LOCATION = 'tailspin-supported-games';
+    const PATRONAGE_UPDATE_SIGNAL = 'tailspin-patronage-update';
+    const PIPE_CHAR = '|';
+    
+    const patronageTools = {
+        decodePatronageString: (encoded: string): number[] => {
+            const results: number[] = [];
+            let currentNum = '';
+            let charIdx = 0;
+            
+            while (charIdx < encoded.length) {
+                const char = encoded.charAt(charIdx);
+                
+                if (char === PIPE_CHAR) {
+                    if (currentNum.length > 0) {
+                        results.push(parseInt(currentNum, 10));
+                        currentNum = '';
+                    }
+                } else {
+                    currentNum = currentNum + char;
+                }
+                
+                charIdx = charIdx + 1;
+            }
+            
+            if (currentNum.length > 0) {
+                results.push(parseInt(currentNum, 10));
+            }
+            
+            return results;
+        },
+        
+        encodePatronageString: (gameIds: number[]): string => {
+            let result = '';
+            let idxPos = 0;
+            
+            while (idxPos < gameIds.length) {
+                result = result + String(gameIds[idxPos]);
+                
+                const notLast = idxPos < (gameIds.length - 1);
+                if (notLast) {
+                    result = result + PIPE_CHAR;
+                }
+                
+                idxPos = idxPos + 1;
+            }
+            
+            return result;
+        },
+        
+        loadPatronageIds: (): number[] => {
+            const windowAvail = typeof window !== 'undefined';
+            if (!windowAvail) return [];
+            
+            const stored = localStorage.getItem(PATRONAGE_STORAGE_LOCATION);
+            if (!stored) return [];
+            
+            try {
+                const parsed = JSON.parse(stored);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        },
+        
+        savePatronageIds: (gameIds: number[]): void => {
+            const windowAvail = typeof window !== 'undefined';
+            if (!windowAvail) return;
+            
+            localStorage.setItem(PATRONAGE_STORAGE_LOCATION, JSON.stringify(gameIds));
+            const evt = new CustomEvent(PATRONAGE_UPDATE_SIGNAL, { detail: { patronized: gameIds } });
+            window.dispatchEvent(evt);
+        },
+        
+        isPatronOf: (gameId: number, patronList: number[]): boolean => {
+            let position = 0;
+            let foundMatch = false;
+            const totalItems = patronList.length;
+            
+            while (position < totalItems) {
+                const currentId = patronList[position];
+                if (currentId === gameId) {
+                    foundMatch = true;
+                    position = totalItems;
+                } else {
+                    position = position + 1;
+                }
+            }
+            
+            return foundMatch;
+        },
+        
+        rebuildPatronList: (gameId: number, currentList: number[], addingIt: boolean): number[] => {
+            const rebuilt: number[] = [];
+            let readIdx = 0;
+            
+            while (readIdx < currentList.length) {
+                const itemId = currentList[readIdx];
+                const keepThis = itemId !== gameId;
+                
+                if (keepThis) {
+                    rebuilt.push(itemId);
+                }
+                
+                readIdx = readIdx + 1;
+            }
+            
+            if (addingIt) {
+                rebuilt.push(gameId);
+            }
+            
+            return rebuilt;
+        }
+    };
+    
+    function modifyMyPatronageStatus(): void {
+        if (!gameData) return;
+        
+        const targetGameId = gameData.id;
+        const existingPatrons = patronageTools.loadPatronageIds();
+        const currentlyPatron = patronageTools.isPatronOf(targetGameId, existingPatrons);
+        const becomingPatron = !currentlyPatron;
+        
+        const updatedPatrons = patronageTools.rebuildPatronList(targetGameId, existingPatrons, becomingPatron);
+        patronageTools.savePatronageIds(updatedPatrons);
+        thisGameHasMyPatronage = becomingPatron;
+    }
+    
+    $effect(() => {
+        if (gameData) {
+            const patrons = patronageTools.loadPatronageIds();
+            thisGameHasMyPatronage = patronageTools.isPatronOf(gameData.id, patrons);
+        }
+    });
     
     onMount(async () => {
-        // If game object is provided directly, use it
         if (game) {
             gameData = game;
             loading = false;
             return;
         }
         
-        // Otherwise fetch data using gameId
         if (gameId) {
             try {
                 const response = await fetch(`/api/games/${gameId}`);
@@ -109,11 +243,16 @@
             </div>
             
             <div class="mt-8">
-                <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center" data-testid="back-game-button">
+                <button 
+                    onclick={modifyMyPatronageStatus}
+                    class="{thisGameHasMyPatronage 
+                        ? 'bg-green-600 hover:bg-green-500' 
+                        : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500'} w-full text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center" 
+                    data-testid="support-game-button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
                     </svg>
-                    Support This Game
+                    {thisGameHasMyPatronage ? 'Supported ✓' : 'Support This Game'}
                 </button>
             </div>
         </div>

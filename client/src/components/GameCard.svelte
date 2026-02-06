@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { onMount } from "svelte";
+
     interface Game {
         id: number;
         title: string;
@@ -8,6 +10,39 @@
     }
 
     let { game }: { game: Game } = $props();
+    let showHeartBadge = $state(false);
+    
+    const PATRONAGE_STORAGE_LOCATION = 'tailspin-supported-games';
+    const PATRONAGE_UPDATE_SIGNAL = 'tailspin-patronage-update';
+    
+    function checkPatronageStatus(): void {
+        if (typeof window === 'undefined') return;
+        
+        const stored = localStorage.getItem(PATRONAGE_STORAGE_LOCATION);
+        if (!stored) {
+            showHeartBadge = false;
+            return;
+        }
+        
+        try {
+            const parsed = JSON.parse(stored);
+            const patronList = Array.isArray(parsed) ? parsed : [];
+            showHeartBadge = patronList.some(id => id === game.id);
+        } catch {
+            showHeartBadge = false;
+        }
+    }
+    
+    onMount(() => {
+        checkPatronageStatus();
+        
+        const handleUpdate = () => checkPatronageStatus();
+        window.addEventListener(PATRONAGE_UPDATE_SIGNAL, handleUpdate);
+        
+        return () => {
+            window.removeEventListener(PATRONAGE_UPDATE_SIGNAL, handleUpdate);
+        };
+    });
 </script>
 
 <a 
@@ -19,6 +54,13 @@
 >
     <div class="p-6 relative">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        {#if showHeartBadge}
+            <div class="absolute top-3 right-3 bg-red-500 rounded-full p-2" data-testid="heart-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                </svg>
+            </div>
+        {/if}
         <div class="relative z-10">
             <h3 class="text-xl font-semibold text-slate-100 mb-2 group-hover:text-blue-400 transition-colors" data-testid="game-title">{game.title}</h3>
             

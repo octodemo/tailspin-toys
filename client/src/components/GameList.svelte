@@ -16,6 +16,8 @@
     let { games = $bindable([]) }: { games?: Game[] } = $props();
     let loading = $state(true);
     let error = $state<string | null>(null);
+    
+    const PATRONAGE_UPDATE_SIGNAL = 'tailspin-patronage-update';
 
     const fetchGames = async () => {
         loading = true;

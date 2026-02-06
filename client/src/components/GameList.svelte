@@ -37,16 +37,6 @@
 
     onMount(() => {
         fetchGames();
-        
-        const handlePatronageUpdate = () => {
-            // GameCard components handle their own updates via events
-        };
-        
-        window.addEventListener(PATRONAGE_UPDATE_SIGNAL, handlePatronageUpdate);
-        
-        return () => {
-            window.removeEventListener(PATRONAGE_UPDATE_SIGNAL, handlePatronageUpdate);
-        };
     });
 </script>
 

@@ -1,26 +1,52 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import GameCard from "./GameCard.svelte";
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
     import EmptyState from "./EmptyState.svelte";
 
+    interface Publisher {
+        id: number;
+        name: string;
+    }
+    
+    interface Category {
+        id: number;
+        name: string;
+    }
+
     interface Game {
         id: number;
         title: string;
         description: string;
-        publisher_name?: string;
-        category_name?: string;
+        publisher?: Publisher | null;
+        category?: Category | null;
     }
 
-    let { games = $bindable([]) }: { games?: Game[] } = $props();
+    let { 
+        games = $bindable([]),
+        publisherId = null,
+        categoryId = null
+    }: { 
+        games?: Game[];
+        publisherId?: number | null;
+        categoryId?: number | null;
+    } = $props();
+    
     let loading = $state(true);
     let error = $state<string | null>(null);
 
-    const fetchGames = async () => {
+    const fetchGames = async (pubId: number | null, catId: number | null) => {
         loading = true;
+        error = null;
         try {
-            const response = await fetch('/api/games');
+            // Build URL with filter params
+            const params = new URLSearchParams();
+            if (pubId) params.append('publisher_id', pubId.toString());
+            if (catId) params.append('category_id', catId.toString());
+            
+            const url = `/api/games${params.toString() ? '?' + params.toString() : ''}`;
+            const response = await fetch(url);
+            
             if(response.ok) {
                 games = await response.json();
             } else {
@@ -33,8 +59,9 @@
         }
     };
 
-    onMount(() => {
-        fetchGames();
+    // Refetch when filters change
+    $effect(() => {
+        fetchGames(publisherId, categoryId);
     });
 </script>
 

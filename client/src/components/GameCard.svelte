@@ -1,10 +1,20 @@
 <script lang="ts">
+    interface Publisher {
+        id: number;
+        name: string;
+    }
+    
+    interface Category {
+        id: number;
+        name: string;
+    }
+    
     interface Game {
         id: number;
         title: string;
         description: string;
-        publisher_name?: string;
-        category_name?: string;
+        publisher?: Publisher | null;
+        category?: Category | null;
     }
 
     let { game }: { game: Game } = $props();
@@ -22,16 +32,16 @@
         <div class="relative z-10">
             <h3 class="text-xl font-semibold text-slate-100 mb-2 group-hover:text-blue-400 transition-colors" data-testid="game-title">{game.title}</h3>
             
-            {#if game.category_name || game.publisher_name}
+            {#if game.category?.name || game.publisher?.name}
                 <div class="flex gap-2 mb-3">
-                    {#if game.category_name}
+                    {#if game.category?.name}
                         <span class="text-xs font-medium px-2.5 py-0.5 rounded bg-blue-900/60 text-blue-300" data-testid="game-category">
-                            {game.category_name}
+                            {game.category.name}
                         </span>
                     {/if}
-                    {#if game.publisher_name}
+                    {#if game.publisher?.name}
                         <span class="text-xs font-medium px-2.5 py-0.5 rounded bg-purple-900/60 text-purple-300" data-testid="game-publisher">
-                            {game.publisher_name}
+                            {game.publisher.name}
                         </span>
                     {/if}
                 </div>

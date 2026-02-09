@@ -34,8 +34,10 @@
     
     let loading = $state(true);
     let error = $state<string | null>(null);
+    let requestCounter = 0;
 
     const fetchGames = async (pubId: number | null, catId: number | null) => {
+        const thisRequest = ++requestCounter;
         loading = true;
         error = null;
         try {
@@ -47,15 +49,22 @@
             const url = `/api/games${params.toString() ? '?' + params.toString() : ''}`;
             const response = await fetch(url);
             
+            // Ignore stale responses from earlier requests
+            if (thisRequest !== requestCounter) return;
+            
             if(response.ok) {
                 games = await response.json();
             } else {
                 error = `Failed to fetch data: ${response.status} ${response.statusText}`;
             }
         } catch (err) {
+            // Ignore errors from stale requests
+            if (thisRequest !== requestCounter) return;
             error = `Error: ${err instanceof Error ? err.message : String(err)}`;
         } finally {
-            loading = false;
+            if (thisRequest === requestCounter) {
+                loading = false;
+            }
         }
     };
 
@@ -65,10 +74,11 @@
     });
 </script>
 
-<div>
+<div aria-busy={loading}>
     <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
     
     {#if loading}
+        <div role="status" aria-live="polite" class="sr-only">Loading games...</div>
         <LoadingSkeleton count={6} />
     {:else if error}
         <ErrorMessage error={error} />
@@ -81,4 +91,11 @@
             {/each}
         </div>
     {/if}
+    
+    <!-- Live region to announce filter results to screen readers -->
+    <div role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+        {#if !loading && !error}
+            {games.length} {games.length === 1 ? 'game' : 'games'} found
+        {/if}
+    </div>
 </div>

@@ -3,7 +3,7 @@
 </script>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {#each Array(count) as _, i}
+    {#each Array(count) as _, i (i)}
         <div class="bg-slate-800/60 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-slate-700/50">
             <div class="p-6">
                 <div class="animate-pulse">

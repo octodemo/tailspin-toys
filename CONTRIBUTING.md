@@ -97,6 +97,7 @@ All change requests should start with an issue. You're welcome to file the issue
 
 ### Pull Request Guidelines
 
+- Use the appropriate pull request template, and ensure all sections are completed.
 - Keep your changes focused. If you have multiple unrelated changes, submit them as separate pull requests.
 - Write clear commit messages that explain *what* and *why*.
 - Update documentation if your changes affect how the application works.

@@ -57,7 +57,12 @@
     let hasActiveFilters = $derived(selectedPublisherId !== null || selectedCategoryId !== null);
 </script>
 
-<div class="bg-slate-800 rounded-xl p-4 mb-6 border border-slate-700" data-testid="game-filters">
+<div 
+    class="bg-slate-800 rounded-xl p-4 mb-6 border border-slate-700" 
+    data-testid="game-filters"
+    role="group"
+    aria-label="Filter games"
+>
     <div class="flex flex-wrap items-center gap-4">
         <div class="flex items-center gap-2">
             <label for="publisher-filter" class="text-slate-300 text-sm font-medium">

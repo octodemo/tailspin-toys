@@ -12,10 +12,6 @@ Please note that this project is released with a [Contributor Code of Conduct][c
 
 ## Getting Started
 
-### Issues
-
-All change requests should start with an issue. You're welcome to file the issue alongside the PR, but an issue must always be created.
-
 ### Prerequisites
 
 Before you can run and test the application locally, you'll need to install:
@@ -71,12 +67,18 @@ Before you can run and test the application locally, you'll need to install:
 
 ## Submitting a Pull Request
 
+### Issues
+
+All change requests should start with an issue. You're welcome to file the issue alongside the PR, but an issue must always be created.
+
+### Workflow
+
 1. Create a new branch from `main` for your changes:
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
-2. Make your changes, following the coding standards above
+2. Make your changes, following the documented coding standards.
 
 3. Run the test suites to ensure nothing is broken:
    ```bash
@@ -89,9 +91,9 @@ Before you can run and test the application locally, you'll need to install:
    git commit -m "Add feature: brief description of changes"
    ```
 
-5. Push to your fork and [submit a pull request][pr]
+5. Push to your fork and [submit a pull request][pr].
 
-6. Wait for your pull request to be reviewed and merged
+6. Wait for your pull request to be reviewed and merged.
 
 ### Pull Request Guidelines
 

@@ -72,16 +72,20 @@ class TestPublishersRoutes(unittest.TestCase):
         self.assertEqual(names, sorted(names))
 
     def test_get_publishers_structure(self) -> None:
-        """Test the response structure for publishers."""
+        """Test the response structure for publishers (minimal for dropdowns)."""
         response = self.client.get(self.PUBLISHERS_API_PATH)
         data = self._get_response_data(response)
         
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(data, list)
         
-        required_fields = ['id', 'name', 'description', 'game_count']
+        # List endpoint returns minimal structure for dropdown performance
+        required_fields = ['id', 'name']
         for field in required_fields:
             self.assertIn(field, data[0])
+        # Verify description and game_count are NOT included (N+1 optimization)
+        self.assertNotIn('description', data[0])
+        self.assertNotIn('game_count', data[0])
 
     def test_get_publisher_by_id_success(self) -> None:
         """Test successful retrieval of a single publisher by ID."""

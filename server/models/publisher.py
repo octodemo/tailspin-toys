@@ -31,3 +31,10 @@ class Publisher(BaseModel):
             'description': self.description,
             'game_count': len(self.games) if self.games else 0
         }
+
+    def to_dict_minimal(self) -> dict[str, Any]:
+        """Return minimal dict for dropdowns without triggering games relationship."""
+        return {
+            'id': self.id,
+            'name': self.name
+        }

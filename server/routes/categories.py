@@ -15,7 +15,7 @@ def get_categories_base_query() -> Query:
 def get_categories() -> Response:
     """Get all categories for dropdown population."""
     categories_query = get_categories_base_query().all()
-    categories_list = [category.to_dict() for category in categories_query]
+    categories_list = [category.to_dict_minimal() for category in categories_query]
     return jsonify(categories_list)
 
 

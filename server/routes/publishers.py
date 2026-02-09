@@ -15,7 +15,7 @@ def get_publishers_base_query() -> Query:
 def get_publishers() -> Response:
     """Get all publishers for dropdown population."""
     publishers_query = get_publishers_base_query().all()
-    publishers_list = [publisher.to_dict() for publisher in publishers_query]
+    publishers_list = [publisher.to_dict_minimal() for publisher in publishers_query]
     return jsonify(publishers_list)
 
 

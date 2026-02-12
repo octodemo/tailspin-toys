@@ -1,20 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    
-    interface Game {
-        id: number;
-        title: string;
-        description: string;
-        publisher: {
-            id: number;
-            name: string;
-        } | null;
-        category: {
-            id: number;
-            name: string;
-        } | null;
-        starRating: number | null;
-    }
+    import type { Game } from '../types/game';
+    import { API_ENDPOINTS } from '../config/api';
+    import ErrorMessage from "./ErrorMessage.svelte";
 
     let { game = undefined, gameId = 0 }: { game?: Game, gameId?: number } = $props();
     
@@ -33,7 +21,7 @@
         // Otherwise fetch data using gameId
         if (gameId) {
             try {
-                const response = await fetch(`/api/games/${gameId}`);
+                const response = await fetch(API_ENDPOINTS.gameById(gameId));
                 if (response.ok) {
                     gameData = await response.json();
                 } else {
@@ -69,9 +57,7 @@
         <div class="h-4 bg-slate-700 rounded w-full mb-3"></div>
     </div>
 {:else if error}
-    <div class="bg-red-500/20 border border-red-500/50 text-red-400 rounded-xl p-6">
-        {error}
-    </div>
+    <ErrorMessage {error} />
 {:else if gameData}
     <div class="bg-slate-800/70 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden" data-testid="game-details">
         <div class="p-6">

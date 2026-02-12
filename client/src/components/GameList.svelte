@@ -1,17 +1,11 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import type { Game } from '../types/game';
+    import { API_ENDPOINTS } from '../config/api';
     import GameCard from "./GameCard.svelte";
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
     import EmptyState from "./EmptyState.svelte";
-
-    interface Game {
-        id: number;
-        title: string;
-        description: string;
-        publisher_name?: string;
-        category_name?: string;
-    }
 
     let { games = $bindable([]) }: { games?: Game[] } = $props();
     let loading = $state(true);
@@ -20,7 +14,7 @@
     const fetchGames = async () => {
         loading = true;
         try {
-            const response = await fetch('/api/games');
+            const response = await fetch(API_ENDPOINTS.games);
             if(response.ok) {
                 games = await response.json();
             } else {
@@ -34,7 +28,11 @@
     };
 
     onMount(() => {
-        fetchGames();
+        if (games.length === 0) {
+            fetchGames();
+        } else {
+            loading = false;
+        }
     });
 </script>
 

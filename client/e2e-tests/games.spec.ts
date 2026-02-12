@@ -130,4 +130,19 @@ test.describe('Game Listing and Navigation', () => {
       await expect(page).toHaveTitle(/Game Details - Tailspin Toys/);
     });
   });
+
+  test('should display error message for non-existent game', async ({ page }) => {
+    await test.step('Navigate to non-existent game', async () => {
+      await page.goto('/game/99999');
+    });
+
+    await test.step('Verify error message is displayed to the user', async () => {
+      const errorContainer = page.getByTestId('error-message');
+      await expect(errorContainer).toBeVisible();
+
+      const errorText = page.getByTestId('error-text');
+      await expect(errorText).toBeVisible();
+      await expect(errorText).not.toBeEmpty();
+    });
+  });
 });

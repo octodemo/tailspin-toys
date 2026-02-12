@@ -25,9 +25,7 @@ class Game(BaseModel):
     
     @validates('description')
     def validate_description(self, key, description):
-        if description is not None:
-            return self.validate_string_length('Description', description, min_length=10, allow_none=True)
-        return description
+        return self.validate_string_length('Description', description, min_length=10)
     
     def __repr__(self) -> str:
         return f'<Game {self.title}, ID: {self.id}>'

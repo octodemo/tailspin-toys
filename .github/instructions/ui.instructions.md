@@ -31,7 +31,10 @@ Refer to technology-specific instruction files:
 
 - Use semantic HTML elements (`<nav>`, `<main>`, `<article>`, `<button>`)
 - Provide ARIA labels and roles where semantic HTML isn't sufficient
-- Ensure keyboard navigation works for all interactive elements
+- Navigation menus should use `role="menu"` and `role="menuitem"` attributes
+- Loading states should use `role="status"` and `aria-live="polite"` for screen reader announcements
+- Include Escape key handlers for dismissible elements (menus, modals)
+- Ensure keyboard navigation works for all interactive elements, with proper focus management
 - Include visible focus states: `focus:ring-2 focus:ring-blue-500 focus:outline-none`
 - Maintain sufficient color contrast (especially in dark theme)
 

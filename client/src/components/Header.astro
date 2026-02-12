@@ -12,9 +12,9 @@
           </svg>
         </button>
         <nav id="menu" class="hidden absolute left-0 mt-2 w-48 bg-white dark:bg-slate-800 text-slate-800 dark:text-white rounded shadow-lg z-10 transition-colors duration-300">
-          <ul class="py-1">
-            <li><a href="/" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">Home</a></li>
-            <li><a href="/about" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">About</a></li>
+          <ul class="py-1" role="menu">
+            <li><a href="/" role="menuitem" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">Home</a></li>
+            <li><a href="/about" role="menuitem" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">About</a></li>
           </ul>
         </nav>
       </div>
@@ -33,14 +33,28 @@
       menu.classList.toggle('hidden');
       const isExpanded = !menu.classList.contains('hidden');
       menuToggle.setAttribute('aria-expanded', String(isExpanded));
+      if (isExpanded) {
+        const firstLink = menu.querySelector('a');
+        if (firstLink) firstLink.focus();
+      }
     });
     
     // Close menu when clicking outside
     document.addEventListener('click', (event) => {
-      const isClickInside = menuToggle.contains(event.target as Node) || menu.contains(event.target as Node);
+      const target = event.target;
+      const isClickInside = target instanceof Node && (menuToggle.contains(target) || menu.contains(target));
       if (!isClickInside && !menu.classList.contains('hidden')) {
         menu.classList.add('hidden');
         menuToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close menu with Escape key and return focus to toggle button
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !menu.classList.contains('hidden')) {
+        menu.classList.add('hidden');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.focus();
       }
     });
   }

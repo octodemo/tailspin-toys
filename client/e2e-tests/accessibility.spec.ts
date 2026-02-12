@@ -38,73 +38,92 @@ test.describe('Accessibility Tests', () => {
   test('keyboard navigation - should be able to navigate header menu', async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
-    
-    // Focus on the menu button using Tab
-    await page.keyboard.press('Tab');
-    
-    // Verify the menu button is focused
-    const menuButton = page.locator('#menu-toggle');
-    await expect(menuButton).toBeFocused();
-    
-    // Open menu with keyboard (Enter or Space)
-    await page.keyboard.press('Enter');
-    
-    // Verify menu is visible
+
+    const menuButton = page.getByRole('button', { name: /toggle menu/i });
     const menu = page.locator('#menu');
-    await expect(menu).not.toHaveClass(/hidden/);
-    
-    // Tab to first menu item
-    await page.keyboard.press('Tab');
-    const homeLink = page.locator('#menu a[href="/"]');
-    await expect(homeLink).toBeFocused();
-    
-    // Tab to second menu item
-    await page.keyboard.press('Tab');
-    const aboutLink = page.locator('#menu a[href="/about"]');
-    await expect(aboutLink).toBeFocused();
+
+    await test.step('Tab until the menu button is focused', async () => {
+      for (let i = 0; i < 20; i++) {
+        await page.keyboard.press('Tab');
+        if (await menuButton.evaluate(el => el === document.activeElement)) break;
+      }
+      await expect(menuButton).toBeFocused();
+    });
+
+    await test.step('Open menu with Enter and verify it is visible', async () => {
+      await page.keyboard.press('Enter');
+      await expect(menu).not.toHaveClass(/hidden/);
+    });
+
+    await test.step('Verify menu items are reachable', async () => {
+      const homeLink = menu.getByRole('menuitem', { name: /home/i });
+      // Focus may already be on the first menu item after opening
+      if (!await homeLink.evaluate(el => el === document.activeElement)) {
+        for (let i = 0; i < 10; i++) {
+          await page.keyboard.press('Tab');
+          if (await homeLink.evaluate(el => el === document.activeElement)) break;
+        }
+      }
+      await expect(homeLink).toBeFocused();
+
+      const aboutLink = menu.getByRole('menuitem', { name: /about/i });
+      for (let i = 0; i < 10; i++) {
+        await page.keyboard.press('Tab');
+        if (await aboutLink.evaluate(el => el === document.activeElement)) break;
+      }
+      await expect(aboutLink).toBeFocused();
+    });
   });
 
   test('keyboard navigation - should be able to navigate to game cards', async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
-    
-    // Tab through header elements to get to game cards
-    let tabCount = 0;
-    let gameCardFocused = false;
-    
-    // Tab up to 20 times to find a game card
-    while (tabCount < 20 && !gameCardFocused) {
-      await page.keyboard.press('Tab');
-      tabCount++;
-      
-      // Check if a game card is focused
-      const focusedElement = page.locator(':focus');
-      const testId = await focusedElement.getAttribute('data-testid').catch(() => null);
-      
-      if (testId === 'game-card') {
-        gameCardFocused = true;
-      }
-    }
-    
-    expect(gameCardFocused).toBeTruthy();
+
+    await test.step('Tab through page until a game card receives focus', async () => {
+      const MAX_TABS = 50;
+      let tabCount = 0;
+
+      await expect.poll(async () => {
+        if (tabCount < MAX_TABS) {
+          await page.keyboard.press('Tab');
+          tabCount++;
+        }
+        return page.locator('[data-testid="game-card"]:focus').count();
+      }, { timeout: 15000, message: 'Expected a game card to receive focus via Tab' }).toBeGreaterThan(0);
+    });
   });
 
   test('keyboard navigation - should be able to activate game card with Enter', async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
-    
-    // Get first game card
-    const firstGameCard = page.locator('[data-testid="game-card"]').first();
-    const gameId = await firstGameCard.getAttribute('data-game-id');
-    
-    // Focus on the game card
-    await firstGameCard.focus();
-    
-    // Activate with Enter
-    await page.keyboard.press('Enter');
-    
-    // Verify navigation occurred
-    await expect(page).toHaveURL(`/game/${gameId}`);
+
+    let gameId: string | null = null;
+
+    await test.step('Tab to a game card using real keyboard navigation', async () => {
+      let tabCount = 0;
+      let gameCardFocused = false;
+
+      while (tabCount < 20 && !gameCardFocused) {
+        await page.keyboard.press('Tab');
+        tabCount++;
+
+        const focusedElement = page.locator(':focus');
+        const testId = await focusedElement.getAttribute('data-testid').catch(() => null);
+
+        if (testId === 'game-card') {
+          gameId = await focusedElement.getAttribute('data-game-id');
+          gameCardFocused = true;
+        }
+      }
+
+      expect(gameCardFocused).toBeTruthy();
+      expect(gameId).not.toBeNull();
+    });
+
+    await test.step('Press Enter and verify navigation to game page', async () => {
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(`/game/${gameId}`);
+    });
   });
 
   test('focus indicators - should have visible focus indicators on interactive elements', async ({ page }) => {

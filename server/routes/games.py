@@ -1,6 +1,6 @@
 from flask import jsonify, Response, Blueprint
 from models import db, Game, Publisher, Category
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, contains_eager
 
 # Create a Blueprint for games routes
 games_bp = Blueprint('games', __name__)
@@ -19,6 +19,9 @@ def get_games_base_query() -> Query:
         Category, 
         Game.category_id == Category.id, 
         isouter=True
+    ).options(
+        contains_eager(Game.publisher),
+        contains_eager(Game.category)
     )
 
 @games_bp.route('/api/games', methods=['GET'])

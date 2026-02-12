@@ -1,4 +1,5 @@
 from typing import Any
+from sqlalchemy import func
 from . import db
 from .base import BaseModel
 from sqlalchemy.orm import validates, relationship
@@ -25,9 +26,10 @@ class Category(BaseModel):
         return f'<Category {self.name}>'
         
     def to_dict(self) -> dict[str, Any]:
+        from .game import Game
         return {
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'game_count': len(self.games) if self.games else 0
+            'game_count': db.session.query(func.count(Game.id)).filter(Game.category_id == self.id).scalar() or 0
         }

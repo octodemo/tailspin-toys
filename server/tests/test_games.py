@@ -136,8 +136,9 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(len(data), len(self.TEST_DATA["games"]))
         
         required_fields = ['id', 'title', 'description', 'publisher', 'category', 'starRating']
-        for field in required_fields:
-            self.assertIn(field, data[0])
+        for game in data:
+            for field in required_fields:
+                self.assertIn(field, game)
 
     def test_get_game_by_id_success(self) -> None:
         """Test successful retrieval of a single game by ID"""

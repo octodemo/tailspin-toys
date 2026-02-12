@@ -46,8 +46,10 @@ tailspin-toys/
 │   │   ├── components/    # Reusable Svelte components
 │   │   ├── layouts/       # Astro layout templates
 │   │   ├── pages/         # Astro page routes (file-based routing)
+│   │   │   └── api/       # Streaming API proxy (catch-all endpoint)
 │   │   ├── styles/        # CSS and Tailwind config
-│   │   └── types/         # TypeScript types
+│   │   ├── types/         # TypeScript interfaces (Game, Publisher, Category)
+│   │   └── config/        # Centralized API configuration
 │   └── e2e-tests/         # Playwright E2E tests (*.spec.ts)
 ├── scripts/               # Development automation scripts
 ├── data/                  # SQLite database files
@@ -123,12 +125,14 @@ return jsonify({"error": "Invalid input"}), 400
 **Astro Integration**
 ```astro
 ---
-import GameCard from '../components/GameCard.svelte';
-const games = await fetchGames();
+import GameList from '../components/GameList.svelte';
+const API_SERVER_URL = process.env.API_SERVER_URL || 'http://localhost:5100';
+const response = await fetch(`${API_SERVER_URL}/api/games`);
+const games = await response.json();
 ---
 
 <Layout title="Games">
-  <GameCard client:only="svelte" {games} />
+  <GameList client:load {games} />
 </Layout>
 ```
 
@@ -179,8 +183,8 @@ def tearDown(self) -> None:
 The project already includes comprehensive Playwright E2E tests:
 - `home.spec.ts` - Homepage display and content
 - `games.spec.ts` - Game listing, navigation, and details pages
-- `filtering.spec.ts` - Game filtering functionality
 - `accessibility.spec.ts` - Accessibility compliance tests
+- `api-proxy.spec.ts` - API proxy streaming endpoint tests
 
 **Before creating new E2E tests**, check existing coverage in `client/e2e-tests/`.
 
@@ -230,7 +234,7 @@ The project already includes comprehensive Playwright E2E tests:
 1. Read `.github/instructions/astro.instructions.md`
 2. Create `.astro` file in `client/src/pages/`
 3. Use existing layout from `client/src/layouts/`
-4. Add Svelte components with `client:only="svelte"`
+4. Add Svelte components with `client:load`
 
 ### Creating a Svelte Component
 
@@ -281,20 +285,19 @@ The project already includes comprehensive Playwright E2E tests:
 
 Key models in `server/models/`:
 - **Game**: Crowdfunding game projects
-- **Creator**: Game creators/developers
-- **Backer**: Users who fund games
-- **Pledge**: Backing relationships between games and backers
+- **Publisher**: Game publishers
+- **Category**: Game categories
+- **BaseModel** (`base.py`): Shared base model with common fields
 
-Relationships use SQLAlchemy with outer joins for optional relations.
+Relationships use SQLAlchemy with `contains_eager` for optimized loading.
 
 ## API Conventions
 
 - **Base URL**: `/api/<resource>`
 - **GET** `/api/games` - List all games
 - **GET** `/api/games/<id>` - Get single game
-- **POST** `/api/games` - Create game
-- **PUT/PATCH** `/api/games/<id>` - Update game
-- **DELETE** `/api/games/<id>` - Delete game
+
+Additional write endpoints (POST, PUT/PATCH, DELETE) are not yet implemented.
 
 All endpoints return JSON with appropriate status codes.
 
@@ -325,4 +328,3 @@ When creating workflows (`.github/workflows/`):
 
 - [README.md](./README.md) - Project overview and setup
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines
-- [Workshop Content](./workshop-content/README.md) - Learning materials

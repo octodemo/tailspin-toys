@@ -65,5 +65,11 @@ All Svelte components MUST use Svelte 5 runes-based reactivity patterns:
 
 ## Component Integration
 
-- Use `client:only="svelte"` directive in Astro pages when including Svelte components
+- Use `client:load` directive in Astro pages when including Svelte components for SSR hydration
 - Import components normally: `import Component from './Component.svelte';`
+
+## Shared Types and Configuration
+
+- Import shared TypeScript interfaces from `src/types/game.ts`: `import type { Game } from '../types/game';`
+- Use centralized API endpoints from `src/config/api.ts`: `import { API_ENDPOINTS } from '../config/api';`
+- Never duplicate type definitions that already exist in the shared types directory

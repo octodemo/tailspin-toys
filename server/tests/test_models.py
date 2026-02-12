@@ -145,5 +145,56 @@ class TestModels(unittest.TestCase):
             self.assertIsNotNone(publisher.id)
             self.assertIsNone(publisher.description)
 
+    def test_publisher_description_too_short(self) -> None:
+        """Test that publisher description validation rejects descriptions that are too short"""
+        with self.app.app_context():
+            with self.assertRaises(ValueError) as context:
+                publisher = Publisher(name="Valid Name", description="Too short")
+                db.session.add(publisher)
+                db.session.commit()
+            
+            self.assertIn("Description must be at least 10 characters", str(context.exception))
+
+    def test_category_description_too_short(self) -> None:
+        """Test that category description validation rejects descriptions that are too short"""
+        with self.app.app_context():
+            with self.assertRaises(ValueError) as context:
+                category = Category(name="Valid Name", description="Too short")
+                db.session.add(category)
+                db.session.commit()
+            
+            self.assertIn("Description must be at least 10 characters", str(context.exception))
+
+    def test_category_description_none_allowed(self) -> None:
+        """Test that None descriptions are allowed for categories"""
+        with self.app.app_context():
+            category = Category(name="Test Category", description=None)
+            db.session.add(category)
+            db.session.commit()
+            
+            self.assertIsNotNone(category.id)
+            self.assertIsNone(category.description)
+
+    def test_game_description_none_rejected(self) -> None:
+        """Test that game description validation rejects None since column is not nullable"""
+        with self.app.app_context():
+            publisher = Publisher(**self.TEST_DATA["valid_publisher"])
+            category = Category(**self.TEST_DATA["valid_category"])
+            db.session.add_all([publisher, category])
+            db.session.commit()
+            
+            with self.assertRaises(ValueError) as context:
+                game = Game(
+                    title=self.TEST_DATA["valid_game"]["title"],
+                    description=None,
+                    publisher=publisher,
+                    category=category,
+                    star_rating=4.0
+                )
+                db.session.add(game)
+                db.session.commit()
+            
+            self.assertIn("Description cannot be empty", str(context.exception))
+
 if __name__ == '__main__':
     unittest.main()

@@ -16,6 +16,7 @@ applyTo: 'server/routes/*.py'
 
 - Create base query functions: `get_<resource>_base_query() -> Query`
 - Use SQLAlchemy with outer joins: `isouter=True` for optional relations
+- Use `contains_eager` for optimized eager loading to avoid N+1 queries
 - Return queries from helpers for reusability across endpoints
 - Use `.all()` for multiple results, `.first()` for single result
 

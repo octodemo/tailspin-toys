@@ -13,7 +13,7 @@ Astro is used for page routing, layouts, and static content. Svelte components h
 
 ```astro
 ---
-// Frontmatter: Server-side code (runs at build time)
+// Frontmatter: Server-side code (runs at request time in SSR mode)
 import Layout from '../layouts/Layout.astro';
 import Component from '../components/Component.svelte';
 
@@ -27,7 +27,7 @@ const { title, description } = Astro.props;
 
 <Layout title={title}>
   <!-- HTML content -->
-  <Component client:only="svelte" />
+  <Component client:load />
 </Layout>
 ```
 
@@ -69,20 +69,14 @@ const { title } = Astro.props;
 
 ### Dynamic Routes
 
-For dynamic routes, export `getStaticPaths()`:
+With `output: 'server'` (SSR mode), dynamic routes use request-time parameters instead of `getStaticPaths()`:
 
 ```astro
 ---
-export async function getStaticPaths() {
-  const games = await fetchGames();
-  
-  return games.map(game => ({
-    params: { id: game.id },
-    props: { game }
-  }));
-}
-
-const { game } = Astro.props;
+const API_SERVER_URL = process.env.API_SERVER_URL || 'http://localhost:5100';
+const { id } = Astro.params;
+const response = await fetch(`${API_SERVER_URL}/api/games/${id}`);
+const game = await response.json();
 ---
 
 <Layout title={game.title}>
@@ -94,8 +88,8 @@ const { game } = Astro.props;
 
 Use client directives to control hydration:
 
-- `client:only="svelte"` - Only runs on client (use for most interactive components)
-- `client:load` - Hydrates immediately on page load
+- `client:load` - Hydrates immediately on page load (preferred for SSR components)
+- `client:only="svelte"` - Only runs on client, no server rendering
 - `client:visible` - Hydrates when component becomes visible
 - `client:idle` - Hydrates when browser is idle
 
@@ -104,12 +98,19 @@ Use client directives to control hydration:
 ```astro
 ---
 import GameList from '../components/GameList.svelte';
+const API_SERVER_URL = process.env.API_SERVER_URL || 'http://localhost:5100';
+const response = await fetch(`${API_SERVER_URL}/api/games`);
+const games = await response.json();
 ---
 
 <Layout>
-  <GameList client:only="svelte" />
+  <GameList client:load {games} />
 </Layout>
 ```
+
+## Server Endpoints
+
+Server endpoints handle API proxying. The catch-all endpoint at `src/pages/api/[...path].ts` streams requests to the Flask backend, keeping API calls internal to the server.
 
 ## TypeScript
 
@@ -121,5 +122,5 @@ import GameList from '../components/GameList.svelte';
 
 - Keep Astro components for static content and routing
 - Use Svelte for interactivity and client-side state
-- Minimize client-side JavaScript by using Astro's static rendering where possible
+- Minimize client-side JavaScript by leveraging SSR data fetching in Astro frontmatter
 - Import and use global CSS styles from layouts

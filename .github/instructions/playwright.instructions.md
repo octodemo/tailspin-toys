@@ -22,7 +22,7 @@ applyTo: '**/*.spec.ts'
 
 ## File Organization
 
-- **Location**: Store all test files in the `tests/` directory.
+- **Location**: Store all test files in the `e2e-tests/` directory.
 - **Naming**: Use the convention `<feature-or-page>.spec.ts` (e.g., `login.spec.ts`, `search.spec.ts`).
 - **Scope**: Aim for one test file per major application feature or page.
 

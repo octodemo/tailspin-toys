@@ -45,7 +45,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - **Svelte 5 Components**: Use runes-based reactivity (`$state`, `$derived`, `$effect`, `$props`) - see `svelte.instructions.md`
 - **Astro Pages**: Use Astro for routing, layouts, and static content - see `astro.instructions.md`
 - Create reusable Svelte components when functionality is used in multiple places
-- Use `client:only="svelte"` directive when embedding Svelte in Astro pages
+- Use `client:load` directive when embedding Svelte in Astro pages for SSR hydration
 
 ### Styling
 
@@ -81,8 +81,11 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
   - `src/components/`: Reusable Svelte components
   - `src/layouts/`: Astro layout templates
   - `src/pages/`: Astro page routes
+    - `src/pages/api/`: Streaming API proxy (catch-all endpoint)
   - `src/styles/`: CSS and Tailwind configuration
-  - `e2e-tests/`: Playwright E2E tests (home, games, filtering, accessibility)
+  - `src/types/`: TypeScript interfaces (Game, Publisher, Category)
+  - `src/config/`: Centralized API configuration
+  - `e2e-tests/`: Playwright E2E tests (home, games, accessibility, api-proxy)
 - `scripts/`: Development and deployment scripts
 - `data/`: Database files
 - `README.md`: Project documentation

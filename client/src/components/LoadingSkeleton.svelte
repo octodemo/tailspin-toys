@@ -2,9 +2,10 @@
     let { count = 6 }: { count?: number } = $props();
 </script>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" role="status" aria-live="polite" aria-label="Loading games">
+    <span class="sr-only">Loading content, please wait</span>
     {#each Array(count) as _, i}
-        <div class="bg-slate-800/60 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-slate-700/50">
+        <div class="bg-slate-800/60 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-slate-700/50" aria-hidden="true">
             <div class="p-6">
                 <div class="animate-pulse">
                     <div class="h-6 bg-slate-700 rounded w-3/4 mb-3"></div>

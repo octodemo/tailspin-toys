@@ -86,6 +86,52 @@ test.describe('Game Listing and Navigation', () => {
     });
   });
 
+  test('should filter games by publisher and category', async ({ page }) => {
+    await test.step('Navigate to homepage and wait for filter controls', async () => {
+      await page.goto('/');
+      await expect(page.getByTestId('publisher-filter')).toBeVisible();
+      await expect(page.getByTestId('category-filter')).toBeVisible();
+    });
+
+    await test.step('Filter by a publisher and verify visible game publishers match', async () => {
+      const publisherFilter = page.getByTestId('publisher-filter');
+      const publisherOptions = await publisherFilter.locator('option').allTextContents();
+      expect(publisherOptions.length).toBeGreaterThan(1);
+
+      const chosenPublisher = publisherOptions[1];
+      await publisherFilter.selectOption({ label: chosenPublisher });
+
+      const gamePublishers = page.getByTestId('game-publisher');
+      await expect(gamePublishers.first()).toBeVisible();
+
+      const publisherCount = await gamePublishers.count();
+      expect(publisherCount).toBeGreaterThan(0);
+
+      for (let index = 0; index < publisherCount; index++) {
+        await expect(gamePublishers.nth(index)).toHaveText(chosenPublisher);
+      }
+    });
+
+    await test.step('Filter by a category and verify visible game categories match', async () => {
+      const categoryFilter = page.getByTestId('category-filter');
+      const categoryOptions = await categoryFilter.locator('option').allTextContents();
+      expect(categoryOptions.length).toBeGreaterThan(1);
+
+      const chosenCategory = categoryOptions[1];
+      await categoryFilter.selectOption({ label: chosenCategory });
+
+      const gameCategories = page.getByTestId('game-category');
+      await expect(gameCategories.first()).toBeVisible();
+
+      const categoryCount = await gameCategories.count();
+      expect(categoryCount).toBeGreaterThan(0);
+
+      for (let index = 0; index < categoryCount; index++) {
+        await expect(gameCategories.nth(index)).toHaveText(chosenCategory);
+      }
+    });
+  });
+
   test('should display a button to back the game', async ({ page }) => {
     await test.step('Navigate to game details page', async () => {
       await page.goto('/game/1');

@@ -1,6 +1,7 @@
-from flask import jsonify, Response, Blueprint
+from flask import jsonify, Response, Blueprint, request
 from models import db, Game, Publisher, Category
 from sqlalchemy.orm import Query, contains_eager
+from sqlalchemy import func
 
 # Create a Blueprint for games routes
 games_bp = Blueprint('games', __name__)
@@ -24,10 +25,39 @@ def get_games_base_query() -> Query:
         contains_eager(Game.category)
     )
 
+VALID_SORT_OPTIONS: dict[str, list] = {
+    'rating': [Game.star_rating.desc().nulls_last(), Game.title.asc()],
+    'title': [Game.title.asc()],
+}
+DEFAULT_SORT = 'rating'
+
 @games_bp.route('/api/games', methods=['GET'])
 def get_games() -> Response:
-    # Use the base query for all games
-    games_query = get_games_base_query().all()
+    publisher_filter = request.args.get('publisher', type=str)
+    category_filter = request.args.get('category', type=str)
+    sort_param = request.args.get('sort', default=DEFAULT_SORT, type=str)
+
+    games_query = get_games_base_query()
+
+    if publisher_filter and publisher_filter.strip():
+        normalized_publisher = publisher_filter.strip().lower()
+        games_query = games_query.filter(
+            func.lower(Publisher.name) == normalized_publisher
+        )
+
+    if category_filter and category_filter.strip():
+        normalized_category = category_filter.strip().lower()
+        games_query = games_query.filter(
+            func.lower(Category.name) == normalized_category
+        )
+
+    # Apply sorting
+    sort_key = sort_param.strip().lower() if sort_param else DEFAULT_SORT
+    order_clauses = VALID_SORT_OPTIONS.get(sort_key, VALID_SORT_OPTIONS[DEFAULT_SORT])
+    games_query = games_query.order_by(*order_clauses)
+
+    # Use the filtered query for games
+    games_query = games_query.all()
     
     # Convert the results using the model's to_dict method
     games_list = [game.to_dict() for game in games_query]

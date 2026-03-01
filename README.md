@@ -1,16 +1,40 @@
 # Tailspin Toys
 
-Tailspin Toys is a crowdfunding platform for games with a developer theme. The project is a website for a fictional game crowd-funding company, with a [Flask](https://flask.palletsprojects.com/en/stable/) backend using [SQLAlchemy](https://www.sqlalchemy.org/) and [Astro](https://astro.build/) frontend using [Svelte](https://svelte.dev/) for dynamic pages.
+Tailspin Toys is a crowdfunding platform for games with a developer theme. The project is a website for a fictional game crowd-funding company, with a [Spring Boot](https://spring.io/projects/spring-boot) backend using [Spring Data JPA](https://spring.io/projects/spring-data-jpa) and an [Astro](https://astro.build/) frontend using [Svelte](https://svelte.dev/) for dynamic pages.
+
+## Prerequisites
+
+- **Java 17+** – [Download Temurin](https://adoptium.net/)
+- **Node.js 18+** – [Download](https://nodejs.org/)
+- **Gradle** – bundled via the Gradle wrapper (`./gradlew`)
 
 ## Launch the site
-
-A script file has been created to launch the site. You can run it by:
 
 ```bash
 ./scripts/start-app.sh
 ```
 
 Then navigate to the [website](http://localhost:4321) to see the site!
+
+## Running tests
+
+### Backend (Spring Boot)
+
+```bash
+./scripts/run-server-tests.sh
+```
+
+### Frontend (Playwright E2E)
+
+```bash
+./scripts/run-e2e-tests.sh
+```
+
+## Project structure
+
+- `server-java/` – Spring Boot backend API (Java 17, Gradle)
+- `client/` – Astro/Svelte frontend
+- `scripts/` – Development automation scripts
 
 ## License 
 

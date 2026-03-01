@@ -69,3 +69,6 @@ msbuild.wrn
 
 # SQLite
 *.db
+# Gradle
+.gradle/
+server-java/build/

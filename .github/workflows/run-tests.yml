@@ -18,18 +18,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          python-version: "3.13"
-          cache: "pip"
+          java-version: "17"
+          distribution: "temurin"
 
-      - name: Install Python dependencies
-        run: bash ./scripts/setup-env.sh
-        
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Run Flask unit tests
-        run: bash ./scripts/run-server-tests.sh
+      - name: Run Spring Boot unit tests
+        working-directory: ./server-java
+        run: ./gradlew test
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -39,6 +39,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Spring Boot server
+        working-directory: ./server-java
+        run: ./gradlew classes
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -54,9 +67,6 @@ jobs:
       - name: Install Playwright browsers
         working-directory: ./client
         run: npx playwright install --with-deps
-
-      - name: Run environment setup
-        run: bash ./scripts/setup-env.sh
 
       - name: Run Playwright e2e tests
         working-directory: ./client

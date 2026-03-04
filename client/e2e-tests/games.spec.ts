@@ -139,7 +139,7 @@ test.describe('Game Listing and Navigation', () => {
     });
 
     await test.step('Verify back game button is visible and enabled', async () => {
-      const backButton = page.getByTestId('back-game-button');
+      const backButton = page.getByTestId('support-game-button');
       await expect(backButton).toBeVisible();
       await expect(backButton).toContainText('Support This Game');
       await expect(backButton).toBeEnabled();
@@ -189,6 +189,70 @@ test.describe('Game Listing and Navigation', () => {
       const errorText = page.getByTestId('error-text');
       await expect(errorText).toBeVisible();
       await expect(errorText).not.toBeEmpty();
+    });
+  });
+
+  test('should toggle support status when clicking the support button', async ({ page }) => {
+    await test.step('Navigate to game details page', async () => {
+      await page.goto('/game/1');
+      await expect(page.getByTestId('game-details')).toBeVisible();
+    });
+
+    await test.step('Verify button initially shows "Support This Game"', async () => {
+      const supportButton = page.getByTestId('support-game-button');
+      await expect(supportButton).toContainText('Support This Game');
+      await expect(supportButton).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    await test.step('Click support button and verify status changes to "Supported"', async () => {
+      await page.getByTestId('support-game-button').click();
+      const supportButton = page.getByTestId('support-game-button');
+      await expect(supportButton).toContainText('Supported');
+      await expect(supportButton).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    await test.step('Click again to toggle off and verify status reverts', async () => {
+      await page.getByTestId('support-game-button').click();
+      const supportButton = page.getByTestId('support-game-button');
+      await expect(supportButton).toContainText('Support This Game');
+      await expect(supportButton).toHaveAttribute('aria-pressed', 'false');
+    });
+  });
+
+  test('should display heart icon on game card after supporting a game', async ({ page }) => {
+    let gameId: string | null = null;
+
+    await test.step('Navigate to homepage and get the first game ID', async () => {
+      await page.goto('/');
+      await expect(page.getByTestId('games-grid')).toBeVisible();
+      const firstCard = page.getByTestId('game-card').first();
+      gameId = await firstCard.getAttribute('data-game-id');
+    });
+
+    await test.step('Navigate to the game details page and support the game', async () => {
+      await page.goto(`/game/${gameId}`);
+      await expect(page.getByTestId('game-details')).toBeVisible();
+      await page.getByTestId('support-game-button').click();
+      await expect(page.getByTestId('support-game-button')).toContainText('Supported');
+    });
+
+    await test.step('Navigate to homepage and verify heart icon appears on the supported game card', async () => {
+      await page.goto('/');
+      await expect(page.getByTestId('games-grid')).toBeVisible();
+      const supportedCard = page.locator(`[data-testid="game-card"][data-game-id="${gameId}"]`);
+      await expect(supportedCard.getByTestId('supported-badge')).toBeVisible();
+    });
+
+    await test.step('Verify unsupported cards do not show the heart icon', async () => {
+      const allCards = page.getByTestId('game-card');
+      const cardCount = await allCards.count();
+      if (cardCount > 1) {
+        const secondCard = allCards.nth(1);
+        const secondGameId = await secondCard.getAttribute('data-game-id');
+        if (secondGameId !== gameId) {
+          await expect(secondCard.getByTestId('supported-badge')).toHaveCount(0);
+        }
+      }
     });
   });
 });

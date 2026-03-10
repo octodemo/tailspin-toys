@@ -29,11 +29,11 @@ jobs:
     steps:
       # Checkout the repository code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Authenticate with GHCR using the GITHUB_TOKEN
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -42,7 +42,7 @@ jobs:
       # Extract metadata (tags and labels) for the client image
       - name: Extract metadata (tags, labels)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -54,7 +54,7 @@ jobs:
       # Build and push the client container image to GHCR
       - name: Build and push client image
         id: push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: ./client
           push: true
@@ -63,7 +63,7 @@ jobs:
 
       # Generate a build attestation for supply chain security
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
@@ -71,7 +71,7 @@ jobs:
 
       # Generate SBOM for the client container image
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
           artifact-name: sbom-client.spdx.json
@@ -94,11 +94,11 @@ jobs:
     steps:
       # Checkout the repository code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Authenticate with GHCR using the GITHUB_TOKEN
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -107,7 +107,7 @@ jobs:
       # Extract metadata (tags and labels) for the server image
       - name: Extract metadata (tags, labels)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -119,7 +119,7 @@ jobs:
       # Build and push the server container image to GHCR
       - name: Build and push server image
         id: push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: ./server
           push: true
@@ -128,7 +128,7 @@ jobs:
 
       # Generate a build attestation for supply chain security
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
@@ -136,7 +136,7 @@ jobs:
 
       # Generate SBOM for the server container image
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
           artifact-name: sbom-server.spdx.json
@@ -157,22 +157,22 @@ jobs:
     steps:
       # Checkout the repository to generate release notes
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Download SBOM artifacts from both build jobs
       - name: Download client SBOM
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: sbom-client.spdx.json
 
       - name: Download server SBOM
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: sbom-server.spdx.json
 
       # Create a GitHub Release with SBOMs attached
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           generate_release_notes: true
           files: |

@@ -58,6 +58,13 @@ jobs:
       - name: Run environment setup
         run: bash ./scripts/setup-env.sh
 
+      # Seed the database so E2E tests have data to work with
+      - name: Seed database
+        run: |
+          source venv/bin/activate
+          cd server
+          python3 utils/seed_database.py
+
       - name: Run Playwright e2e tests
         working-directory: ./client
         run: npm run test:e2e

@@ -1,4 +1,7 @@
 FROM node:lts AS runtime
+
+LABEL org.opencontainers.image.source=https://github.com/octodemo/tailspin-toys
+
 WORKDIR /app
 
 COPY . .

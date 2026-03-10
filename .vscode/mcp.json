@@ -1,9 +1,9 @@
 {
   "servers": {
-    // "github": {
-    //   "type": "http",
-    //   "url": "https://api.githubcopilot.com/mcp/"
-    // },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
     "svelte": {
       "type": "http",
       "url": "https://mcp.svelte.dev/mcp"
@@ -14,7 +14,7 @@
         "@playwright/mcp@latest"
       ]
     },
-    "astro-docs": {
+     "astro-docs": {
       "type": "http",
       "url": "https://mcp.docs.astro.build/mcp"
     }

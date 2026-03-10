@@ -148,6 +148,9 @@ jobs:
     needs: [build-client, build-server]
     runs-on: ubuntu-latest
 
+    # Requires approval from a reviewer before proceeding
+    environment: production
+
     permissions:
       contents: write
 

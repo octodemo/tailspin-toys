@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/octodemo/tailspin-toys/compare/v1.0.0...v1.1.0) (2026-03-10)
+
+
+### Features
+
+* add production environment gate to release job ([fdc5f79](https://github.com/octodemo/tailspin-toys/commit/fdc5f796b1f154685f629ccd2beaf60d54a6265f))
+
 ## 1.0.0 (2026-03-10)
 
 

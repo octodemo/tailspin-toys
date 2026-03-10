@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup environment: Python virtualenv and dependencies
+# Setup environment: client Node.js dependencies
 
 # Determine project root
 if [[ $(basename $(pwd)) == "scripts" ]]; then
@@ -10,13 +10,6 @@ else
 fi
 
 cd "$PROJECT_ROOT" || exit 1
-
-# Create and activate virtual environment
-python3 -m venv venv
-source venv/bin/activate || . venv/bin/activate
-
-echo "Installing Python dependencies..."
-pip install -r server/requirements.txt
 
 echo "Installing client dependencies..."
 cd client || exit 1

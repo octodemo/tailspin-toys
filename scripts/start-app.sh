@@ -10,28 +10,21 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 # Check if we're in scripts, client, or server directory and navigate up one level
 current_directory=$(basename $(pwd))
-if [[ "$current_directory" =~ ^(scripts|client|server)$ ]]; then
+if [[ "$current_directory" =~ ^(scripts|client|server|server-java)$ ]]; then
     cd ..
 fi
 
-echo "Starting API (Flask) server..."
+echo "Starting API (Spring Boot) server..."
 
-# Source environment setup script
-source "${SCRIPT_DIR}/setup-env.sh"
-
-# Continue with server startup
-cd server || {
-    echo "Error: server directory not found"
+# Build and start Spring Boot server
+cd server-java || {
+    echo "Error: server-java directory not found"
     cd "$INITIAL_DIR"
     exit 1
 }
-export FLASK_DEBUG=1
-export FLASK_PORT=5100
+./gradlew bootRun &
 
-# Start Flask server
-python3 app.py &
-
-# Store the Python server process ID
+# Store the Java server process ID
 SERVER_PID=$!
 
 echo "Starting client (Astro)..."
@@ -50,7 +43,7 @@ CLIENT_PID=$!
 sleep 5
 
 # Display the server URLs
-echo -e "\n${GREEN}Server (Flask) running at: http://localhost:5100${NC}"
+echo -e "\n${GREEN}Server (Spring Boot) running at: http://localhost:5100${NC}"
 echo -e "${GREEN}Client (Astro) server running at: http://localhost:4321${NC}\n"
 
 echo "Ctl-C to stop the servers"
@@ -75,11 +68,6 @@ cleanup() {
     if ps -p $CLIENT_PID > /dev/null 2>&1; then
         pkill -P $CLIENT_PID 2>/dev/null
         kill -9 $CLIENT_PID 2>/dev/null
-    fi
-
-    # Deactivate virtual environment if active
-    if [[ -n "${VIRTUAL_ENV}" ]]; then
-        deactivate
     fi
 
     # Return to initial directory

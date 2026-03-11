@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/octodemo/tailspin-toys/compare/v1.1.1...v1.2.0) (2026-03-11)
+
+
+### Features
+
+* Add pagination to games listing ([#23](https://github.com/octodemo/tailspin-toys/issues/23)) ([06e5808](https://github.com/octodemo/tailspin-toys/commit/06e5808ffce2aa436639a6f45e120880e19cdcc8))
+
 ## [1.1.1](https://github.com/octodemo/tailspin-toys/compare/v1.1.0...v1.1.1) (2026-03-11)
 
 

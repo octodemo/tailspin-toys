@@ -30,3 +30,30 @@ export interface Game {
     category: Category | null;
     starRating: number | null;
 }
+
+/**
+ * Pagination metadata returned by the API
+ */
+export interface Pagination {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+}
+
+/**
+ * Available filter options returned by the API
+ */
+export interface FilterOptions {
+    publishers: string[];
+    categories: string[];
+}
+
+/**
+ * Paginated response wrapper for game listings
+ */
+export interface PaginatedGamesResponse {
+    games: Game[];
+    pagination: Pagination;
+    filters: FilterOptions;
+}

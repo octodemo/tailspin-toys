@@ -1,17 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import GameList from '../components/GameList.svelte';
-
-const API_SERVER_URL = process.env.API_SERVER_URL || 'http://localhost:5100';
-let games = [];
-try {
-  const response = await fetch(`${API_SERVER_URL}/api/games`);
-  if (response.ok) {
-    games = await response.json();
-  }
-} catch {
-  // Fall back to client-side fetching if server fetch fails
-}
 ---
 
 <Layout title="Tailspin Toys - Crowdfunding your new favorite game!">
@@ -21,6 +10,6 @@ try {
       <p class="text-xl text-slate-300">Find your next game! And maybe even back one! Explore our collection!</p>
     </div>
     
-    <GameList client:load {games} />
+    <GameList client:load />
   </div>
 </Layout>

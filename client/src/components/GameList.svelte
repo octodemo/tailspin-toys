@@ -1,30 +1,27 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { Game } from '../types/game';
+    import type { Game, PaginatedGamesResponse } from '../types/game';
     import { API_ENDPOINTS } from '../config/api';
     import GameCard from "./GameCard.svelte";
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
     import EmptyState from "./EmptyState.svelte";
 
-    let { games = $bindable([]) }: { games?: Game[] } = $props();
     let loading = $state(true);
     let error = $state<string | null>(null);
-    let allGames = $state<Game[]>([]);
     let filteredGames = $state<Game[]>([]);
     let selectedPublisher = $state('all');
     let selectedCategory = $state('all');
     let selectedSort = $state('rating');
 
-    let publisherOptions = $derived(
-        [...new Set(allGames.map((game) => game.publisher?.name).filter(Boolean))] as string[]
-    );
+    let publisherOptions = $state<string[]>([]);
+    let categoryOptions = $state<string[]>([]);
 
-    let categoryOptions = $derived(
-        [...new Set(allGames.map((game) => game.category?.name).filter(Boolean))] as string[]
-    );
+    let currentPage = $state(1);
+    let totalPages = $state(1);
+    let totalGames = $state(0);
 
-    const fetchGames = async (publisher: string = 'all', category: string = 'all', sort: string = 'rating') => {
+    const fetchGames = async (publisher: string = 'all', category: string = 'all', sort: string = 'rating', page: number = 1) => {
         loading = true;
         error = null;
         try {
@@ -37,20 +34,19 @@
                 queryParams.set('category', category);
             }
             queryParams.set('sort', sort);
+            queryParams.set('page', String(page));
 
-            const endpoint = queryParams.toString()
-                ? `${API_ENDPOINTS.games}?${queryParams.toString()}`
-                : API_ENDPOINTS.games;
+            const endpoint = `${API_ENDPOINTS.games}?${queryParams.toString()}`;
 
             const response = await fetch(endpoint);
             if(response.ok) {
-                const data = await response.json();
-                filteredGames = data;
-
-                if (publisher === 'all' && category === 'all') {
-                    allGames = data;
-                    games = data;
-                }
+                const data: PaginatedGamesResponse = await response.json();
+                filteredGames = data.games;
+                currentPage = data.pagination.page;
+                totalPages = data.pagination.totalPages;
+                totalGames = data.pagination.total;
+                publisherOptions = data.filters.publishers;
+                categoryOptions = data.filters.categories;
             } else {
                 error = `Failed to fetch data: ${response.status} ${response.statusText}`;
             }
@@ -62,17 +58,16 @@
     };
 
     const onFilterChange = async () => {
-        await fetchGames(selectedPublisher, selectedCategory, selectedSort);
+        currentPage = 1;
+        await fetchGames(selectedPublisher, selectedCategory, selectedSort, 1);
+    };
+
+    const goToPage = async (page: number) => {
+        await fetchGames(selectedPublisher, selectedCategory, selectedSort, page);
     };
 
     onMount(() => {
-        if (games.length === 0) {
-            fetchGames();
-        } else {
-            allGames = games;
-            filteredGames = games;
-            loading = false;
-        }
+        fetchGames();
     });
 </script>
 
@@ -139,5 +134,40 @@
                 <GameCard {game} />
             {/each}
         </div>
+
+        {#if totalPages > 1}
+            <nav class="flex items-center justify-center gap-4 mt-8" aria-label="Pagination" data-testid="pagination">
+                <button
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
+                        {currentPage <= 1
+                            ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-2 focus:ring-blue-500 focus:outline-none'}"
+                    disabled={currentPage <= 1}
+                    onclick={() => goToPage(currentPage - 1)}
+                    data-testid="pagination-prev"
+                    aria-label="Go to previous page"
+                >
+                    ← Previous
+                </button>
+
+                <span class="text-sm text-slate-300" data-testid="pagination-info">
+                    Page {currentPage} of {totalPages}
+                    <span class="text-slate-400">({totalGames} games)</span>
+                </span>
+
+                <button
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
+                        {currentPage >= totalPages
+                            ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-2 focus:ring-blue-500 focus:outline-none'}"
+                    disabled={currentPage >= totalPages}
+                    onclick={() => goToPage(currentPage + 1)}
+                    data-testid="pagination-next"
+                    aria-label="Go to next page"
+                >
+                    Next →
+                </button>
+            </nav>
+        {/if}
     {/if}
 </div>

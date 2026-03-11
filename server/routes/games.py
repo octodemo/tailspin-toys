@@ -11,6 +11,8 @@ games_bp = Blueprint('games', __name__)
 # - PUT /api/games/<id> - Update an existing game
 # - DELETE /api/games/<id> - Delete a game
 
+DEFAULT_PAGE_SIZE = 9
+
 def get_games_base_query() -> Query:
     return db.session.query(Game).join(
         Publisher, 
@@ -25,6 +27,20 @@ def get_games_base_query() -> Query:
         contains_eager(Game.category)
     )
 
+def get_available_filters() -> dict[str, list[str]]:
+    """Return distinct publisher and category names for filter dropdowns."""
+    publishers = [
+        name for (name,) in db.session.query(Publisher.name)
+        .join(Game, Game.publisher_id == Publisher.id)
+        .distinct().order_by(Publisher.name).all()
+    ]
+    categories = [
+        name for (name,) in db.session.query(Category.name)
+        .join(Game, Game.category_id == Category.id)
+        .distinct().order_by(Category.name).all()
+    ]
+    return {"publishers": publishers, "categories": categories}
+
 VALID_SORT_OPTIONS: dict[str, list] = {
     'rating': [Game.star_rating.desc().nulls_last(), Game.title.asc()],
     'title': [Game.title.asc()],
@@ -36,6 +52,12 @@ def get_games() -> Response:
     publisher_filter = request.args.get('publisher', type=str)
     category_filter = request.args.get('category', type=str)
     sort_param = request.args.get('sort', default=DEFAULT_SORT, type=str)
+    page = request.args.get('page', default=1, type=int)
+    page_size = request.args.get('pageSize', default=DEFAULT_PAGE_SIZE, type=int)
+
+    # Clamp pagination values
+    page = max(1, page)
+    page_size = max(1, min(page_size, 100))
 
     games_query = get_games_base_query()
 
@@ -56,13 +78,24 @@ def get_games() -> Response:
     order_clauses = VALID_SORT_OPTIONS.get(sort_key, VALID_SORT_OPTIONS[DEFAULT_SORT])
     games_query = games_query.order_by(*order_clauses)
 
-    # Use the filtered query for games
-    games_query = games_query.all()
+    # Get total count before pagination (clear ordering for performance)
+    total = games_query.order_by(None).count()
+    total_pages = max(1, (total + page_size - 1) // page_size)
+
+    # Apply pagination
+    offset = (page - 1) * page_size
+    games_list = [game.to_dict() for game in games_query.offset(offset).limit(page_size).all()]
     
-    # Convert the results using the model's to_dict method
-    games_list = [game.to_dict() for game in games_query]
-    
-    return jsonify(games_list)
+    return jsonify({
+        "games": games_list,
+        "pagination": {
+            "page": page,
+            "pageSize": page_size,
+            "total": total,
+            "totalPages": total_pages,
+        },
+        "filters": get_available_filters(),
+    })
 
 @games_bp.route('/api/games/<int:id>', methods=['GET'])
 def get_game(id: int) -> tuple[Response, int] | Response:

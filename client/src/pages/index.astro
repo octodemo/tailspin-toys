@@ -9,7 +9,7 @@ try {
   if (response.ok) {
     games = await response.json();
   }
-} catch (e) {
+} catch {
   // Fall back to client-side fetching if server fetch fails
 }
 ---

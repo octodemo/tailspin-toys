@@ -47,27 +47,12 @@ jobs:
           cache: "npm"
           cache-dependency-path: "./client/package.json"
 
-      - name: Install JavaScript dependencies
-        working-directory: ./client
-        run: npm ci
-
       - name: Install Playwright browsers
         working-directory: ./client
         run: npx playwright install --with-deps
 
-      - name: Run environment setup
-        run: bash ./scripts/setup-env.sh
-
-      # Seed the database so E2E tests have data to work with
-      - name: Seed database
-        working-directory: ./server
-        run: |
-          source ../venv/bin/activate
-          python3 utils/seed_database.py
-
       - name: Run Playwright e2e tests
-        working-directory: ./client
-        run: npm run test:e2e
+        run: bash ./scripts/run-e2e-tests.sh
         env:
           CI: true
 

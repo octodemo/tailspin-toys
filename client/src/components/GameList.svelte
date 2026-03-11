@@ -140,7 +140,7 @@
                 <button
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
                         {currentPage <= 1
-                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                            ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
                             : 'bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-2 focus:ring-blue-500 focus:outline-none'}"
                     disabled={currentPage <= 1}
                     onclick={() => goToPage(currentPage - 1)}
@@ -152,13 +152,13 @@
 
                 <span class="text-sm text-slate-300" data-testid="pagination-info">
                     Page {currentPage} of {totalPages}
-                    <span class="text-slate-500">({totalGames} games)</span>
+                    <span class="text-slate-400">({totalGames} games)</span>
                 </span>
 
                 <button
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
                         {currentPage >= totalPages
-                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                            ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
                             : 'bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-2 focus:ring-blue-500 focus:outline-none'}"
                     disabled={currentPage >= totalPages}
                     onclick={() => goToPage(currentPage + 1)}

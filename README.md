@@ -12,6 +12,16 @@ A script file has been created to launch the site. You can run it by:
 
 Then navigate to the [website](http://localhost:4321) to see the site!
 
+## Linting
+
+The frontend uses ESLint to enforce code quality across TypeScript, Astro, and Svelte files. Run it with:
+
+```bash
+./scripts/run-lint.sh
+```
+
+ESLint is also run automatically in CI on pull requests to `main`.
+
 ## License 
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) for the full terms.

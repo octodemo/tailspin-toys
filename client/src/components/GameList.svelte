@@ -28,6 +28,7 @@
         loading = true;
         error = null;
         try {
+            // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local variable, not reactive state
             const queryParams = new URLSearchParams();
             if (publisher !== 'all') {
                 queryParams.set('publisher', publisher);
@@ -89,7 +90,7 @@
                 onchange={onFilterChange}
             >
                 <option value="all">All Publishers</option>
-                {#each publisherOptions as publisher}
+                {#each publisherOptions as publisher (publisher)}
                     <option value={publisher}>{publisher}</option>
                 {/each}
             </select>
@@ -105,7 +106,7 @@
                 onchange={onFilterChange}
             >
                 <option value="all">All Categories</option>
-                {#each categoryOptions as category}
+                {#each categoryOptions as category (category)}
                     <option value={category}>{category}</option>
                 {/each}
             </select>

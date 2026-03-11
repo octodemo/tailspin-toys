@@ -78,8 +78,8 @@ def get_games() -> Response:
     order_clauses = VALID_SORT_OPTIONS.get(sort_key, VALID_SORT_OPTIONS[DEFAULT_SORT])
     games_query = games_query.order_by(*order_clauses)
 
-    # Get total count before pagination
-    total = games_query.count()
+    # Get total count before pagination (clear ordering for performance)
+    total = games_query.order_by(None).count()
     total_pages = max(1, (total + page_size - 1) // page_size)
 
     # Apply pagination

@@ -19,6 +19,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 #### Testing guidelines
 
 - Run Python tests to ensure backend functionality, and Playwright tests to ensure e2e and frontend functionality
+- Run ESLint to check frontend code quality before committing
 - Review the existing tests to ensure we're not duplicating efforts
 - Test code should be of the same quality as the rest of the project, and follow DRY principles
 - For frontend changes, run builds in the client directory to verify build success and the end-to-end tests, to ensure everything works correctly
@@ -33,6 +34,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 ### Code formatting requirements
 
 - When writing Python, you must use type hints for return values and function parameters.
+- Frontend code (TypeScript, Astro, Svelte) must pass ESLint checks (`scripts/run-lint.sh`)
 
 ### Python and Flask Patterns
 
@@ -68,6 +70,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
     - `scripts/setup-env.sh`: Performs installation of all Python and Node dependencies
     - `scripts/run-server-tests.sh`: Calls setup-env, then runs all Python tests
     - `scripts/run-e2e-tests.sh`: Runs Playwright E2E tests for frontend
+    - `scripts/run-lint.sh`: Runs ESLint on the frontend codebase
     - `scripts/start-app.sh`: Calls setup-env, then starts both backend and frontend servers
 
 ## Repository Structure

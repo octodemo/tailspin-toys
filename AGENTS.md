@@ -214,7 +214,8 @@ The project already includes comprehensive Playwright E2E tests:
 
 ### Before Committing
 1. **Run backend tests**: `./scripts/run-server-tests.sh`
-2. **Run frontend tests** (if UI changed): `./scripts/run-e2e-tests.sh`
+2. **Run ESLint** (if frontend changed): `./scripts/run-lint.sh`
+3. **Run frontend tests** (if UI changed): `./scripts/run-e2e-tests.sh`
 3. **Update tests** - if adding/modifying API endpoints or UI
 4. **Update README** - if adding new functionality
 5. **Update instructions** - if patterns change
@@ -252,6 +253,7 @@ The project already includes comprehensive Playwright E2E tests:
 | `./scripts/start-app.sh` | Start both backend and frontend servers |
 | `./scripts/run-server-tests.sh` | Run Python unit tests |
 | `./scripts/run-e2e-tests.sh` | Run Playwright E2E tests |
+| `./scripts/run-lint.sh` | Run ESLint on the frontend codebase |
 
 **Always use existing scripts** rather than performing operations manually.
 
@@ -267,6 +269,7 @@ The project already includes comprehensive Playwright E2E tests:
 
 ### Code Quality
 - ✅ Type hints for all Python code
+- ✅ Frontend code must pass ESLint (`scripts/run-lint.sh`)
 - ✅ Descriptive variable/function names
 - ✅ Follow REST conventions for APIs
 - ✅ Dark theme throughout UI

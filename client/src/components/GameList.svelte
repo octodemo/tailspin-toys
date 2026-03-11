@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import type { Game, PaginatedGamesResponse } from '../types/game';
     import { API_ENDPOINTS } from '../config/api';
     import GameCard from "./GameCard.svelte";
@@ -66,7 +65,7 @@
         await fetchGames(selectedPublisher, selectedCategory, selectedSort, page);
     };
 
-    onMount(() => {
+    $effect(() => {
         fetchGames();
     });
 </script>

@@ -7,7 +7,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test:e2e": "npx playwright install && npx playwright test"
+    "test:e2e": "npx playwright install && npx playwright test",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@astrojs/check": "^0.9.2",
@@ -20,10 +21,17 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.55.1",
     "@types/node": "^25.3.5",
     "autoprefixer": "^10.4.21",
+    "eslint": "^10.0.3",
+    "eslint-plugin-astro": "^1.6.0",
+    "eslint-plugin-svelte": "^3.15.2",
+    "globals": "^17.4.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.14"
+    "svelte-eslint-parser": "^1.6.0",
+    "tailwindcss": "^4.1.14",
+    "typescript-eslint": "^8.57.0"
   }
 }

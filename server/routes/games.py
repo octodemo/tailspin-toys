@@ -82,6 +82,9 @@ def get_games() -> Response:
     total = games_query.order_by(None).count()
     total_pages = max(1, (total + page_size - 1) // page_size)
 
+    # Clamp page to total_pages so page <= totalPages always holds
+    page = min(page, total_pages)
+
     # Apply pagination
     offset = (page - 1) * page_size
     games_list = [game.to_dict() for game in games_query.offset(offset).limit(page_size).all()]

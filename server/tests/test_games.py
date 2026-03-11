@@ -174,14 +174,16 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(data['games'][0]['title'], 'Agile Adventures')
 
     def test_get_games_page_beyond_results(self) -> None:
-        """Test requesting a page beyond available results returns empty games"""
+        """Test requesting a page beyond available results clamps page to totalPages"""
         response = self.client.get(f'{self.GAMES_API_PATH}?page=99')
         data = self._get_response_data(response)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(data['games']), 0)
-        self.assertEqual(data['pagination']['page'], 99)
         self.assertEqual(data['pagination']['total'], 2)
+        self.assertEqual(data['pagination']['totalPages'], 1)
+        # page must be clamped so page <= totalPages always holds
+        self.assertEqual(data['pagination']['page'], 1)
+        self.assertEqual(len(data['games']), 2)
 
     def test_get_games_page_size_clamped(self) -> None:
         """Test that page size is clamped to valid range"""

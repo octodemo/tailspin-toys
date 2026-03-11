@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/octodemo/tailspin-toys/compare/v1.1.0...v1.1.1) (2026-03-11)
+
+
+### Bug Fixes
+
+* add database seed step to frontend-tests CI job ([#16](https://github.com/octodemo/tailspin-toys/issues/16)) ([5e5044a](https://github.com/octodemo/tailspin-toys/commit/5e5044af951f13db8ad940f59fe5ab71fd89cda1))
+* pin GitHub Actions to commit SHAs for supply chain security ([#14](https://github.com/octodemo/tailspin-toys/issues/14)) ([79f2e8d](https://github.com/octodemo/tailspin-toys/commit/79f2e8d83cb3a54f1f90daf4f371dedf62f55bac))
+
 ## [1.1.0](https://github.com/octodemo/tailspin-toys/compare/v1.0.0...v1.1.0) (2026-03-10)
 
 

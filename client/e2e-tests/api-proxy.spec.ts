@@ -1,15 +1,18 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('API Proxy', () => {
-  test('should proxy GET /api/games and return JSON array', async ({ request }) => {
+  test('should proxy GET /api/games and return paginated response', async ({ request }) => {
     await test.step('Fetch games list via proxy', async () => {
       const response = await request.get('/api/games');
       expect(response.status()).toBe(200);
       expect(response.headers()['content-type']).toContain('application/json');
 
       const data = await response.json();
-      expect(Array.isArray(data)).toBeTruthy();
-      expect(data.length).toBeGreaterThan(0);
+      expect(data).toHaveProperty('games');
+      expect(data).toHaveProperty('pagination');
+      expect(data).toHaveProperty('filters');
+      expect(Array.isArray(data.games)).toBeTruthy();
+      expect(data.games.length).toBeGreaterThan(0);
     });
   });
 
@@ -54,7 +57,7 @@ test.describe('API Proxy', () => {
       const response = await request.get('/api/games');
       const data = await response.json();
 
-      for (const game of data) {
+      for (const game of data.games) {
         expect(game).toHaveProperty('id');
         expect(game).toHaveProperty('title');
         expect(game).toHaveProperty('description');

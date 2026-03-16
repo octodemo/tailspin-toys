@@ -21,6 +21,7 @@
     let loading = $state(true);
     let error = $state<string | null>(null);
     let gameData = $state<Game | null>(null);
+    let isPlayable = $derived(gameData?.title === 'Space Invaders: Code Defense');
     
     onMount(async () => {
         // If game object is provided directly, use it
@@ -108,7 +109,15 @@
                 </div>
             </div>
             
-            <div class="mt-8">
+            <div class="mt-8 flex flex-col gap-3">
+                {#if isPlayable}
+                <a href="/play" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center focus:ring-2 focus:ring-green-500 focus:outline-none" data-testid="play-game-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    Play Now
+                </a>
+                {/if}
                 <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center" data-testid="back-game-button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />

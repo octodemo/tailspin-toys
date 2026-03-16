@@ -18,6 +18,10 @@ A script file has been created to launch the site. You can run it by:
 
 Then navigate to the [website](http://localhost:4321) to see the site!
 
+### Space Invaders Mini-Game
+
+The site includes a playable Space Invaders arcade game! Navigate to [/play](http://localhost:4321/play) or use the **Play** link in the navigation menu to try it out. Use arrow keys (or A/D) to move and Space to shoot.
+
 ## License 
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) for the full terms.

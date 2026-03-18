@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import type { Game } from '../types/game';
     import { API_ENDPOINTS } from '../config/api';
+    import { isSupported, toggleSupport } from '../utils/supportState';
     import ErrorMessage from "./ErrorMessage.svelte";
 
     let { game = undefined, gameId = 0 }: { game?: Game, gameId?: number } = $props();
@@ -9,11 +10,13 @@
     let loading = $state(true);
     let error = $state<string | null>(null);
     let gameData = $state<Game | null>(null);
+    let supported = $state(false);
     
     onMount(async () => {
         // If game object is provided directly, use it
         if (game) {
             gameData = game;
+            supported = isSupported(game.id);
             loading = false;
             return;
         }
@@ -24,6 +27,9 @@
                 const response = await fetch(API_ENDPOINTS.gameById(gameId));
                 if (response.ok) {
                     gameData = await response.json();
+                    if (gameData) {
+                        supported = isSupported(gameData.id);
+                    }
                 } else {
                     error = `Failed to fetch game: ${response.status} ${response.statusText}`;
                 }
@@ -37,6 +43,11 @@
             loading = false;
         }
     });
+
+    function handleSupportClick(): void {
+        if (!gameData) return;
+        supported = toggleSupport(gameData.id);
+    }
 
     function renderStarRating(rating: number | null): string {
         if (rating === null) return "Not yet rated";
@@ -95,12 +106,31 @@
             </div>
             
             <div class="mt-8">
-                <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center" data-testid="back-game-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
-                    </svg>
-                    Support This Game
-                </button>
+                {#if supported}
+                    <button
+                        class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center"
+                        data-testid="support-game-button"
+                        onclick={handleSupportClick}
+                        aria-pressed="true"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        Supported
+                    </button>
+                {:else}
+                    <button
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex justify-center items-center"
+                        data-testid="support-game-button"
+                        onclick={handleSupportClick}
+                        aria-pressed="false"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                        </svg>
+                        Support This Game
+                    </button>
+                {/if}
             </div>
         </div>
     </div>

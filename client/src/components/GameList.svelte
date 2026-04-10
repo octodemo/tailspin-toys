@@ -9,31 +9,18 @@
 
     let loading = $state(true);
     let error = $state<string | null>(null);
-    let filteredGames = $state<Game[]>([]);
-    let selectedPublisher = $state('all');
-    let selectedCategory = $state('all');
-    let selectedSort = $state('rating');
-
-    let publisherOptions = $state<string[]>([]);
-    let categoryOptions = $state<string[]>([]);
+    let games = $state<Game[]>([]);
 
     let currentPage = $state(1);
     let totalPages = $state(1);
     let totalGames = $state(0);
 
-    const fetchGames = async (publisher: string = 'all', category: string = 'all', sort: string = 'rating', page: number = 1) => {
+    const fetchGames = async (page: number = 1) => {
         loading = true;
         error = null;
         try {
             // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local variable, not reactive state
             const queryParams = new URLSearchParams();
-            if (publisher !== 'all') {
-                queryParams.set('publisher', publisher);
-            }
-            if (category !== 'all') {
-                queryParams.set('category', category);
-            }
-            queryParams.set('sort', sort);
             queryParams.set('page', String(page));
 
             const endpoint = `${API_ENDPOINTS.games}?${queryParams.toString()}`;
@@ -41,12 +28,10 @@
             const response = await fetch(endpoint);
             if(response.ok) {
                 const data: PaginatedGamesResponse = await response.json();
-                filteredGames = data.games;
+                games = data.games;
                 currentPage = data.pagination.page;
                 totalPages = data.pagination.totalPages;
                 totalGames = data.pagination.total;
-                publisherOptions = data.filters.publishers;
-                categoryOptions = data.filters.categories;
             } else {
                 error = `Failed to fetch data: ${response.status} ${response.statusText}`;
             }
@@ -57,13 +42,8 @@
         }
     };
 
-    const onFilterChange = async () => {
-        currentPage = 1;
-        await fetchGames(selectedPublisher, selectedCategory, selectedSort, 1);
-    };
-
     const goToPage = async (page: number) => {
-        await fetchGames(selectedPublisher, selectedCategory, selectedSort, page);
+        await fetchGames(page);
     };
 
     onMount(() => {
@@ -73,64 +53,16 @@
 
 <div>
     <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6" data-testid="games-filters">
-        <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2" for="publisher-filter">Publisher</label>
-            <select
-                id="publisher-filter"
-                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                data-testid="publisher-filter"
-                bind:value={selectedPublisher}
-                onchange={onFilterChange}
-            >
-                <option value="all">All Publishers</option>
-                {#each publisherOptions as publisher (publisher)}
-                    <option value={publisher}>{publisher}</option>
-                {/each}
-            </select>
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2" for="category-filter">Category</label>
-            <select
-                id="category-filter"
-                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                data-testid="category-filter"
-                bind:value={selectedCategory}
-                onchange={onFilterChange}
-            >
-                <option value="all">All Categories</option>
-                {#each categoryOptions as category (category)}
-                    <option value={category}>{category}</option>
-                {/each}
-            </select>
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2" for="sort-select">Sort By</label>
-            <select
-                id="sort-select"
-                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                data-testid="sort-select"
-                bind:value={selectedSort}
-                onchange={onFilterChange}
-            >
-                <option value="rating">Top Rated</option>
-                <option value="title">Title (A-Z)</option>
-            </select>
-        </div>
-    </div>
     
     {#if loading}
         <LoadingSkeleton count={6} />
     {:else if error}
         <ErrorMessage error={error} />
-    {:else if filteredGames.length === 0}
+    {:else if games.length === 0}
         <EmptyState message="No games available at the moment." />
     {:else}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="games-grid">
-            {#each filteredGames as game (game.id)}
+            {#each games as game (game.id)}
                 <GameCard {game} />
             {/each}
         </div>

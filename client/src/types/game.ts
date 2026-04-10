@@ -42,18 +42,9 @@ export interface Pagination {
 }
 
 /**
- * Available filter options returned by the API
- */
-export interface FilterOptions {
-    publishers: string[];
-    categories: string[];
-}
-
-/**
  * Paginated response wrapper for game listings
  */
 export interface PaginatedGamesResponse {
     games: Game[];
     pagination: Pagination;
-    filters: FilterOptions;
 }

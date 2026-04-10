@@ -10,7 +10,6 @@ test.describe('API Proxy', () => {
       const data = await response.json();
       expect(data).toHaveProperty('games');
       expect(data).toHaveProperty('pagination');
-      expect(data).toHaveProperty('filters');
       expect(Array.isArray(data.games)).toBeTruthy();
       expect(data.games.length).toBeGreaterThan(0);
     });

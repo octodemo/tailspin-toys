@@ -132,6 +132,67 @@ test.describe('Game Listing and Navigation', () => {
     });
   });
 
+  test('should persist filter selections in URL query string', async ({ page }) => {
+    let chosenPublisher: string;
+
+    await test.step('Navigate to homepage and wait for filter controls', async () => {
+      await page.goto('/');
+      await expect(page.getByTestId('publisher-filter')).toBeVisible();
+    });
+
+    await test.step('Select a publisher filter and verify URL is updated', async () => {
+      const publisherFilter = page.getByTestId('publisher-filter');
+      const publisherOptions = await publisherFilter.locator('option').allTextContents();
+      expect(publisherOptions.length).toBeGreaterThan(1);
+
+      chosenPublisher = publisherOptions[1];
+      await publisherFilter.selectOption({ label: chosenPublisher });
+
+      await expect(page).toHaveURL(/[?&]publisher=/);
+    });
+
+    await test.step('Reload the page and verify filter is restored from URL', async () => {
+      await page.reload();
+      await expect(page.getByTestId('games-grid')).toBeVisible();
+
+      const publisherFilter = page.getByTestId('publisher-filter');
+      await expect(publisherFilter).toHaveValue(chosenPublisher);
+
+      const gamePublishers = page.getByTestId('game-publisher');
+      await expect(gamePublishers.first()).toBeVisible();
+      const publisherCount = await gamePublishers.count();
+      for (let index = 0; index < publisherCount; index++) {
+        await expect(gamePublishers.nth(index)).toHaveText(chosenPublisher);
+      }
+    });
+  });
+
+  test('should load filtered results when navigating directly to a URL with query params', async ({ page }) => {
+    await test.step('Get a valid publisher name from the API', async () => {
+      await page.goto('/');
+      await expect(page.getByTestId('publisher-filter')).toBeVisible();
+    });
+
+    await test.step('Navigate directly to URL with publisher filter param', async () => {
+      const publisherFilter = page.getByTestId('publisher-filter');
+      const publisherOptions = await publisherFilter.locator('option').allTextContents();
+      const chosenPublisher = publisherOptions[1];
+
+      await page.goto(`/?publisher=${encodeURIComponent(chosenPublisher)}`);
+      await expect(page.getByTestId('games-grid')).toBeVisible();
+
+      await expect(publisherFilter).toHaveValue(chosenPublisher);
+
+      const gamePublishers = page.getByTestId('game-publisher');
+      await expect(gamePublishers.first()).toBeVisible();
+      const publisherCount = await gamePublishers.count();
+      for (let index = 0; index < publisherCount; index++) {
+        await expect(gamePublishers.nth(index)).toHaveText(chosenPublisher);
+      }
+    });
+  });
+
+
   test('should display a button to back the game', async ({ page }) => {
     await test.step('Navigate to game details page', async () => {
       await page.goto('/game/1');

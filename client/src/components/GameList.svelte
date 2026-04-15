@@ -57,17 +57,39 @@
         }
     };
 
+    const syncFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        selectedPublisher = params.get('publisher') || 'all';
+        selectedCategory = params.get('category') || 'all';
+        selectedSort = params.get('sort') || 'rating';
+        currentPage = Math.max(1, parseInt(params.get('page') || '1', 10));
+    };
+
+    const syncToUrl = (publisher: string, category: string, sort: string, page: number) => {
+        // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local variable, not reactive state
+        const params = new URLSearchParams();
+        if (publisher !== 'all') params.set('publisher', publisher);
+        if (category !== 'all') params.set('category', category);
+        if (sort !== 'rating') params.set('sort', sort);
+        if (page > 1) params.set('page', String(page));
+        const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+        history.pushState(null, '', newUrl);
+    };
+
     const onFilterChange = async () => {
         currentPage = 1;
+        syncToUrl(selectedPublisher, selectedCategory, selectedSort, 1);
         await fetchGames(selectedPublisher, selectedCategory, selectedSort, 1);
     };
 
     const goToPage = async (page: number) => {
+        syncToUrl(selectedPublisher, selectedCategory, selectedSort, page);
         await fetchGames(selectedPublisher, selectedCategory, selectedSort, page);
     };
 
     onMount(() => {
-        fetchGames();
+        syncFromUrl();
+        fetchGames(selectedPublisher, selectedCategory, selectedSort, currentPage);
     });
 </script>
 

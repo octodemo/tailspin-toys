@@ -239,5 +239,100 @@ class TestGamesRoutes(unittest.TestCase):
         response = self.client.get(f'{self.GAMES_API_PATH}/invalid-id')
         self.assertEqual(response.status_code, 404)
 
+    # --- Filter tests ---
+
+    def test_filter_by_category(self) -> None:
+        """Test filtering games by category ID"""
+        # Get category ID for 'Strategy' (index 0)
+        with self.app.app_context():
+            category = Category.query.filter_by(name='Strategy').first()
+            category_id = category.id
+
+        response = self.client.get(f'{self.GAMES_API_PATH}?category={category_id}')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 1)
+        self.assertEqual(data['games'][0]['title'], 'Pipeline Panic')
+        self.assertEqual(data['pagination']['total'], 1)
+
+    def test_filter_by_publisher(self) -> None:
+        """Test filtering games by publisher ID"""
+        with self.app.app_context():
+            publisher = Publisher.query.filter_by(name='DevGames Inc').first()
+            publisher_id = publisher.id
+
+        response = self.client.get(f'{self.GAMES_API_PATH}?publisher={publisher_id}')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 1)
+        self.assertEqual(data['games'][0]['title'], 'Pipeline Panic')
+        self.assertEqual(data['pagination']['total'], 1)
+
+    def test_filter_by_category_and_publisher(self) -> None:
+        """Test filtering games by both category and publisher"""
+        with self.app.app_context():
+            category = Category.query.filter_by(name='Strategy').first()
+            publisher = Publisher.query.filter_by(name='DevGames Inc').first()
+            category_id = category.id
+            publisher_id = publisher.id
+
+        response = self.client.get(
+            f'{self.GAMES_API_PATH}?category={category_id}&publisher={publisher_id}'
+        )
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 1)
+        self.assertEqual(data['games'][0]['title'], 'Pipeline Panic')
+
+    def test_filter_nonexistent_category_returns_empty(self) -> None:
+        """Test that filtering by a nonexistent category ID returns empty results"""
+        response = self.client.get(f'{self.GAMES_API_PATH}?category=9999')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 0)
+        self.assertEqual(data['pagination']['total'], 0)
+
+    def test_filter_nonexistent_publisher_returns_empty(self) -> None:
+        """Test that filtering by a nonexistent publisher ID returns empty results"""
+        response = self.client.get(f'{self.GAMES_API_PATH}?publisher=9999')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 0)
+        self.assertEqual(data['pagination']['total'], 0)
+
+    def test_filter_invalid_category_returns_400(self) -> None:
+        """Test that a malformed category param returns 400"""
+        response = self.client.get(f'{self.GAMES_API_PATH}?category=abc')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', data)
+
+    def test_filter_invalid_publisher_returns_400(self) -> None:
+        """Test that a malformed publisher param returns 400"""
+        response = self.client.get(f'{self.GAMES_API_PATH}?publisher=xyz')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', data)
+
+    def test_filter_pagination_metadata(self) -> None:
+        """Test that pagination metadata reflects filtered results"""
+        with self.app.app_context():
+            category = Category.query.filter_by(name='Strategy').first()
+            category_id = category.id
+
+        response = self.client.get(f'{self.GAMES_API_PATH}?category={category_id}&pageSize=1')
+        data = self._get_response_data(response)
+
+        self.assertEqual(data['pagination']['total'], 1)
+        self.assertEqual(data['pagination']['totalPages'], 1)
+        self.assertEqual(data['pagination']['pageSize'], 1)
+
 if __name__ == '__main__':
     unittest.main()

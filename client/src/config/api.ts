@@ -5,4 +5,6 @@ export const API_BASE = '/api';
 export const API_ENDPOINTS = {
   games: `${API_BASE}/games`,
   gameById: (id: number | string) => `${API_BASE}/games/${id}`,
+  categories: `${API_BASE}/categories`,
+  publishers: `${API_BASE}/publishers`,
 } as const;

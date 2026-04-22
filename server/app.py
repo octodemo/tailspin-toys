@@ -2,6 +2,8 @@ import os
 from flask import Flask
 from routes.games import games_bp
 from routes.auth import auth_bp
+from routes.categories import categories_bp
+from routes.publishers import publishers_bp
 from models import db
 from utils.database import get_connection_string
 from utils.seed_database import seed_database
@@ -24,6 +26,8 @@ with app.app_context():
 # Register blueprints
 app.register_blueprint(games_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(categories_bp)
+app.register_blueprint(publishers_bp)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5100) # Port 5100 to avoid macOS conflicts

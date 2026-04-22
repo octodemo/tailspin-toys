@@ -12,6 +12,23 @@ A script file has been created to launch the site. You can run it by:
 
 Then navigate to the [website](http://localhost:4321) to see the site!
 
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/games` | List games (paginated). Supports `page`, `pageSize`, `category`, and `publisher` query params. |
+| GET | `/api/games/<id>` | Get a single game by ID |
+| GET | `/api/categories` | List all categories with game counts |
+| GET | `/api/publishers` | List all publishers with game counts |
+
+### Filtering
+
+The games listing supports filtering by category and/or publisher using their IDs:
+
+```
+GET /api/games?category=1&publisher=2&page=1&pageSize=9
+```
+
 ## Linting
 
 The frontend uses ESLint to enforce code quality across TypeScript, Astro, and Svelte files. Run it with:

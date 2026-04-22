@@ -3,6 +3,7 @@
     import type { Game, PaginatedGamesResponse } from '../types/game';
     import { API_ENDPOINTS } from '../config/api';
     import GameCard from "./GameCard.svelte";
+    import FilterBar from "./FilterBar.svelte";
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
     import EmptyState from "./EmptyState.svelte";
@@ -15,17 +16,32 @@
     let totalPages = $state(1);
     let totalGames = $state(0);
 
+    let selectedCategory = $state('');
+    let selectedPublisher = $state('');
+    let abortController = $state<AbortController | null>(null);
+
+    let hasActiveFilters = $derived(selectedCategory !== '' || selectedPublisher !== '');
+
     const fetchGames = async (page: number = 1) => {
+        // Cancel any in-flight request
+        if (abortController) {
+            abortController.abort();
+        }
+        const controller = new AbortController();
+        abortController = controller;
+
         loading = true;
         error = null;
         try {
             // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local variable, not reactive state
             const queryParams = new URLSearchParams();
             queryParams.set('page', String(page));
+            if (selectedCategory) queryParams.set('category', selectedCategory);
+            if (selectedPublisher) queryParams.set('publisher', selectedPublisher);
 
             const endpoint = `${API_ENDPOINTS.games}?${queryParams.toString()}`;
 
-            const response = await fetch(endpoint);
+            const response = await fetch(endpoint, { signal: controller.signal });
             if(response.ok) {
                 const data: PaginatedGamesResponse = await response.json();
                 games = data.games;
@@ -36,14 +52,29 @@
                 error = `Failed to fetch data: ${response.status} ${response.statusText}`;
             }
         } catch (err) {
+            if (err instanceof DOMException && err.name === 'AbortError') return;
             error = `Error: ${err instanceof Error ? err.message : String(err)}`;
         } finally {
-            loading = false;
+            if (!controller.signal.aborted) {
+                loading = false;
+            }
         }
     };
 
     const goToPage = async (page: number) => {
         await fetchGames(page);
+    };
+
+    const handleFilterChange = async (filters: { category: string; publisher: string }) => {
+        selectedCategory = filters.category;
+        selectedPublisher = filters.publisher;
+        await fetchGames(1);
+    };
+
+    const clearFilters = async () => {
+        selectedCategory = '';
+        selectedPublisher = '';
+        await fetchGames(1);
     };
 
     onMount(() => {
@@ -53,11 +84,24 @@
 
 <div>
     <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
+
+    <FilterBar onFilterChange={handleFilterChange} />
     
     {#if loading}
         <LoadingSkeleton count={6} />
     {:else if error}
         <ErrorMessage error={error} />
+    {:else if games.length === 0 && hasActiveFilters}
+        <div class="text-center py-12" data-testid="filtered-empty-state">
+            <p class="text-slate-300 text-lg mb-4">No games match your current filters.</p>
+            <button
+                class="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-500 transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                onclick={clearFilters}
+                data-testid="clear-filters-button"
+            >
+                Clear Filters
+            </button>
+        </div>
     {:else if games.length === 0}
         <EmptyState message="No games available at the moment." />
     {:else}

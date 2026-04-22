@@ -183,6 +183,7 @@ def tearDown(self) -> None:
 The project already includes comprehensive Playwright E2E tests:
 - `home.spec.ts` - Homepage display and content
 - `games.spec.ts` - Game listing, navigation, and details pages
+- `filters.spec.ts` - Category and publisher filtering
 - `accessibility.spec.ts` - Accessibility compliance tests
 - `api-proxy.spec.ts` - API proxy streaming endpoint tests
 
@@ -297,8 +298,10 @@ Relationships use SQLAlchemy with `contains_eager` for optimized loading.
 ## API Conventions
 
 - **Base URL**: `/api/<resource>`
-- **GET** `/api/games` - List all games
+- **GET** `/api/games` - List all games (supports `?category=ID&publisher=ID` filters and `?page=N&pageSize=N` pagination)
 - **GET** `/api/games/<id>` - Get single game
+- **GET** `/api/categories` - List all categories with game counts
+- **GET** `/api/publishers` - List all publishers with game counts
 
 Additional write endpoints (POST, PUT/PATCH, DELETE) are not yet implemented.
 

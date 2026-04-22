@@ -20,6 +20,16 @@ export interface Category {
 }
 
 /**
+ * Represents a filter option (category or publisher) with game count
+ */
+export interface FilterOption {
+    id: number;
+    name: string;
+    description: string | null;
+    gameCount: number;
+}
+
+/**
  * Represents a game as returned by the API
  */
 export interface Game {

@@ -27,15 +27,40 @@ def get_games_base_query() -> Query:
     )
 
 @games_bp.route('/api/games', methods=['GET'])
-def get_games() -> Response:
+def get_games() -> Response | tuple[Response, int]:
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('pageSize', default=DEFAULT_PAGE_SIZE, type=int)
+
+    # Validate filter params: present but non-integer → 400
+    category_raw = request.args.get('category')
+    publisher_raw = request.args.get('publisher')
+
+    category_id: int | None = None
+    publisher_id: int | None = None
+
+    if category_raw is not None:
+        try:
+            category_id = int(category_raw)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid category parameter"}), 400
+
+    if publisher_raw is not None:
+        try:
+            publisher_id = int(publisher_raw)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid publisher parameter"}), 400
 
     # Clamp pagination values
     page = max(1, page)
     page_size = max(1, min(page_size, 100))
 
     games_query = get_games_base_query().order_by(Game.title.asc())
+
+    # Apply optional filters
+    if category_id is not None:
+        games_query = games_query.filter(Game.category_id == category_id)
+    if publisher_id is not None:
+        games_query = games_query.filter(Game.publisher_id == publisher_id)
 
     # Get total count before pagination (clear ordering for performance)
     total = games_query.order_by(None).count()

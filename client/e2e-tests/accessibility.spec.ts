@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 test.describe('Accessibility Tests', () => {
   test('home page should not have accessibility violations', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
     
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -15,7 +15,7 @@ test.describe('Accessibility Tests', () => {
 
   test('game details page should not have accessibility violations', async ({ page }) => {
     await page.goto('/game/1');
-    await page.waitForSelector('[data-testid="game-details"]', { timeout: 10000 });
+    await expect(page.getByTestId('game-details')).toBeVisible();
     
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -26,7 +26,7 @@ test.describe('Accessibility Tests', () => {
 
   test('about page should not have accessibility violations', async ({ page }) => {
     await page.goto('/about');
-    await page.waitForSelector('[data-testid="about-section"]', { timeout: 10000 });
+    await expect(page.getByTestId('about-section')).toBeVisible();
     
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -37,7 +37,7 @@ test.describe('Accessibility Tests', () => {
 
   test('keyboard navigation - should be able to navigate header menu', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
 
     const menuButton = page.getByRole('button', { name: /toggle menu/i });
     const menu = page.locator('#menu');
@@ -77,7 +77,7 @@ test.describe('Accessibility Tests', () => {
 
   test('keyboard navigation - should be able to navigate to game cards', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
 
     await test.step('Tab through page until a game card receives focus', async () => {
       const MAX_TABS = 50;
@@ -89,13 +89,13 @@ test.describe('Accessibility Tests', () => {
           tabCount++;
         }
         return page.locator('[data-testid="game-card"]:focus').count();
-      }, { timeout: 15000, message: 'Expected a game card to receive focus via Tab' }).toBeGreaterThan(0);
+      }, { message: 'Expected a game card to receive focus via Tab' }).toBeGreaterThan(0);
     });
   });
 
   test('keyboard navigation - should be able to activate game card with Enter', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
 
     let gameId: string | null = null;
 
@@ -128,7 +128,7 @@ test.describe('Accessibility Tests', () => {
 
   test('focus indicators - should have visible focus indicators on interactive elements', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
     
     // Check menu button has focus indicator
     const menuButton = page.locator('#menu-toggle');
@@ -172,7 +172,7 @@ test.describe('Accessibility Tests', () => {
 
   test('color contrast - should meet WCAG AA standards', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
     
     // Run axe with specific color contrast checks
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -190,7 +190,7 @@ test.describe('Accessibility Tests', () => {
 
   test('semantic HTML - main landmarks should be present', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
     
     // Check for header landmark (use first() to avoid strict mode violation from dev tools)
     const header = page.locator('header').first();
@@ -203,7 +203,7 @@ test.describe('Accessibility Tests', () => {
 
   test('decorative SVGs should have aria-hidden attribute', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    await expect(page.getByTestId('games-grid')).toBeVisible();
     
     // Check menu button SVG has aria-hidden
     const menuButtonSvg = page.locator('#menu-toggle svg');

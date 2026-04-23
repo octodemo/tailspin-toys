@@ -24,6 +24,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - Test code should be of the same quality as the rest of the project, and follow DRY principles
 - For frontend changes, run builds in the client directory to verify build success and the end-to-end tests, to ensure everything works correctly
 - When making API changes, update and run the corresponding tests to ensure everything works correctly
+- Use the `test-runner` skill (`/test-runner`) for detailed test execution guidance, troubleshooting, and debugging
 
 #### Project guidelines
 

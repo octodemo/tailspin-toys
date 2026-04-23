@@ -1,6 +1,6 @@
 ---
 name: test-runner
-description: Run, debug, and troubleshoot the project's test suites. Use this when asked to run tests, debug test failures, or verify code changes. Also use this before performing any merge commands or pushing code.
+description: Handles all test execution for this project — running tests, debugging failures, verifying code changes, and validating readiness before commits, pushes, or merges. Use this skill instead of running test commands directly.
 allowed-tools:
   - shell
 ---

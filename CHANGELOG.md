@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.0](https://github.com/octodemo/tailspin-toys/compare/v1.1.1...v1.2.0) (2026-04-23)
+
+
+### Features
+
+* add .mcp.json configuration for GitHub Copilot and Playwright ([a3daf49](https://github.com/octodemo/tailspin-toys/commit/a3daf49460593d9b40fa537bb0f4101c04bf6c0a))
+* Add pagination to games listing ([#23](https://github.com/octodemo/tailspin-toys/issues/23)) ([06e5808](https://github.com/octodemo/tailspin-toys/commit/06e5808ffce2aa436639a6f45e120880e19cdcc8))
+* add QA Reviewer agent and test-runner skill, remove testing-guidelines skill ([f168f89](https://github.com/octodemo/tailspin-toys/commit/f168f89b83b47fbcc617f07bbea6893956dc5a42))
+* update package-lock.json to remove unused dependencies ([a3daf49](https://github.com/octodemo/tailspin-toys/commit/a3daf49460593d9b40fa537bb0f4101c04bf6c0a))
+
 ## [1.1.1](https://github.com/octodemo/tailspin-toys/compare/v1.1.0...v1.1.1) (2026-03-11)
 
 

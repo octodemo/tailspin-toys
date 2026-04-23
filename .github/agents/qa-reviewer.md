@@ -5,11 +5,11 @@ tools:
   - read
   - edit
   - search
-  - shell
+  - execute
   - web
   - agent
-mcp-servers:
-  - playwright
+  - todo
+  - playwright/*
 ---
 
 # QA Reviewer Agent
@@ -61,7 +61,7 @@ If any of these are unclear, ask the user before proceeding.
 
 ### Phase 4 — Run Verification Suite
 
-Use `/test-runner` skill to execute and interpret all three checks:
+Use the `test-runner` skill to execute and interpret all three checks:
 
 ```bash
 ./scripts/run-server-tests.sh

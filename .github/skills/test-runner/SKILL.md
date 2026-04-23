@@ -1,6 +1,6 @@
 ---
 name: test-runner
-description: Guidelines for running and writing unit and E2E tests. Use this when asked to run tests, write tests, debug test failures, or verify code changes. Also use this before performing any merge commands or pushing code.
+description: Run, debug, and troubleshoot the project's test suites. Use this when asked to run tests, debug test failures, or verify code changes. Also use this before performing any merge commands or pushing code.
 allowed-tools:
   - shell
 ---
@@ -65,7 +65,7 @@ allowed-tools:
 
 - Ensure Python 3.11+ is available: `python3 --version`
 - Ensure Node 18+ is available: `node --version`
-- If `venv` is missing: `python3 -m venv server/venv && source server/venv/bin/activate && pip install -r server/requirements.txt`
+- If `venv` is missing: `python3 -m venv venv && source venv/bin/activate && pip install -r server/requirements.txt`
 
 ---
 
@@ -96,7 +96,7 @@ Then re-run the failing script.
 Run a single test class for faster iteration:
 
 ```bash
-cd server && source venv/bin/activate && python3 -m unittest tests.test_games_routes -v
+source venv/bin/activate && cd server && python3 -m unittest tests.test_games -v
 ```
 
 ---

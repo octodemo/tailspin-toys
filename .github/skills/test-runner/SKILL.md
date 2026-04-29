@@ -1,6 +1,6 @@
 ---
 name: test-runner
-description: Handles all test execution for this project — running tests, debugging failures, verifying code changes, and validating readiness before commits, pushes, or merges. Use this skill instead of running test commands directly.
+description: Handles all test, lint, and quality-check execution for this project — running backend unit tests, Playwright E2E tests, and ESLint; debugging failures; verifying code changes; and validating readiness before commits, pushes, or merges. Use this skill instead of running test, lint, or verification commands (such as run-server-tests.sh, run-e2e-tests.sh, or run-lint.sh) directly.
 allowed-tools:
   - shell
 ---

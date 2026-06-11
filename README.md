@@ -2,15 +2,32 @@
 
 Tailspin Toys is a crowdfunding platform for games with a developer theme. The project is a website for a fictional game crowd-funding company, with a [Flask](https://flask.palletsprojects.com/en/stable/) backend using [SQLAlchemy](https://www.sqlalchemy.org/) and [Astro](https://astro.build/) frontend using [Svelte](https://svelte.dev/) for dynamic pages.
 
-## Launch the site
+## Getting started
 
-A script file has been created to launch the site. You can run it by:
+Install dependencies (Python venv, npm packages, Playwright Chromium) once with the setup script. It is idempotent and only installs what is missing or stale, so it is safe to re-run any time:
+
+```bash
+./scripts/setup-env.sh
+```
+
+Pass `--force` to reinstall everything, or `--with-system-deps` to also install Playwright's OS-level dependencies (Linux only; may require sudo).
+
+## Launch the site
 
 ```bash
 ./scripts/start-app.sh
 ```
 
 Then navigate to the [website](http://localhost:4321) to see the site!
+
+## Running tests
+
+```bash
+./scripts/run-server-tests.sh   # Flask unit tests
+./scripts/run-e2e-tests.sh      # Playwright end-to-end tests
+```
+
+Each runner verifies its prerequisites and exits with a remediation message if anything is missing — it will never silently install dependencies on your behalf. Run `./scripts/setup-env.sh` when prompted.
 
 ## Linting
 

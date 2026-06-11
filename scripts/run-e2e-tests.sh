@@ -1,17 +1,20 @@
 #!/bin/bash
 
-# Run end-to-end tests: Playwright will automatically start servers via webServer config
+# run-e2e-tests.sh — run the Playwright end-to-end tests.
+# Playwright's webServer config starts both the Flask backend and the Astro
+# dev server, so all backend prerequisites must be in place too.
 
-# Define color codes
+set -u
+
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Determine project root
-if [[ $(basename $(pwd)) == "scripts" ]]; then
-    PROJECT_ROOT=$(pwd)/..
-else
-    PROJECT_ROOT=$(pwd)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if ! "$SCRIPT_DIR/setup-env.sh" --check e2e; then
+  exit 1
 fi
 
 cd "$PROJECT_ROOT/client" || exit 1
@@ -23,10 +26,7 @@ echo -e "  • Astro client server: http://localhost:4321"
 echo ""
 echo -e "${BLUE}Running tests:${NC}"
 
-# Run Playwright tests - this will automatically start the servers silently
 npm run test:e2e
-
-# Store the exit code
 TEST_EXIT_CODE=$?
 
 echo ""

@@ -25,5 +25,22 @@ with app.app_context():
 app.register_blueprint(games_bp)
 app.register_blueprint(auth_bp)
 
+def _env_flag(name: str, default: bool = False) -> bool:
+    value: str = os.environ.get(name, "").strip().lower()
+    if not value:
+        return default
+    return value in {"1", "true", "yes", "on"}
+
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5100) # Port 5100 to avoid macOS conflicts
+    # Hot-reload is on by default; the interactive Werkzeug debugger is opt-in
+    # via FLASK_INTERACTIVE_DEBUGGER because it requires POSIX semaphores that
+    # are blocked under some sandboxed environments.
+    use_reloader: bool = _env_flag("FLASK_DEBUG", default=True)
+    use_debugger: bool = _env_flag("FLASK_INTERACTIVE_DEBUGGER", default=False)
+    app.run(
+        host='0.0.0.0',
+        port=5100,  # Port 5100 to avoid macOS conflicts
+        use_reloader=use_reloader,
+        use_debugger=use_debugger,
+    )

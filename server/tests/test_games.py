@@ -222,8 +222,9 @@ class TestGamesRoutes(unittest.TestCase):
 
     def test_get_games_empty_database(self) -> None:
         """Test retrieval of games when database is empty"""
+        from sqlalchemy import delete
         with self.app.app_context():
-            db.session.query(Game).delete()
+            db.session.execute(delete(Game))
             db.session.commit()
         
         response = self.client.get(self.GAMES_API_PATH)

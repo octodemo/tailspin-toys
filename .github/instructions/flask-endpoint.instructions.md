@@ -9,16 +9,18 @@ applyTo: 'server/routes/*.py'
 
 - Create Blueprint: `bp_name = Blueprint('name', __name__)`
 - Use descriptive names matching resource (e.g., `games_bp`)
-- Include type hints: `Response`, `tuple[Response, int]`, `Query`
+- Include type hints: `Response`, `tuple[Response, int]`, `Select`
 - Import: `from flask import jsonify, Response, Blueprint`
 
 ## Data Access Patterns
 
-- Create base query functions: `get_<resource>_base_query() -> Query`
-- Use SQLAlchemy with outer joins: `isouter=True` for optional relations
+- Create base statement functions: `get_<resource>_base_stmt() -> Select`
+- Use SQLAlchemy 2.0 `select()` (not legacy `Query` / `Model.query`)
+- Use outer joins: `isouter=True` for optional relations
 - Use `contains_eager` for optimized eager loading to avoid N+1 queries
-- Return queries from helpers for reusability across endpoints
-- Use `.all()` for multiple results, `.first()` for single result
+- Return `Select` statements from helpers for reusability across endpoints
+- Execute via `db.session.scalars(stmt).all()` for collections and `db.session.scalars(stmt).one_or_none()` for single rows
+- Use `.unique()` on the scalar result when joining collection relationships to deduplicate parent rows
 
 ## Route Definitions
 
@@ -36,9 +38,9 @@ applyTo: 'server/routes/*.py'
 
 ## Query and Validation
 
-- Filter conditions: `.filter(Model.id == id)`
+- Filter conditions: `stmt.where(Model.id == id)`
 - Check None: `if not result: return jsonify({"error": "..."}), 404`
-- Apply ordering when needed
+- Apply ordering when needed: `stmt.order_by(Model.field.asc())`
 
 ## Required Testing
 

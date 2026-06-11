@@ -1,23 +1,27 @@
-from typing import Any
-from . import db
+from typing import Any, Optional, TYPE_CHECKING
+from sqlalchemy import ForeignKey, String, Text, Float
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from .base import BaseModel
-from sqlalchemy.orm import validates, relationship
+
+if TYPE_CHECKING:
+    from .category import Category
+    from .publisher import Publisher
 
 class Game(BaseModel):
     __tablename__ = 'games'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    star_rating = db.Column(db.Float, nullable=True)
-    
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    star_rating: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
     # Foreign keys for one-to-many relationships
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
-    publisher_id = db.Column(db.Integer, db.ForeignKey('publishers.id'), nullable=False)
-    
+    category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
+    publisher_id: Mapped[int] = mapped_column(ForeignKey('publishers.id'), nullable=False)
+
     # One-to-many relationships (many games belong to one category/publisher)
-    category = relationship("Category", back_populates="games")
-    publisher = relationship("Publisher", back_populates="games")
+    category: Mapped["Category"] = relationship(back_populates="games")
+    publisher: Mapped["Publisher"] = relationship(back_populates="games")
     
     @validates('title')
     def validate_name(self, key, name):

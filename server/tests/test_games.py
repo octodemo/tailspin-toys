@@ -235,6 +235,27 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(data['pagination']['total'], 0)
         self.assertEqual(data['pagination']['totalPages'], 1)
 
+    def test_get_game_by_id_serialization_contract(self) -> None:
+        """The game JSON contract should expose camelCase `starRating` and
+        nested `{id, name}` objects for publisher and category."""
+        list_response = self.client.get(self.GAMES_API_PATH)
+        game_id = self._get_games_list(list_response)[0]['id']
+
+        response = self.client.get(f'{self.GAMES_API_PATH}/{game_id}')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+
+        # camelCase, not snake_case
+        self.assertIn('starRating', data)
+        self.assertNotIn('star_rating', data)
+
+        # Nested relations are {id, name} objects, not bare ids
+        self.assertIsInstance(data['publisher'], dict)
+        self.assertEqual(set(data['publisher'].keys()), {'id', 'name'})
+        self.assertIsInstance(data['category'], dict)
+        self.assertEqual(set(data['category'].keys()), {'id', 'name'})
+
     def test_get_game_by_invalid_id_type(self) -> None:
         """Test retrieval of a game with invalid ID type"""
         response = self.client.get(f'{self.GAMES_API_PATH}/invalid-id')

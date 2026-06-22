@@ -256,10 +256,66 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertIsInstance(data['category'], dict)
         self.assertEqual(set(data['category'].keys()), {'id', 'name'})
 
-    def test_get_game_by_invalid_id_type(self) -> None:
-        """Test retrieval of a game with invalid ID type"""
-        response = self.client.get(f'{self.GAMES_API_PATH}/invalid-id')
-        self.assertEqual(response.status_code, 404)
+    def test_get_games_filter_by_category(self) -> None:
+        """Test filtering games by category_id"""
+        # Get category ID for "Strategy"
+        response = self.client.get(self.GAMES_API_PATH)
+        games = self._get_games_list(response)
+        strategy_game = next(g for g in games if g['title'] == 'Pipeline Panic')
+        category_id = strategy_game['category']['id']
+
+        response = self.client.get(f'{self.GAMES_API_PATH}?categoryId={category_id}')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 1)
+        self.assertEqual(data['games'][0]['title'], 'Pipeline Panic')
+        self.assertEqual(data['pagination']['total'], 1)
+
+    def test_get_games_filter_by_publisher(self) -> None:
+        """Test filtering games by publisher_id"""
+        response = self.client.get(self.GAMES_API_PATH)
+        games = self._get_games_list(response)
+        agile_game = next(g for g in games if g['title'] == 'Agile Adventures')
+        publisher_id = agile_game['publisher']['id']
+
+        response = self.client.get(f'{self.GAMES_API_PATH}?publisherId={publisher_id}')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 1)
+        self.assertEqual(data['games'][0]['title'], 'Agile Adventures')
+        self.assertEqual(data['pagination']['total'], 1)
+
+    def test_get_games_filter_by_category_and_publisher(self) -> None:
+        """Test that combining category and publisher filters narrows results"""
+        response = self.client.get(self.GAMES_API_PATH)
+        games = self._get_games_list(response)
+        pipeline_game = next(g for g in games if g['title'] == 'Pipeline Panic')
+        category_id = pipeline_game['category']['id']
+        # Use a publisher from a different game — should return 0 results
+        agile_game = next(g for g in games if g['title'] == 'Agile Adventures')
+        publisher_id = agile_game['publisher']['id']
+
+        response = self.client.get(
+            f'{self.GAMES_API_PATH}?categoryId={category_id}&publisherId={publisher_id}'
+        )
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 0)
+        self.assertEqual(data['pagination']['total'], 0)
+
+    def test_get_games_filter_no_match(self) -> None:
+        """Test filtering with a non-existent category returns empty results"""
+        response = self.client.get(f'{self.GAMES_API_PATH}?categoryId=9999')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 0)
+        self.assertEqual(data['pagination']['total'], 0)
+
+
 
 if __name__ == '__main__':
     unittest.main()

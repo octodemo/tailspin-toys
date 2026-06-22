@@ -78,9 +78,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: "./client/package.json"
 
-      # setup-env.sh installs the Python venv, npm dependencies, and Playwright
-      # browsers, and writes the SHA markers that run-e2e-tests.sh validates.
-      - name: Install dependencies
+      - name: Install all dependencies (Python venv, Node modules, Playwright browsers)
         run: bash ./scripts/setup-env.sh --with-system-deps
 
       - name: Run Playwright e2e tests

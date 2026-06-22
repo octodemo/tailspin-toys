@@ -20,6 +20,26 @@ export interface Category {
 }
 
 /**
+ * Represents a publisher as returned by GET /api/publishers
+ */
+export interface PublisherOption {
+    id: number;
+    name: string;
+    description: string | null;
+    game_count: number;
+}
+
+/**
+ * Represents a category as returned by GET /api/categories
+ */
+export interface CategoryOption {
+    id: number;
+    name: string;
+    description: string | null;
+    game_count: number;
+}
+
+/**
  * Represents a game as returned by the API
  */
 export interface Game {

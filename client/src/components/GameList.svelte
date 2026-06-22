@@ -3,6 +3,7 @@
     import type { Game, PaginatedGamesResponse } from '../types/game';
     import { API_ENDPOINTS } from '../config/api';
     import GameCard from "./GameCard.svelte";
+    import GameFilters from "./GameFilters.svelte";
     import LoadingSkeleton from "./LoadingSkeleton.svelte";
     import ErrorMessage from "./ErrorMessage.svelte";
     import EmptyState from "./EmptyState.svelte";
@@ -15,6 +16,9 @@
     let totalPages = $state(1);
     let totalGames = $state(0);
 
+    let categoryId = $state<number | null>(null);
+    let publisherId = $state<number | null>(null);
+
     const fetchGames = async (page: number = 1) => {
         loading = true;
         error = null;
@@ -22,6 +26,8 @@
             // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local variable, not reactive state
             const queryParams = new URLSearchParams();
             queryParams.set('page', String(page));
+            if (categoryId !== null) queryParams.set('categoryId', String(categoryId));
+            if (publisherId !== null) queryParams.set('publisherId', String(publisherId));
 
             const endpoint = `${API_ENDPOINTS.games}?${queryParams.toString()}`;
 
@@ -46,6 +52,10 @@
         await fetchGames(page);
     };
 
+    const handleFilterChange = () => {
+        fetchGames(1);
+    };
+
     onMount(() => {
         fetchGames();
     });
@@ -53,7 +63,9 @@
 
 <div>
     <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
-    
+
+    <GameFilters bind:categoryId bind:publisherId onchange={handleFilterChange} />
+
     {#if loading}
         <LoadingSkeleton count={6} />
     {:else if error}

@@ -24,4 +24,21 @@ test.describe('Home Page', () => {
     // Check that the welcome message is present using more specific locator
     await expect(page.getByText('Find your next game! And maybe even back one! Explore our collection!')).toBeVisible();
   });
+
+  test('should persist theme preference after reload', async ({ page }) => {
+    const toggle = page.getByTestId('theme-toggle-button');
+    const initialTheme = await page.evaluate(() => document.documentElement.dataset.theme ?? 'dark');
+    const expectedTheme = initialTheme === 'light' ? 'dark' : 'light';
+
+    await toggle.click();
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe(expectedTheme);
+
+    await page.reload();
+
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe(expectedTheme);
+  });
 });

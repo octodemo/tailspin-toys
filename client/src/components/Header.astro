@@ -20,10 +20,68 @@
       </div>
       <div class="text-xl font-bold"><a href="/" class="hover:underline">Tailspin Toys</a></div>
     </div>
+    <button
+      id="theme-toggle"
+      type="button"
+      data-testid="theme-toggle-button"
+      class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-2 py-1 text-xs font-medium transition-colors duration-200 hover:bg-white/20 focus:ring-2 focus:ring-white focus:outline-none"
+      role="switch"
+      aria-checked="false"
+      aria-label="Switch to light mode"
+    >
+      <span
+        id="theme-toggle-track"
+        aria-hidden="true"
+        class="relative h-5 w-9 rounded-full bg-white/30 transition-colors duration-200"
+      >
+        <span
+          id="theme-toggle-thumb"
+          class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-200"
+        ></span>
+      </span>
+      <span id="theme-toggle-label">Dark</span>
+    </button>
   </div>
 </header>
 
 <script>
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeToggleLabel = document.getElementById('theme-toggle-label');
+  const themeToggleTrack = document.getElementById('theme-toggle-track');
+  const themeToggleThumb = document.getElementById('theme-toggle-thumb');
+  const themeStorageKey = 'tailspin-theme';
+
+  const applyTheme = (theme) => {
+    const isDark = theme === 'dark';
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.style.colorScheme = theme;
+
+    if (themeToggle && themeToggleLabel) {
+      themeToggle.setAttribute('aria-checked', String(!isDark));
+      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      themeToggleLabel.textContent = isDark ? 'Dark' : 'Light';
+    }
+
+    if (themeToggleTrack && themeToggleThumb) {
+      themeToggleTrack.classList.toggle('bg-white/30', isDark);
+      themeToggleTrack.classList.toggle('bg-blue-300/90', !isDark);
+      themeToggleThumb.classList.toggle('translate-x-0', isDark);
+      themeToggleThumb.classList.toggle('translate-x-4', !isDark);
+    }
+  };
+
+  const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  applyTheme(currentTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+      applyTheme(nextTheme);
+      localStorage.setItem(themeStorageKey, nextTheme);
+    });
+  }
+
   // Toggle menu visibility when hamburger is clicked
   const menuToggle = document.getElementById('menu-toggle');
   const menu = document.getElementById('menu');

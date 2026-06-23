@@ -17,7 +17,7 @@ This file defines the central UI development strategy for Tailspin Toys. Technol
 Refer to technology-specific instruction files:
 - [`svelte.instructions.md`](svelte.instructions.md) - Svelte 5 components with runes
 - [`astro.instructions.md`](astro.instructions.md) - Astro pages and layouts  
-- [`tailwindcss.instructions.md`](tailwindcss.instructions.md) - Tailwind CSS styling patterns
+- [`style.instructions.md`](style.instructions.md) - Tailwind CSS styling patterns
 
 ## Core Principles
 

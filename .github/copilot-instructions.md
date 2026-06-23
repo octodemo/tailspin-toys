@@ -52,7 +52,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ### Styling
 
-- Use Tailwind CSS utility classes exclusively - see `tailwindcss.instructions.md`
+- Use Tailwind CSS utility classes exclusively - see `style.instructions.md`
 - Dark theme colors: slate palette (`bg-slate-800`, `text-slate-100`, etc.)
 - Rounded corners and modern UI patterns
 - Follow modern UI/UX principles with clean, accessible interfaces

@@ -71,13 +71,16 @@ test.describe('Movie Search Feature', () => {
 });
 ```
 
-## Test Execution Strategy
+## Authoring & Iteration Strategy
 
-1. **Initial Run**: Execute tests with `npx playwright test --project=chromium`
-2. **Debug Failures**: Analyze test failures and identify root causes
-3. **Iterate**: Refine locators, assertions, or test logic as needed
-4. **Validate**: Ensure tests pass consistently and cover the intended functionality
-5. **Report**: Provide feedback on test results and any issues discovered
+> [!NOTE]
+> This file covers how specs should be written. To *run* the E2E suite, use the `quality-checks` skill — never invoke `npx playwright test` or `run-e2e-tests.sh` directly.
+
+1. **Run**: Execute the suite through the `quality-checks` skill.
+2. **Debug Failures**: Analyze test failures and identify root causes.
+3. **Iterate**: Refine locators, assertions, or test logic as needed, re-running through the skill.
+4. **Validate**: Ensure tests pass consistently and cover the intended functionality.
+5. **Report**: Provide feedback on test results and any issues discovered.
 
 ## Quality Checklist
 

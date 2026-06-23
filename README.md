@@ -43,9 +43,9 @@ ESLint is also run automatically in CI on pull requests to `main`.
 
 This project ships two Copilot customizations to assist with quality assurance:
 
-### QA Reviewer Agent
+### PR Readiness Agent
 
-The **QA Reviewer** (`.github/agents/qa-reviewer.md`) is a pre-PR quality gate. Invoke it before opening a pull request to:
+The **PR Readiness** agent (`.github/agents/pr-readiness.md`) is a pre-PR quality gate. Invoke it before opening a pull request to:
 
 - Verify all acceptance criteria have been implemented
 - Audit test coverage and fill any gaps
@@ -53,13 +53,13 @@ The **QA Reviewer** (`.github/agents/qa-reviewer.md`) is a pre-PR quality gate. 
 - Validate UI changes in the browser via Playwright MCP
 - Produce a go/no-go report
 
-### test-runner Skill
+### quality-checks Skill
 
-The **test-runner** skill (`.github/skills/test-runner/SKILL.md`) wraps the project's test scripts with a detailed debugging and troubleshooting runbook. Use it via `/test-runner` when:
+The **quality-checks** skill (`.github/skills/quality-checks/SKILL.md`) wraps the project's test and lint scripts with a detailed debugging and troubleshooting runbook. Use it via `/quality-checks` when:
 
-- Running tests for the first time after setup
+- Running tests or lint for the first time after setup
 - Diagnosing test failures (environment issues, port conflicts, flaky tests, CI divergence)
-- Writing new backend or frontend tests following project conventions
+- Validating readiness before commits, pushes, or merges
 
 ## License 
 

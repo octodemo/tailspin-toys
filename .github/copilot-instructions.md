@@ -18,12 +18,12 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 #### Testing guidelines
 
-- Invoke tests using agent skills when available.
+- **Always run tests and lint through the `quality-checks` skill — never invoke `run-server-tests.sh`, `run-e2e-tests.sh`, or `run-lint.sh` directly.** The skill wraps environment setup, ordering, and troubleshooting. (Starting the app for manual validation is not a quality check — call `scripts/start-app.sh` directly for that.)
 - Run Python tests to ensure backend functionality, and Playwright tests to ensure e2e and frontend functionality
 - Run ESLint to check frontend code quality before committing
 - Review the existing tests to ensure we're not duplicating efforts
 - Test code should be of the same quality as the rest of the project, and follow DRY principles
-- For frontend changes, run builds in the client directory to verify build success and the end-to-end tests, to ensure everything works correctly
+- For frontend changes, verify the build in the `client` directory (`npm run build`) directly, and run the end-to-end tests through the `quality-checks` skill, to ensure everything works correctly
 - When making API changes, update and run the corresponding tests to ensure everything works correctly
 
 #### Project guidelines
@@ -52,7 +52,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ### Styling
 
-- Use Tailwind CSS utility classes exclusively - see `tailwindcss.instructions.md`
+- Use Tailwind CSS utility classes exclusively - see `style.instructions.md`
 - Dark theme colors: slate palette (`bg-slate-800`, `text-slate-100`, etc.)
 - Rounded corners and modern UI patterns
 - Follow modern UI/UX principles with clean, accessible interfaces

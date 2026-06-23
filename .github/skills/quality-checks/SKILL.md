@@ -1,11 +1,11 @@
 ---
-name: test-runner
+name: quality-checks
 description: Handles all test, lint, and quality-check execution for this project — running backend unit tests, Playwright E2E tests, and ESLint; debugging failures; verifying code changes; and validating readiness before commits, pushes, or merges. Use this skill instead of running test, lint, or verification commands (such as run-server-tests.sh, run-e2e-tests.sh, or run-lint.sh) directly.
 allowed-tools:
   - shell
 ---
 
-# Test Runner
+# Quality Checks
 
 ## Quick Reference
 
@@ -49,6 +49,16 @@ allowed-tools:
 
 - Runs ESLint on all TypeScript, Astro, and Svelte files in `client/`
 - Must pass with zero errors before committing
+
+### Starting the App (for manual / browser validation)
+
+```bash
+./scripts/start-app.sh
+```
+
+- Starts the Flask backend (port 5100) and Astro dev server (port 4321)
+- Use this when manually validating the UI (e.g. via the Playwright MCP server); the E2E script starts its own servers automatically
+- Wait for both servers to report ready before navigating
 
 ---
 
@@ -108,7 +118,7 @@ source venv/bin/activate && cd server && python3 -m unittest tests.test_games -v
 1. **Browser not installed**: Run `cd client && npx playwright install --with-deps chromium` to install browser binaries.
 2. **Servers not running**: The E2E script starts servers automatically, but if running tests manually, start both servers first (`./scripts/start-app.sh`).
 3. **Locator changed**: If a `data-testid` was renamed or removed, update the spec to match the new attribute.
-4. **Flaky test**: If a test fails intermittently, look for hard-coded waits or race conditions. Replace with auto-retrying Playwright assertions (`expect(locator).toBeVisible()`). **Never use `waitForTimeout`.**
+4. **Flaky test**: If a test fails intermittently, look for hard-coded waits or race conditions. Replace them with auto-retrying web-first assertions (see [playwright.instructions.md](../../instructions/playwright.instructions.md)). **Never use `waitForTimeout`.**
 5. **Aria snapshot mismatch**: Re-generate the snapshot with `npx playwright test --update-snapshots`.
 
 Run a single spec for faster iteration:
@@ -141,14 +151,7 @@ cd client && npx playwright test e2e-tests/games.spec.ts
 
 ---
 
-## Core Philosophy
-
-### Test Core Functionality, Not Everything
-
-- Focus on critical user paths and essential business logic
-- Prioritize tests that catch regressions in key features
-- Avoid over-testing trivial functionality or implementation details
-- Ask: "If this breaks, will users notice?" — if yes, test it
+## Verification Policy
 
 ### Tests Must Pass Before Commit/Merge
 
@@ -156,61 +159,12 @@ cd client && npx playwright test e2e-tests/games.spec.ts
 - Never skip or disable tests without explicit justification
 - Broken tests block merges — fix them, don't ignore them
 - Run the full test suite, not just tests for changed code
+- New functionality must ship with appropriate test coverage
 
-### Tests Are Production Code
-
-- Apply the same code quality standards to tests as production code
-- Use clear, descriptive names that explain what is being tested
-- Keep tests maintainable, readable, and well-organized
-- Include type hints, proper formatting, and meaningful comments
-
----
-
-## Test Quality Standards
-
-- **Deterministic** — Same result every run, no flaky tests
-- **Independent** — No shared state between tests; each test seeds its own data
-- **Fast** — Optimize for quick feedback loops
-- **Focused** — One logical assertion per test
-- **Descriptive** — Test names should read like specifications
-
-### Backend Test Pattern (`server/tests/test_*.py`)
-
-```python
-class TestGamesRoutes(unittest.TestCase):
-    """Tests for the /api/games endpoints."""
-
-    TEST_DATA = [{"title": "Test Game", ...}]
-
-    def setUp(self) -> None:
-        self.app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:"})
-        self.client = self.app.test_client()
-        with self.app.app_context():
-            db.create_all()
-            self._seed_test_data()
-
-    def tearDown(self) -> None:
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.engine.dispose()
-```
-
-### Frontend E2E Pattern (`client/e2e-tests/*.spec.ts`)
-
-```typescript
-test('game card displays correct title', async ({ page }) => {
-  await test.step('navigate to games page', async () => {
-    await page.goto('/games');
-  });
-
-  await test.step('verify game card', async () => {
-    const card = page.getByTestId('game-card-1');
-    await expect(card).toBeVisible();
-    await expect(card.getByRole('heading')).toHaveText('Test Game');
-  });
-});
-```
+> [!NOTE]
+> This skill covers **running, verifying, and debugging** tests. For **how to author** test code — structure, fixtures, naming, locators, and quality standards — follow the instructions files, which are the single source of truth:
+> - Backend (`server/tests/test_*.py`): [unit-tests.instructions.md](../../instructions/unit-tests.instructions.md)
+> - Frontend E2E (`client/e2e-tests/*.spec.ts`): [playwright.instructions.md](../../instructions/playwright.instructions.md)
 
 ---
 

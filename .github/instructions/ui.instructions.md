@@ -31,7 +31,7 @@ Refer to technology-specific instruction files:
 
 - Use semantic HTML elements (`<nav>`, `<main>`, `<article>`, `<button>`)
 - Provide ARIA labels and roles where semantic HTML isn't sufficient
-- Navigation menus should use `role="menu"` and `role="menuitem"` attributes
+- Use plain `<nav>` with `<a>`/`<button>` elements for site navigation — do **not** add `role="menu"`. Reserve `role="menu"` / `role="menuitem"` for true application-style menus that implement full composite keyboard semantics (arrow-key roving focus, Home/End, type-ahead)
 - Loading states should use `role="status"` and `aria-live="polite"` for screen reader announcements
 - Include Escape key handlers for dismissible elements (menus, modals)
 - Ensure keyboard navigation works for all interactive elements, with proper focus management

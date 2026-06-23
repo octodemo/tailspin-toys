@@ -158,7 +158,7 @@ Matches the `role="status"` / `aria-live="polite"` pattern in `ui.instructions.m
 
 - Use native HTML first (`<button>` over `<div role="button">`); only add ARIA when native semantics are insufficient
 - Common landmarks: `navigation`, `search`, `main`, `complementary`, `banner`, `contentinfo`
-- Menus use `role="menu"` / `role="menuitem"` with Escape-to-dismiss (per `ui.instructions.md`)
+- Site navigation uses plain `<nav>` + `<a>`/`<button>` (no `role="menu"`); reserve `role="menu"` / `role="menuitem"` (with full keyboard semantics and Escape-to-dismiss) for true application-style menus, per `ui.instructions.md`
 - Reference visible text with `aria-labelledby`; supplement with `aria-describedby`
 - Mark decorative SVGs/icons `aria-hidden="true"` (as `GameCard.svelte` does)
 

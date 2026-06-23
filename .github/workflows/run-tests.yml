@@ -72,11 +72,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      # No pip cache here: setup-python's cache step shells out to `lsb_release`,
+      # which the slim Playwright container image does not ship. The requirements
+      # install is quick, so we skip caching rather than add an apt dependency.
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-          cache: "pip"
 
       - name: Set up Node.js
         uses: actions/setup-node@v6

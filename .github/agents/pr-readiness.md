@@ -88,7 +88,7 @@ Use the Playwright MCP server to manually validate the UI, and defer accessibili
 4. Incorporate the Accessibility agent's findings into your QA assessment instead of producing specialist accessibility guidance yourself.
 5. Capture screenshots or aria snapshots as evidence.
 
-> The only execution command in this phase is **starting the app** — do that through the `quality-checks` skill (which documents the app-startup workflow), then wait for both servers to be ready before navigating. The browser-driving itself stays direct via Playwright MCP.
+> The only execution command in this phase is **starting the app** — run `./scripts/start-app.sh` directly (launching servers is a prerequisite, not a quality check), then wait for both servers to be ready before navigating. The browser-driving itself stays direct via Playwright MCP.
 
 ### Phase 6 — QA Report
 

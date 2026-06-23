@@ -14,7 +14,6 @@ allowed-tools:
 | Backend unit tests | `./scripts/run-server-tests.sh` | After any Python/API change |
 | Frontend E2E tests | `./scripts/run-e2e-tests.sh` | After any UI/frontend change |
 | Frontend lint | `./scripts/run-lint.sh` | After any TypeScript/Svelte/Astro change |
-| Start the app | `./scripts/start-app.sh` | For manual / Playwright MCP browser validation |
 
 **Always use the provided scripts** — they handle environment setup, virtual environments, and proper configuration automatically.
 
@@ -50,16 +49,6 @@ allowed-tools:
 
 - Runs ESLint on all TypeScript, Astro, and Svelte files in `client/`
 - Must pass with zero errors before committing
-
-### Starting the App (for manual / browser validation)
-
-```bash
-./scripts/start-app.sh
-```
-
-- Starts the Flask backend (port 5100) and Astro dev server (port 4321)
-- Use this when manually validating the UI (e.g. via the Playwright MCP server); the E2E script starts its own servers automatically
-- Wait for both servers to report ready before navigating
 
 ---
 

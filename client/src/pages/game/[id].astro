@@ -2,6 +2,7 @@
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import GameDetails from '../../components/GameDetails.svelte';
+import RecentGamesBreadcrumb from '../../components/RecentGamesBreadcrumb.svelte';
 
 const { id } = Astro.params;
 const gameId = parseInt(id || '0');
@@ -10,6 +11,16 @@ const gameId = parseInt(id || '0');
 
 <Layout title="Game Details - Tailspin Toys">
   <div class="py-8">
+    <div class="mb-6">
+      <RecentGamesBreadcrumb
+        client:load
+        currentGameId={gameId}
+        heading="Recent visits"
+        showCard={false}
+        showHomeLink={true}
+      />
+    </div>
+
     <GameDetails client:load gameId={gameId} />
     
     <div class="mt-8">

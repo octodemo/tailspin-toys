@@ -2,14 +2,14 @@
 name: PR Readiness
 description: Pre-PR quality gate that verifies requirements are met, audits test coverage, fills gaps, runs the full verification suite, and produces a go/no-go report. Use this when you want to validate that a feature or fix is complete, correct, and well-tested before opening a pull request.
 tools:
-  - read
-  - edit
-  - search
-  - execute
-  - web
-  - agent
-  - todo
-  - playwright/*
+    - read
+    - edit
+    - search
+    - execute
+    - web
+    - agent
+    - todo
+    - "playwright/\*"
 ---
 
 # PR Readiness Agent
@@ -38,6 +38,12 @@ If any of these are unclear, ask the user before proceeding.
 
 ## Workflow
 
+### Execution Rules *(mandatory)*
+
+1. Run **all phases (1–6)** in order for every PR Readiness invocation.
+2. You may skip a phase only if it is explicitly conditional and its condition is unmet (currently, Phase 3 only).
+3. If any required phase is not completed, return **🔴 NO-GO** and explicitly name the missing phase(s).
+
 ### Phase 1 — Requirements & Code Review
 
 1. Read the feature spec / issue description to extract a list of **acceptance criteria**. If no formal spec exists, derive criteria from the code changes.
@@ -56,8 +62,8 @@ If any of these are unclear, ask the user before proceeding.
 
 1. Before writing, report the gaps to the user and confirm they want you to fill them.
 2. Write the minimum tests needed to cover the gaps, following project conventions:
-   - Backend: `server/tests/test_*.py` — use `unittest.TestCase`, in-memory SQLite, type hints (see `.github/instructions/unit-tests.instructions.md`)
-   - Frontend: `client/e2e-tests/*.spec.ts` — use role-based Playwright locators, `test.step`, no `waitForTimeout` (see `.github/instructions/playwright.instructions.md`)
+    - Backend: `server/tests/test_*.py` — use `unittest.TestCase`, in-memory SQLite, type hints (see `.github/instructions/unit-tests.instructions.md`)
+    - Frontend: `client/e2e-tests/*.spec.ts` — use role-based Playwright locators, `test.step`, no `waitForTimeout` (see `.github/instructions/playwright.instructions.md`)
 3. Add `data-testid` attributes to any interactive elements that are missing them.
 4. Do not rewrite existing tests — only add what is missing.
 
@@ -96,12 +102,30 @@ Use the Playwright MCP server to manually validate the implemented feature, and 
 
 Produce a structured report using the format below. **End with an explicit go/no-go verdict.**
 
+### Output Contract *(mandatory)*
+
+1. The final response must use the QA Report template below, with all sections present and populated.
+2. If any required section, phase status, or evidence is missing, return **🔴 NO-GO** and explicitly list what is missing.
+3. Phase 6 is incomplete unless the **Phase Completion Checklist** table is present and fully populated.
+4. Do not return a prose-only summary; the response must end with the `### Verdict` section from the template.
+
 ---
 
 ## Report Format
 
 ```markdown
 ## QA Report
+
+### Phase Completion Checklist
+
+| Phase | Status | Evidence |
+|-------|--------|----------|
+| Phase 1 — Requirements & Code Review | ✅ Complete / ❌ Incomplete | Summary of criteria mapping |
+| Phase 2 — Test Coverage Audit | ✅ Complete / ❌ Incomplete | Coverage audit notes |
+| Phase 3 — Write Missing Tests *(conditional)* | ✅ Complete / N/A / ❌ Incomplete | Tests added or reason N/A |
+| Phase 4 — Run Verification Suite | ✅ Complete / ❌ Incomplete | Backend/lint/E2E outcome summary |
+| Phase 5 — Browser Validation & Accessibility Delegation | ✅ Complete / ❌ Incomplete | Playwright MCP evidence path(s) and accessibility delegation summary when applicable |
+| Phase 6 — QA Report | ✅ Complete / ❌ Incomplete | Final report and explicit verdict |
 
 ### Acceptance Criteria
 

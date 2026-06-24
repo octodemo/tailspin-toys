@@ -100,6 +100,22 @@ test.describe('Game Listing and Navigation', () => {
     });
   });
 
+  test('should show recently perused games on the home page', async ({ page }) => {
+    await test.step('Navigate to a game details page to peruse a game', async () => {
+      await page.goto('/game/1');
+      await expect(page.getByTestId('game-details')).toBeVisible();
+      await expect(page.getByTestId('game-details-title')).not.toBeEmpty();
+    });
+
+    await test.step('Navigate back to home page and verify recently perused list', async () => {
+      await page.goto('/');
+      const recentGamesBreadcrumb = page.getByTestId('recent-games-breadcrumb');
+      await expect(recentGamesBreadcrumb).toBeVisible();
+      await expect(page.getByTestId('recent-games-list')).toBeVisible();
+      await expect(page.getByTestId('recent-game-link-1')).toBeVisible();
+    });
+  });
+
   test('should be able to navigate back to home from game details', async ({ page }) => {
     await test.step('Navigate to game details page', async () => {
       await page.goto('/game/1');

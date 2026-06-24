@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import type { Game } from '../types/game';
     import { API_ENDPOINTS } from '../config/api';
+    import { addRecentPerusedGame } from '../utils/recent-games';
     import ErrorMessage from "./ErrorMessage.svelte";
 
     let { game = undefined, gameId = 0 }: { game?: Game, gameId?: number } = $props();
@@ -14,6 +15,7 @@
         // If game object is provided directly, use it
         if (game) {
             gameData = game;
+            addRecentPerusedGame(game);
             loading = false;
             return;
         }
@@ -23,7 +25,9 @@
             try {
                 const response = await fetch(API_ENDPOINTS.gameById(gameId));
                 if (response.ok) {
-                    gameData = await response.json();
+                    const fetchedGame: Game = await response.json();
+                    gameData = fetchedGame;
+                    addRecentPerusedGame(fetchedGame);
                 } else {
                     error = `Failed to fetch game: ${response.status} ${response.statusText}`;
                 }

@@ -100,8 +100,8 @@ test.describe('Game Listing and Navigation', () => {
     });
   });
 
-  test('should show recently perused games on the home page', async ({ page }) => {
-    await test.step('Navigate to a game details page to peruse a game', async () => {
+  test('should show recently visited games on the home page', async ({ page }) => {
+    await test.step('Navigate to a game details page to visit a game', async () => {
       await page.goto('/game/1');
       await expect(page.getByTestId('game-details')).toBeVisible();
       await expect(page.getByTestId('game-details-title')).not.toBeEmpty();
@@ -113,6 +113,34 @@ test.describe('Game Listing and Navigation', () => {
       await expect(recentGamesBreadcrumb).toBeVisible();
       await expect(page.getByTestId('recent-games-list')).toBeVisible();
       await expect(page.getByTestId('recent-game-link-1')).toBeVisible();
+    });
+  });
+
+  test('should show the five most recently visited games in breadcrumb order', async ({ page }) => {
+    const visitedTitles: string[] = [];
+
+    await test.step('Visit six game details pages in sequence', async () => {
+      for (const gameId of [1, 2, 3, 4, 5, 6]) {
+        await page.goto(`/game/${gameId}`);
+        await expect(page.getByTestId('game-details')).toBeVisible();
+
+        const gameTitle = await page.getByTestId('game-details-title').textContent();
+        if (gameTitle) {
+          visitedTitles.push(gameTitle.trim());
+        }
+      }
+    });
+
+    await test.step('Verify the recent-games breadcrumb keeps only the five newest visits', async () => {
+      const recentGamesList = page.getByTestId('recent-games-list');
+      const recentGameLinks = recentGamesList.locator('[data-testid^="recent-game-link-"]');
+
+      await expect(page.getByTestId('recent-games-breadcrumb')).toBeVisible();
+      await expect(page.getByTestId('recent-games-home-link')).toBeVisible();
+      await expect(recentGameLinks).toHaveCount(5);
+      await expect(page.getByTestId('recent-game-link-1')).toHaveCount(0);
+      await expect(recentGameLinks).toHaveText(visitedTitles.slice(-5).reverse());
+      await expect(page.getByTestId('recent-game-link-6')).toHaveAttribute('aria-current', 'page');
     });
   });
 

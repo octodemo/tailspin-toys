@@ -7,6 +7,7 @@ export interface RecentPerusedGame {
 
 const RECENT_PERUSED_GAMES_STORAGE_KEY = 'tailspin-recent-perused-games';
 const RECENT_PERUSED_GAMES_LIMIT = 5;
+const RECENT_PERUSED_GAMES_UPDATED_EVENT = 'tailspin:recent-perused-games-updated';
 
 function isRecentPerusedGame(value: unknown): value is RecentPerusedGame {
     if (typeof value !== 'object' || value === null) {
@@ -50,4 +51,40 @@ export function addRecentPerusedGame(game: Pick<Game, 'id' | 'title'>): void {
         .slice(0, RECENT_PERUSED_GAMES_LIMIT);
 
     window.localStorage.setItem(RECENT_PERUSED_GAMES_STORAGE_KEY, JSON.stringify(nextRecentGames));
+    window.dispatchEvent(new CustomEvent<RecentPerusedGame[]>(RECENT_PERUSED_GAMES_UPDATED_EVENT, {
+        detail: nextRecentGames
+    }));
+}
+
+export function subscribeToRecentPerusedGames(
+    onRecentGamesChange: (recentGames: RecentPerusedGame[]) => void
+): () => void {
+    if (typeof window === 'undefined') {
+        return () => {};
+    }
+
+    const handleRecentGamesUpdate = (event: Event): void => {
+        if (event instanceof CustomEvent && Array.isArray(event.detail)) {
+            onRecentGamesChange(event.detail.filter(isRecentPerusedGame).slice(0, RECENT_PERUSED_GAMES_LIMIT));
+            return;
+        }
+
+        onRecentGamesChange(getRecentPerusedGames());
+    };
+
+    const handleStorageUpdate = (event: StorageEvent): void => {
+        if (event.key !== RECENT_PERUSED_GAMES_STORAGE_KEY) {
+            return;
+        }
+
+        onRecentGamesChange(getRecentPerusedGames());
+    };
+
+    window.addEventListener(RECENT_PERUSED_GAMES_UPDATED_EVENT, handleRecentGamesUpdate);
+    window.addEventListener('storage', handleStorageUpdate);
+
+    return () => {
+        window.removeEventListener(RECENT_PERUSED_GAMES_UPDATED_EVENT, handleRecentGamesUpdate);
+        window.removeEventListener('storage', handleStorageUpdate);
+    };
 }

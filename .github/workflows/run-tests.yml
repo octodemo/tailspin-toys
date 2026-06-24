@@ -8,6 +8,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Cancel superseded in-progress runs for the same ref so rapid pushes don't
+# queue behind stale runs (saves runner time and gives faster feedback).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
@@ -16,16 +22,18 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
           cache: "pip"
 
+      # Backend tests only need the Python venv, so scope the install to the
+      # server to skip the unused Node modules and Playwright browser download.
       - name: Install Python dependencies
-        run: bash ./scripts/setup-env.sh
+        run: bash ./scripts/setup-env.sh --scope server
         
 
       - name: Run Flask unit tests
@@ -39,12 +47,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version: "lts/*"
           cache: "npm"
           cache-dependency-path: "./client/package.json"
 
@@ -58,28 +66,40 @@ jobs:
 
   frontend-tests:
     runs-on: ubuntu-latest
+    # Run inside Playwright's official image so the browsers and their OS-level
+    # dependencies are preinstalled. This is the approach recommended by the
+    # Playwright CI docs (https://playwright.dev/docs/ci) and avoids the slow,
+    # network-variable `playwright install --with-deps` apt step on each run.
+    # The tag MUST match the @playwright/test version in client/package-lock.json
+    # so the bundled browsers resolve; bump it whenever Playwright is upgraded.
+    container: mcr.microsoft.com/playwright:v1.58.2-noble
     permissions:
       contents: read
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
+      # No pip cache here: setup-python's cache step shells out to `lsb_release`,
+      # which the slim Playwright container image does not ship. The requirements
+      # install is quick, so we skip caching rather than add an apt dependency.
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-          cache: "pip"
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version: "lts/*"
           cache: "npm"
           cache-dependency-path: "./client/package.json"
 
+      # No --with-system-deps: the Playwright container already provides the
+      # browsers and OS libraries, so setup-env.sh detects them and skips the
+      # download entirely.
       - name: Install all dependencies (Python venv, Node modules, Playwright browsers)
-        run: bash ./scripts/setup-env.sh --with-system-deps
+        run: bash ./scripts/setup-env.sh
 
       - name: Run Playwright e2e tests
         run: bash ./scripts/run-e2e-tests.sh
@@ -87,7 +107,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: playwright-report

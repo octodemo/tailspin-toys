@@ -76,17 +76,19 @@ Then:
 - If a pre-existing failure is discovered (unrelated to the changes under review), flag it in the report but do not fix it — it is out of scope.
 - Re-run through the skill after any fixes to confirm a clean pass.
 
-### Phase 5 — Browser Validation & Accessibility Delegation *(targeted)*
+### Phase 5 — Browser Validation & Accessibility Delegation *(required)*
 
-> **Only perform this phase if the changes include UI-visible behaviour** (new pages, updated components, changed layouts, or modified API responses that surface in the UI).
+> **Always perform this phase for every PR Readiness run.** Manual validation through the Playwright MCP server is mandatory and must cover the feature or fix under review.
 
-Use the Playwright MCP server to manually validate the UI, and defer accessibility-specific review to the Accessibility agent when appropriate. This phase is **interactive, exploratory validation** — driving the browser directly via the Playwright MCP server is expected here, and is distinct from running the E2E suite (which always goes through the `quality-checks` skill):
+Use the Playwright MCP server to manually validate the implemented feature, and defer accessibility-specific review to the Accessibility agent when appropriate. This phase is **interactive, exploratory validation** — driving the browser directly via the Playwright MCP server is required here, and is distinct from running the E2E suite (which always goes through the `quality-checks` skill):
 
-1. Navigate to the relevant page(s).
-2. Confirm that the UI matches each acceptance criterion that has a visual component.
-3. If the change introduces or modifies interactive UI, forms, focus management, dialog behavior, navigation, or other accessibility-sensitive flows, invoke the `Accessibility agent` to perform the accessibility review.
-4. Incorporate the Accessibility agent's findings into your QA assessment instead of producing specialist accessibility guidance yourself.
-5. Capture screenshots or aria snapshots as evidence.
+1. Start the app with `./scripts/start-app.sh` and wait for both servers to be ready.
+2. Navigate to the relevant page(s) or flow entry point(s).
+3. Execute the feature flow end-to-end in the browser and confirm behavior against the acceptance criteria.
+4. If any acceptance criterion is non-visual, still validate the resulting user-observable outcome in the browser (for example: updated data shown in UI, success/error states, navigation state, or content changes).
+5. If the change introduces or modifies interactive UI, forms, focus management, dialog behavior, navigation, or other accessibility-sensitive flows, invoke the `Accessibility agent` to perform the accessibility review.
+6. Incorporate the Accessibility agent's findings into your QA assessment instead of producing specialist accessibility guidance yourself.
+7. Capture screenshots or aria snapshots as evidence.
 
 > The only execution command in this phase is **starting the app** — run `./scripts/start-app.sh` directly (launching servers is a prerequisite, not a quality check), then wait for both servers to be ready before navigating. The browser-driving itself stays direct via Playwright MCP.
 
@@ -124,7 +126,7 @@ Produce a structured report using the format below. **End with an explicit go/no
 
 ### Browser Validation
 
-*(Included only for UI-affecting changes)*
+*(Required for every PR Readiness run via Playwright MCP)*
 
 - Page/feature tested:
 - Result: ✅ Matches spec / ❌ Mismatch
@@ -158,4 +160,5 @@ Produce a structured report using the format below. **End with an explicit go/no
 - **Don't mark a criterion ✅ if you're unsure** — flag it as ⚠️ Partial and explain
 - **Don't fix unrelated pre-existing issues** — flag them but stay in scope
 - **Don't skip browser validation for UI changes** — visual regressions are real bugs
+- **Don't skip Playwright MCP manual validation for any feature** — every PR Readiness run requires it
 - **Don't perform deep accessibility review yourself for UI changes** — defer that specialist work to the Accessibility agent and use its findings in your report

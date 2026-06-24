@@ -1,5 +1,6 @@
 from flask import jsonify, Response, Blueprint, request
 from sqlalchemy import Select, func, select
+from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm import contains_eager
 from models import db, Game, Publisher, Category
 
@@ -12,6 +13,11 @@ games_bp = Blueprint('games', __name__)
 # - DELETE /api/games/<id> - Delete a game
 
 DEFAULT_PAGE_SIZE = 9
+
+SORT_OPTIONS: dict[str, ColumnElement] = {
+    "title": Game.title.asc(),
+    "mostFunded": Game.star_rating.desc().nullslast(),
+}
 
 def get_games_base_stmt() -> Select:
     return (
@@ -28,12 +34,14 @@ def get_games_base_stmt() -> Select:
 def get_games() -> Response:
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('pageSize', default=DEFAULT_PAGE_SIZE, type=int)
+    sort = request.args.get('sort', default='title', type=str)
+    order_by = SORT_OPTIONS.get(sort or 'title', SORT_OPTIONS['title'])
 
     # Clamp pagination values
     page = max(1, page)
     page_size = max(1, min(page_size, 100))
 
-    base_stmt = get_games_base_stmt().order_by(Game.title.asc())
+    base_stmt = get_games_base_stmt().order_by(order_by)
 
     # Get total count before pagination (clear ordering for performance)
     count_stmt = select(func.count()).select_from(base_stmt.order_by(None).subquery())

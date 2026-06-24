@@ -14,14 +14,16 @@
     let currentPage = $state(1);
     let totalPages = $state(1);
     let totalGames = $state(0);
+    let selectedSort = $state<'title' | 'mostFunded'>('title');
 
-    const fetchGames = async (page: number = 1) => {
+    const fetchGames = async (page: number = 1, sort: 'title' | 'mostFunded' = selectedSort) => {
         loading = true;
         error = null;
         try {
             // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local variable, not reactive state
             const queryParams = new URLSearchParams();
             queryParams.set('page', String(page));
+            queryParams.set('sort', sort);
 
             const endpoint = `${API_ENDPOINTS.games}?${queryParams.toString()}`;
 
@@ -43,7 +45,18 @@
     };
 
     const goToPage = async (page: number) => {
-        await fetchGames(page);
+        await fetchGames(page, selectedSort);
+    };
+
+    const onSortChange = async (event: Event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLSelectElement)) {
+            return;
+        }
+
+        const selectedValue = target.value === 'mostFunded' ? 'mostFunded' : 'title';
+        selectedSort = selectedValue;
+        await fetchGames(1, selectedValue);
     };
 
     onMount(() => {
@@ -52,7 +65,23 @@
 </script>
 
 <div>
-    <h2 class="text-2xl font-medium mb-6 text-slate-100">Featured Games</h2>
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <h2 class="text-2xl font-medium text-slate-100">Featured Games</h2>
+        <div class="flex flex-col gap-2">
+            <label for="games-sort" class="text-sm text-slate-300">Sort by</label>
+            <select
+                id="games-sort"
+                class="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm font-normal text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedSort}
+                onchange={onSortChange}
+                data-testid="games-sort-select"
+                aria-label="Sort games list"
+            >
+                <option value="title">Title (A-Z)</option>
+                <option value="mostFunded">Most funded</option>
+            </select>
+        </div>
+    </div>
     
     {#if loading}
         <LoadingSkeleton count={6} />

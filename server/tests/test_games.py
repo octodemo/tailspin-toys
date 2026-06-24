@@ -173,6 +173,16 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(data['pagination']['page'], 2)
         self.assertEqual(data['games'][0]['title'], 'Pipeline Panic')
 
+    def test_get_games_sorted_by_most_funded(self) -> None:
+        """Test sorting by most funded returns highest-rated games first."""
+        response = self.client.get(f'{self.GAMES_API_PATH}?sort=mostFunded')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data['games']), 2)
+        self.assertEqual(data['games'][0]['title'], 'Pipeline Panic')
+        self.assertEqual(data['games'][1]['title'], 'Agile Adventures')
+
     def test_get_games_page_beyond_results(self) -> None:
         """Test requesting a page beyond available results returns empty games"""
         response = self.client.get(f'{self.GAMES_API_PATH}?page=99')

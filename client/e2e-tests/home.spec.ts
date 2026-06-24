@@ -24,4 +24,10 @@ test.describe('Home Page', () => {
     // Check that the welcome message is present using more specific locator
     await expect(page.getByText('Find your next game! And maybe even back one! Explore our collection!')).toBeVisible();
   });
+
+  test('should include most funded sort option in games list', async ({ page }) => {
+    const sortSelect = page.getByTestId('games-sort-select');
+    await expect(sortSelect).toHaveValue('title');
+    await expect(sortSelect.getByRole('option', { name: 'Most funded' })).toBeVisible();
+  });
 });

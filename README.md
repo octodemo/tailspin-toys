@@ -50,7 +50,7 @@ The **PR Readiness** agent (`.github/agents/pr-readiness.md`) is a pre-PR qualit
 - Verify all acceptance criteria have been implemented
 - Audit test coverage and fill any gaps
 - Run the full verification suite (unit tests, lint, E2E tests)
-- Validate UI changes in the browser via Playwright MCP
+- Manually validate the feature in the browser via Playwright MCP (required for every run)
 - Produce a go/no-go report
 
 ### quality-checks Skill

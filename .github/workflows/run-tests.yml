@@ -30,8 +30,10 @@ jobs:
           python-version: "3.13"
           cache: "pip"
 
+      # Backend tests only need the Python venv, so scope the install to the
+      # server to skip the unused Node modules and Playwright browser download.
       - name: Install Python dependencies
-        run: bash ./scripts/setup-env.sh
+        run: bash ./scripts/setup-env.sh --scope server
         
 
       - name: Run Flask unit tests

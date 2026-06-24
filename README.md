@@ -10,7 +10,7 @@ Install dependencies (Python venv, npm packages, Playwright Chromium) once with 
 ./scripts/setup-env.sh
 ```
 
-Pass `--force` to reinstall everything, or `--with-system-deps` to also install Playwright's OS-level dependencies (Linux only; may require sudo).
+Pass `--force` to reinstall everything, or `--with-system-deps` to also install Playwright's OS-level dependencies (Linux only; may require sudo). Use `--scope <server|client|app|e2e|all>` to limit the install to a subset of dependencies (for example `--scope server` installs only the Python venv).
 
 ## Launch the site
 

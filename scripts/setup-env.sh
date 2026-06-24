@@ -4,6 +4,10 @@
 #
 # Modes:
 #   (default)              Install only what is missing or stale (idempotent).
+#   --scope <scope>        Limit install to a subset of dependencies.
+#                          Scope: server | client | app | e2e | all (default: all).
+#                          `server` installs only Python deps; `app` adds Node
+#                          modules; `e2e`/`all` also install the Playwright browser.
 #   --force                Reinstall everything regardless of markers.
 #   --check [scope]        Verify prerequisites without installing.
 #                          Scope: server | client | app | e2e | all (default: all).
@@ -36,9 +40,10 @@ MODE="install"
 FORCE=0
 WITH_SYSTEM_DEPS=0
 CHECK_SCOPE="all"
+INSTALL_SCOPE="all"
 
 usage() {
-  sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '3,19p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 while [[ $# -gt 0 ]]; do
@@ -53,6 +58,16 @@ while [[ $# -gt 0 ]]; do
       if [[ $# -gt 0 && "$1" != --* ]]; then
         CHECK_SCOPE="$1"
         shift
+      fi
+      ;;
+    --scope)
+      shift
+      if [[ $# -gt 0 && "$1" != --* ]]; then
+        INSTALL_SCOPE="$1"
+        shift
+      else
+        echo -e "${RED}--scope requires a value (server|client|app|e2e|all)${NC}" >&2
+        exit 2
       fi
       ;;
     --with-system-deps)
@@ -75,6 +90,14 @@ case "$CHECK_SCOPE" in
   server|client|app|e2e|all) ;;
   *)
     echo -e "${RED}Unknown --check scope: $CHECK_SCOPE (expected: server|client|app|e2e|all)${NC}" >&2
+    exit 2
+    ;;
+esac
+
+case "$INSTALL_SCOPE" in
+  server|client|app|e2e|all) ;;
+  *)
+    echo -e "${RED}Unknown --scope: $INSTALL_SCOPE (expected: server|client|app|e2e|all)${NC}" >&2
     exit 2
     ;;
 esac
@@ -275,7 +298,21 @@ if [[ "$MODE" == "check" ]]; then
 fi
 
 echo -e "${BLUE}Setting up Tailspin Toys development environment...${NC}"
-install_python
-install_node_modules
-install_playwright_browsers
+case "$INSTALL_SCOPE" in
+  server)
+    install_python
+    ;;
+  client)
+    install_node_modules
+    ;;
+  app)
+    install_python
+    install_node_modules
+    ;;
+  e2e|all)
+    install_python
+    install_node_modules
+    install_playwright_browsers
+    ;;
+esac
 echo -e "${GREEN}Environment ready.${NC}"

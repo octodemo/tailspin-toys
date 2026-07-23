@@ -1,8 +1,11 @@
 import unittest
 import json
+import os
 from typing import Dict, Any
+from unittest.mock import patch
 from flask import Flask, Response
 from models import Game, Publisher, Category, db
+from routes.auth import auth_bp
 from routes.games import games_bp
 
 class TestGamesRoutes(unittest.TestCase):
@@ -260,6 +263,369 @@ class TestGamesRoutes(unittest.TestCase):
         """Test retrieval of a game with invalid ID type"""
         response = self.client.get(f'{self.GAMES_API_PATH}/invalid-id')
         self.assertEqual(response.status_code, 404)
+
+
+class TestAdminGamesRoutes(unittest.TestCase):
+    """Tests for the authenticated game create/update/archive/restore endpoints."""
+
+    TEST_DATA: Dict[str, Any] = {
+        "publisher": {"name": "DevGames Inc", "description": "A publisher used for testing"},
+        "category": {"name": "Strategy", "description": "Strategic games used for testing"},
+        "game": {
+            "title": "Pipeline Panic",
+            "description": "Build your DevOps pipeline before chaos ensues",
+            "star_rating": 4.5,
+        },
+        "new_game": {
+            "title": "Rollback Rescue",
+            "description": "Undo the bad deploy before the demo starts",
+            "starRating": 4.0,
+        },
+    }
+
+    GAMES_API_PATH: str = '/api/games'
+    LOGIN_API_PATH: str = '/api/login'
+    ADMIN_PASSWORD: str = 'test-admin-password'
+
+    def setUp(self) -> None:
+        """Set up a test app with the games and auth blueprints registered."""
+        self.app = Flask(__name__)
+        self.app.config['TESTING'] = True
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        self.app.config['SECRET_KEY'] = 'test-secret-key'
+
+        self.app.register_blueprint(games_bp)
+        self.app.register_blueprint(auth_bp)
+
+        self.client = self.app.test_client()
+
+        db.init_app(self.app)
+
+        # Route auth against a known password rather than the developer default.
+        self._password_patcher = patch.dict(
+            os.environ, {'ADMIN_PASSWORD': self.ADMIN_PASSWORD}
+        )
+        self._password_patcher.start()
+
+        with self.app.app_context():
+            db.create_all()
+            self._seed_test_data()
+
+    def tearDown(self) -> None:
+        """Clean up test database and ensure proper connection closure"""
+        self._password_patcher.stop()
+        with self.app.app_context():
+            db.session.remove()
+            db.drop_all()
+            db.engine.dispose()
+
+    def _seed_test_data(self) -> None:
+        """Create one publisher, one category, and one game to act on."""
+        publisher = Publisher(**self.TEST_DATA["publisher"])
+        category = Category(**self.TEST_DATA["category"])
+        db.session.add_all([publisher, category])
+        db.session.commit()
+
+        game = Game(
+            **self.TEST_DATA["game"],
+            publisher=publisher,
+            category=category,
+        )
+        db.session.add(game)
+        db.session.commit()
+
+        self.publisher_id = publisher.id
+        self.category_id = category.id
+        self.game_id = game.id
+
+    def _get_response_data(self, response: Response) -> Any:
+        """Helper method to parse response data"""
+        return json.loads(response.data)
+
+    def _login(self) -> None:
+        """Authenticate the test client as an admin."""
+        response = self.client.post(
+            self.LOGIN_API_PATH, json={"password": self.ADMIN_PASSWORD}
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def _valid_payload(self, **overrides: Any) -> Dict[str, Any]:
+        """Build a valid create payload, applying any overrides."""
+        payload: Dict[str, Any] = {
+            **self.TEST_DATA["new_game"],
+            "publisherId": self.publisher_id,
+            "categoryId": self.category_id,
+        }
+        payload.update(overrides)
+        return payload
+
+    def test_create_game_requires_authentication(self) -> None:
+        """Creating a game without a session should be rejected with 401."""
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload())
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data['error'], "Authentication required")
+
+    def test_update_game_requires_authentication(self) -> None:
+        """Updating a game without a session should be rejected with 401."""
+        response = self.client.put(
+            f'{self.GAMES_API_PATH}/{self.game_id}', json={"title": "Renamed"}
+        )
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_archive_game_requires_authentication(self) -> None:
+        """Archiving a game without a session should be rejected with 401."""
+        response = self.client.delete(f'{self.GAMES_API_PATH}/{self.game_id}')
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_restore_game_requires_authentication(self) -> None:
+        """Restoring a game without a session should be rejected with 401."""
+        response = self.client.post(f'{self.GAMES_API_PATH}/{self.game_id}/restore')
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_include_archived_requires_authentication(self) -> None:
+        """Requesting archived games anonymously should be rejected with 401."""
+        response = self.client.get(f'{self.GAMES_API_PATH}?includeArchived=true')
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_create_game_success(self) -> None:
+        """A valid payload should create a game and return it with 201."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload())
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data['title'], self.TEST_DATA["new_game"]["title"])
+        self.assertEqual(data['publisher']['id'], self.publisher_id)
+        self.assertEqual(data['category']['id'], self.category_id)
+        self.assertEqual(data['starRating'], self.TEST_DATA["new_game"]["starRating"])
+        self.assertFalse(data['isArchived'])
+
+    def test_created_game_appears_in_public_list(self) -> None:
+        """A newly created game should be visible to anonymous visitors."""
+        self._login()
+        self.client.post(self.GAMES_API_PATH, json=self._valid_payload())
+
+        response = self.client.get(self.GAMES_API_PATH)
+        titles = [game['title'] for game in self._get_response_data(response)['games']]
+
+        self.assertIn(self.TEST_DATA["new_game"]["title"], titles)
+
+    def test_create_game_missing_required_fields(self) -> None:
+        """Omitting required fields should return 400 and name them."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json={"title": "Only a title"})
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('description', data['error'])
+        self.assertIn('publisherId', data['error'])
+        self.assertIn('categoryId', data['error'])
+
+    def test_create_game_short_title_rejected(self) -> None:
+        """A title below the model minimum length should return 400."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload(title="X"))
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('at least 2 characters', data['error'])
+
+    def test_create_game_short_description_rejected(self) -> None:
+        """A description below the model minimum length should return 400."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload(description="short"))
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('at least 10 characters', data['error'])
+
+    def test_create_game_out_of_range_rating_rejected(self) -> None:
+        """A star rating above 5 should return 400."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload(starRating=9))
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('between 0 and 5', data['error'])
+
+    def test_create_game_unknown_publisher_rejected(self) -> None:
+        """An unknown publisher id should return 400."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload(publisherId=9999))
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['error'], "Publisher not found")
+
+    def test_create_game_unknown_category_rejected(self) -> None:
+        """An unknown category id should return 400."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload(categoryId=9999))
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data['error'], "Category not found")
+
+    def test_create_game_non_integer_publisher_rejected(self) -> None:
+        """A non-integer publisher id should return 400."""
+        self._login()
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload(publisherId="abc"))
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('must be an integer', data['error'])
+
+    def test_update_game_success(self) -> None:
+        """A partial update should change only the supplied fields."""
+        self._login()
+
+        response = self.client.put(
+            f'{self.GAMES_API_PATH}/{self.game_id}', json={"title": "Pipeline Panic Deluxe"}
+        )
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['title'], "Pipeline Panic Deluxe")
+        # Untouched fields are preserved
+        self.assertEqual(data['description'], self.TEST_DATA["game"]["description"])
+
+    def test_update_game_clears_optional_rating(self) -> None:
+        """Sending a null star rating should clear the value."""
+        self._login()
+
+        response = self.client.put(
+            f'{self.GAMES_API_PATH}/{self.game_id}', json={"starRating": None}
+        )
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(data['starRating'])
+
+    def test_update_game_not_found(self) -> None:
+        """Updating a missing game should return 404."""
+        self._login()
+
+        response = self.client.put(f'{self.GAMES_API_PATH}/9999', json={"title": "Nope"})
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['error'], "Game not found")
+
+    def test_update_game_invalid_value_rejected(self) -> None:
+        """An invalid update value should return 400 and leave the game unchanged."""
+        self._login()
+
+        response = self.client.put(f'{self.GAMES_API_PATH}/{self.game_id}', json={"title": "X"})
+        self.assertEqual(response.status_code, 400)
+
+        unchanged = self.client.get(f'{self.GAMES_API_PATH}/{self.game_id}')
+        self.assertEqual(
+            self._get_response_data(unchanged)['title'], self.TEST_DATA["game"]["title"]
+        )
+
+    def test_archive_game_sets_flag(self) -> None:
+        """Archiving should mark the game rather than delete it."""
+        self._login()
+
+        response = self.client.delete(f'{self.GAMES_API_PATH}/{self.game_id}')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['isArchived'])
+
+        with self.app.app_context():
+            self.assertIsNotNone(db.session.get(Game, self.game_id))
+
+    def test_archived_game_hidden_from_public_list(self) -> None:
+        """An archived game should not appear in the public catalog."""
+        self._login()
+        self.client.delete(f'{self.GAMES_API_PATH}/{self.game_id}')
+
+        anonymous = self.app.test_client()
+        response = anonymous.get(self.GAMES_API_PATH)
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['pagination']['total'], 0)
+        self.assertEqual(len(data['games']), 0)
+
+    def test_archived_game_detail_returns_404_publicly(self) -> None:
+        """An archived game's detail endpoint should 404 for anonymous visitors."""
+        self._login()
+        self.client.delete(f'{self.GAMES_API_PATH}/{self.game_id}')
+
+        anonymous = self.app.test_client()
+        response = anonymous.get(f'{self.GAMES_API_PATH}/{self.game_id}')
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_archived_game_visible_to_admin(self) -> None:
+        """Admins should still be able to list and fetch archived games."""
+        self._login()
+        self.client.delete(f'{self.GAMES_API_PATH}/{self.game_id}')
+
+        list_response = self.client.get(f'{self.GAMES_API_PATH}?includeArchived=true')
+        detail_response = self.client.get(f'{self.GAMES_API_PATH}/{self.game_id}')
+
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual(self._get_response_data(list_response)['pagination']['total'], 1)
+        self.assertEqual(detail_response.status_code, 200)
+
+    def test_archive_game_not_found(self) -> None:
+        """Archiving a missing game should return 404."""
+        self._login()
+
+        response = self.client.delete(f'{self.GAMES_API_PATH}/9999')
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_restore_game_returns_it_to_catalog(self) -> None:
+        """Restoring should clear the archived flag and republish the game."""
+        self._login()
+        self.client.delete(f'{self.GAMES_API_PATH}/{self.game_id}')
+
+        response = self.client.post(f'{self.GAMES_API_PATH}/{self.game_id}/restore')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(data['isArchived'])
+
+        anonymous = self.app.test_client()
+        public = anonymous.get(self.GAMES_API_PATH)
+        self.assertEqual(self._get_response_data(public)['pagination']['total'], 1)
+
+    def test_restore_game_not_found(self) -> None:
+        """Restoring a missing game should return 404."""
+        self._login()
+
+        response = self.client.post(f'{self.GAMES_API_PATH}/9999/restore')
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_write_endpoints_rejected_after_logout(self) -> None:
+        """Signing out should revoke access to the write endpoints."""
+        self._login()
+        self.client.post('/api/logout')
+
+        response = self.client.post(self.GAMES_API_PATH, json=self._valid_payload())
+
+        self.assertEqual(response.status_code, 401)
+
 
 if __name__ == '__main__':
     unittest.main()

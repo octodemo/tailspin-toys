@@ -1,0 +1,278 @@
+---
+import { fetchGames } from '../../utils/preview-data';
+import {
+  TYPE_FONTS_HREF,
+  TYPE_OPTIONS,
+  specimenTitles,
+  typeOptionCss,
+} from '../../utils/preview-type';
+
+const games = await fetchGames();
+const { short, long } = specimenTitles(games);
+const optionCss = typeOptionCss();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Display type options - Tabletop direction</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href={TYPE_FONTS_HREF} rel="stylesheet" />
+    <style set:html={optionCss}></style>
+  </head>
+  <body>
+    <header class="head">
+      <div class="shell">
+        <p class="kicker">Tabletop direction &middot; display face options</p>
+        <h1>Six ways to set a game title</h1>
+        <p class="lede">
+          Each block below sets the same two real titles in a different display face, at the sizes
+          the design actually uses. The short title shows how the face handles a headline; the long
+          one shows how it wraps. Anton is included first for comparison.
+        </p>
+        <p class="lede">
+          Every option except Anton and Alfa Slab One has a full weight range, so the heading weight
+          can be tuned later without changing the typeface.
+        </p>
+      </div>
+    </header>
+
+    <main class="shell">
+      {TYPE_OPTIONS.map((option) => (
+        <section class="spec" data-type={option.id} aria-labelledby={`spec-${option.id}`}>
+          <div class="spec-head">
+            <h2 id={`spec-${option.id}`}>{option.name}</h2>
+            <p class="weights">{option.weightsAvailable}</p>
+            <p class="note">{option.note}</p>
+            <a class="try" href={`/preview/tabletop?type=${option.id}`}>
+              See it in the layout &rarr;
+            </a>
+          </div>
+
+          <div class="spec-body">
+            <p class="size-label">Hero, large</p>
+            <p class="sample hero-size">{short}</p>
+
+            <p class="size-label">Hero, long title</p>
+            <p class="sample hero-size">{long}</p>
+
+            <div class="on-card">
+              <p class="size-label dark">On cardboard, box-lid size</p>
+              <p class="sample card-size">{short}</p>
+              <p class="sample list-size">{long}</p>
+            </div>
+          </div>
+        </section>
+      ))}
+    </main>
+
+    <footer class="foot">
+      <div class="shell">
+        <p><a href="/preview/tabletop">Back to the Tabletop design</a> &middot; <a href="/preview">All directions</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --felt: #1d3b32;
+    --felt-deep: #16302a;
+    --card: #ece0c8;
+    --card-edge: #d6c5a4;
+    --ink: #191410;
+    --ink-soft: #544a3e;
+    --brass: #b98c2f;
+
+    /* Overridden per section by the data-type rules. */
+    --display: 'Anton', sans-serif;
+    --display-weight: 400;
+    --display-scale: 1;
+    --display-tracking: 0.005em;
+    --display-variation: normal;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--felt);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.035) 1px, transparent 0),
+      radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.16) 1px, transparent 0);
+    background-size: 6px 6px, 6px 6px;
+    background-position: 0 0, 3px 3px;
+    color: var(--card);
+    font-family: 'Karla', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--brass);
+    outline-offset: 3px;
+  }
+
+  .head {
+    padding: 64px 0 44px;
+    background: var(--felt-deep);
+    border-bottom: 1px solid rgba(236, 224, 200, 0.16);
+  }
+
+  .kicker {
+    margin: 0 0 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #d9a83f;
+  }
+
+  .head h1 {
+    margin: 0 0 18px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800;
+    font-size: clamp(38px, 5.4vw, 62px);
+    line-height: 0.98;
+    letter-spacing: 0.012em;
+    text-transform: uppercase;
+  }
+
+  .lede {
+    margin: 0 0 12px;
+    max-width: 62ch;
+    color: rgba(236, 224, 200, 0.85);
+  }
+
+  /* ---------- specimen blocks ---------- */
+
+  .spec {
+    display: grid;
+    grid-template-columns: 288px minmax(0, 1fr);
+    gap: 48px;
+    padding: 52px 0;
+    border-bottom: 1px solid rgba(236, 224, 200, 0.16);
+  }
+
+  .spec:last-of-type {
+    border-bottom: 0;
+  }
+
+  .spec-head h2 {
+    margin: 0 0 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .weights {
+    margin: 0 0 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #d9a83f;
+  }
+
+  .note {
+    margin: 0 0 18px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(236, 224, 200, 0.82);
+  }
+
+  .try {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid var(--brass);
+    padding-bottom: 3px;
+  }
+
+  .size-label {
+    margin: 0 0 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(236, 224, 200, 0.6);
+  }
+
+  .size-label.dark {
+    color: rgba(25, 20, 16, 0.55);
+  }
+
+  /* Every sample inherits the face from its section's data-type rule. */
+  .sample {
+    margin: 0 0 26px;
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    font-variation-settings: var(--display-variation);
+    text-transform: uppercase;
+    line-height: 0.94;
+  }
+
+  .hero-size {
+    font-size: calc(clamp(40px, 5.6vw, 72px) * var(--display-scale));
+  }
+
+  .card-size {
+    font-size: calc(40px * var(--display-scale));
+    color: var(--ink);
+  }
+
+  .list-size {
+    margin-bottom: 0;
+    font-size: calc(25px * var(--display-scale));
+    color: var(--ink);
+  }
+
+  .on-card {
+    margin-top: 6px;
+    padding: 26px 26px 28px;
+    background: linear-gradient(155deg, #f3e9d4, var(--card-edge));
+    border-radius: 4px;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, 0.3);
+  }
+
+  .foot {
+    padding: 34px 0 56px;
+    border-top: 1px solid rgba(236, 224, 200, 0.16);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: rgba(236, 224, 200, 0.75);
+  }
+
+  .foot p {
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .spec {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 26px;
+    }
+  }
+</style>

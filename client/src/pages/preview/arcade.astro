@@ -1,0 +1,594 @@
+---
+import { fetchGames, fundingFor, formatCurrency } from '../../utils/preview-data';
+
+const games = await fetchGames();
+
+// The leaderboard is ranked by rating, so position carries real information.
+const ranked = [...games].sort((a, b) => (b.starRating ?? 0) - (a.starRating ?? 0));
+const [spotlight, ...board] = ranked;
+const spotlightFunding = spotlight ? fundingFor(spotlight) : null;
+const top = board.slice(0, 8);
+const remaining = board.slice(8);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Arcade concept - Tailspin Toys</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <a class="skip" href="#leaderboard">Skip to leaderboard</a>
+
+    <header class="top">
+      <div class="shell top-inner">
+        <a class="logo" href="/preview">Tailspin&nbsp;Toys</a>
+        <nav class="top-nav" aria-label="Main navigation">
+          <a href="#leaderboard">Leaderboard</a>
+          <a href="#leaderboard">Studios</a>
+          <a href="/preview">Back to previews</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      {spotlight && spotlightFunding && (
+        <section class="marquee" aria-labelledby="marquee-title">
+          <div class="shell">
+            <p class="marquee-kicker">
+              <span class="live" aria-hidden="true"></span>
+              Now funding &middot; <span class="rank-badge">01</span> highest rated on the platform
+            </p>
+
+            <h1 id="marquee-title">{spotlight.title}</h1>
+
+            <p class="marquee-meta">
+              {spotlight.publisher?.name} <span aria-hidden="true">/</span> {spotlight.category?.name}
+              {spotlight.starRating !== null && (
+                <>
+                  <span aria-hidden="true">/</span> {spotlight.starRating.toFixed(1)} rating
+                </>
+              )}
+            </p>
+
+            <p class="marquee-blurb">{spotlight.description}</p>
+
+            <div class="marquee-bottom">
+              <a class="play" href={`/game/${spotlight.id}`}>
+                Back it now
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+
+              <dl class="score">
+                <div>
+                  <dt>Pledged</dt>
+                  <dd>{formatCurrency(spotlightFunding.pledged)}</dd>
+                </div>
+                <div>
+                  <dt>Funded</dt>
+                  <dd class="hi">{spotlightFunding.percent}%</dd>
+                </div>
+                <div>
+                  <dt>Backers</dt>
+                  <dd>{spotlightFunding.backers.toLocaleString('en-US')}</dd>
+                </div>
+                <div>
+                  <dt>Ends in</dt>
+                  <dd>{spotlightFunding.daysLeft}d</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section class="chart" id="leaderboard" aria-labelledby="chart-title">
+        <div class="shell">
+          <div class="chart-head">
+            <h2 id="chart-title">High scores</h2>
+            <p>Ranked by backer rating. Every title is taking pledges right now.</p>
+          </div>
+
+          <ol class="rows">
+            {top.map((game, index) => {
+              const funding = fundingFor(game);
+              return (
+                <li>
+                  <a class="row" href={`/game/${game.id}`}>
+                    <span class="rank" aria-hidden="true">{String(index + 2).padStart(2, '0')}</span>
+                    <span class="row-title">
+                      {game.title}
+                      <span class="row-studio">{game.publisher?.name}</span>
+                    </span>
+                    <span class="row-cat">{game.category?.name}</span>
+                    <span class="row-rating">
+                      {game.starRating !== null ? game.starRating.toFixed(1) : '--'}
+                    </span>
+                    <span class="row-fund">
+                      <span class="row-bar" aria-hidden="true">
+                        <span
+                          class:list={['row-bar-fill', { over: funding.percent >= 100 }]}
+                          style={`width: ${Math.min(funding.percent, 100)}%`}
+                        ></span>
+                      </span>
+                      <span class="row-pct">{funding.percent}%</span>
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ol>
+
+          {remaining.length > 0 && (
+            <div class="more">
+              <h3>Also taking pledges</h3>
+              <ul class="chips">
+                {remaining.map((game) => (
+                  <li>
+                    <a href={`/game/${game.id}`}>
+                      {game.title}
+                      <span>{fundingFor(game).percent}%</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+
+    <footer class="bottom">
+      <div class="shell">
+        <p>Design concept &middot; funding figures are illustrative</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --void: #180f2e;
+    --void-deep: #120b23;
+    --panel: #221645;
+    --magenta: #ff3d8b;
+    --magenta-deep: #c9005c;
+    --cyan: #3fe0ec;
+    --cream: #f4efff;
+    --dim: #a99cc9;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--void);
+    color: var(--cream);
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .skip {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .skip:focus {
+    left: 24px;
+    top: 14px;
+    z-index: 20;
+    background: var(--cyan);
+    color: var(--void);
+    padding: 10px 16px;
+    border-radius: 4px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+  }
+
+  /* ---------- top ---------- */
+
+  .top {
+    border-bottom: 1px solid rgba(244, 239, 255, 0.14);
+    background: var(--void-deep);
+  }
+
+  .top-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 16px 24px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .top-nav {
+    display: flex;
+    gap: 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .top-nav a {
+    text-decoration: none;
+    color: var(--dim);
+  }
+
+  .top-nav a:hover {
+    color: var(--cyan);
+  }
+
+  /* ---------- marquee ---------- */
+
+  .marquee {
+    position: relative;
+    padding: 84px 0 78px;
+    overflow: hidden;
+    /* Cabinet backlight: one warm bloom behind the title, not a full gradient wash. */
+    background:
+      radial-gradient(120% 90% at 12% 0%, rgba(255, 61, 139, 0.3) 0%, transparent 58%),
+      radial-gradient(90% 80% at 88% 20%, rgba(63, 224, 236, 0.16) 0%, transparent 60%),
+      var(--void);
+  }
+
+  .marquee-kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  .live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--magenta);
+    box-shadow: 0 0 0 4px rgba(255, 61, 139, 0.24);
+  }
+
+  /* Ties the spotlight to the leaderboard below, which starts at 02. */
+  .rank-badge {
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--magenta-deep);
+    color: #fff;
+  }
+
+  .marquee h1 {
+    margin: 0 0 18px;
+    max-width: 20ch;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(48px, 8.4vw, 104px);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+
+  .marquee-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 0 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--cream);
+  }
+
+  .marquee-meta span {
+    color: var(--magenta);
+  }
+
+  .marquee-blurb {
+    margin: 0 0 40px;
+    max-width: 56ch;
+    font-size: 17px;
+    color: #d6cdf0;
+  }
+
+  .marquee-bottom {
+    display: flex;
+    align-items: center;
+    gap: 44px;
+    flex-wrap: wrap;
+  }
+
+  .play {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px 32px;
+    background: var(--magenta-deep);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: none;
+    border-radius: 999px;
+    transition:
+      transform 0.16s ease,
+      background 0.16s ease;
+  }
+
+  .play:hover {
+    transform: translateY(-2px);
+    background: #e00068;
+  }
+
+  .score {
+    display: flex;
+    gap: 34px;
+    margin: 0;
+    flex-wrap: wrap;
+  }
+
+  .score dt {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .score dd {
+    margin: 3px 0 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 23px;
+    letter-spacing: -0.01em;
+  }
+
+  .score dd.hi {
+    color: var(--cyan);
+  }
+
+  /* ---------- chart ---------- */
+
+  .chart {
+    padding: 68px 0 90px;
+  }
+
+  .chart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 26px;
+    flex-wrap: wrap;
+  }
+
+  .chart-head h2 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 30px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .chart-head p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--dim);
+  }
+
+  .rows {
+    list-style: none;
+    margin: 0 0 60px;
+    padding: 0;
+    counter-reset: none;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr) 120px 58px 172px;
+    align-items: center;
+    gap: 20px;
+    padding: 17px 20px;
+    border-bottom: 1px solid rgba(244, 239, 255, 0.12);
+    text-decoration: none;
+    transition: background 0.14s ease;
+  }
+
+  .rows li:first-child .row {
+    border-top: 1px solid rgba(244, 239, 255, 0.12);
+  }
+
+  .row:hover {
+    background: var(--panel);
+  }
+
+  .rank {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--dim);
+  }
+
+  .row:hover .rank {
+    color: var(--cyan);
+  }
+
+  .row-title {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+
+  .row-studio {
+    margin-top: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .row-cat {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #d6cdf0;
+  }
+
+  .row-rating {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 16px;
+    color: var(--cyan);
+  }
+
+  .row-fund {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .row-bar {
+    flex: 1;
+    height: 7px;
+    border-radius: 4px;
+    background: rgba(244, 239, 255, 0.14);
+    overflow: hidden;
+  }
+
+  .row-bar-fill {
+    display: block;
+    height: 100%;
+    background: var(--magenta);
+  }
+
+  .row-bar-fill.over {
+    background: var(--cyan);
+  }
+
+  .row-pct {
+    min-width: 44px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    text-align: right;
+    color: #d6cdf0;
+  }
+
+  /* ---------- more ---------- */
+
+  .more h3 {
+    margin: 0 0 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    border: 1px solid rgba(244, 239, 255, 0.2);
+    border-radius: 999px;
+    font-size: 14px;
+    text-decoration: none;
+    transition:
+      border-color 0.14s ease,
+      color 0.14s ease;
+  }
+
+  .chips a:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  .chips span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  .chips a:hover span {
+    color: var(--cyan);
+  }
+
+  /* ---------- bottom ---------- */
+
+  .bottom {
+    padding: 24px 0 40px;
+    border-top: 1px solid rgba(244, 239, 255, 0.14);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--dim);
+  }
+
+  .bottom p {
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .row {
+      grid-template-columns: 40px minmax(0, 1fr) 66px;
+      gap: 14px;
+    }
+
+    .row-cat,
+    .row-fund {
+      display: none;
+    }
+
+    .score {
+      gap: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>

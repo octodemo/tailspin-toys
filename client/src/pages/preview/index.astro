@@ -1,0 +1,221 @@
+---
+const options = [
+  {
+    href: '/preview/tabletop',
+    name: 'Tabletop',
+    line: 'The games as physical objects',
+    detail:
+      'Green felt table, cardboard box lids, brass funding pips. Leans on the fact that these are board games you eventually hold, not apps you download.',
+    palette: ['#1d3b32', '#ece0c8', '#b98c2f', '#983a26'],
+    type: 'Anton / Karla / Space Mono',
+  },
+  {
+    href: '/preview/pipeline',
+    name: 'Pipeline',
+    line: 'Campaigns grouped by build stage',
+    detail:
+      'Light, precise, technical. Games are sorted onto a rail by funding stage: concept, prototype, production. Speaks the developer audience\u2019s own vocabulary.',
+    palette: ['#f6f5f1', '#17171c', '#2f2fa8', '#8a5a06'],
+    type: 'IBM Plex Sans Condensed / Sans / Mono',
+  },
+  {
+    href: '/preview/arcade',
+    name: 'Arcade',
+    line: 'A high-score leaderboard',
+    detail:
+      'Loud and competitive. One spotlit campaign, then every title ranked by backer rating in a scoreboard. Highest energy of the three.',
+    palette: ['#180f2e', '#ff3d8b', '#3fe0ec', '#f4efff'],
+    type: 'Archivo Black / Archivo / DM Mono',
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Design directions - Tailspin Toys</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="shell">
+      <p class="kicker">Design exploration</p>
+      <h1>Three directions for Tailspin Toys</h1>
+      <p class="lede">
+        Each is a full working page rendering the real catalog. Funding figures are placeholders,
+        since the database has no funding columns yet. Pick one and I will build it out properly,
+        or mix parts of several.
+      </p>
+
+      <ul class="options">
+        {options.map((option) => (
+          <li>
+            <a href={option.href}>
+              <div class="swatches" aria-hidden="true">
+                {option.palette.map((color) => (
+                  <span style={`background: ${color}`}></span>
+                ))}
+              </div>
+              <h2>{option.name}</h2>
+              <p class="line">{option.line}</p>
+              <p class="detail">{option.detail}</p>
+              <p class="type">{option.type}</p>
+              <span class="go">View direction &rarr;</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <p class="back"><a href="/">Back to the current site</a></p>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: #0e1117;
+    color: #e8ecf4;
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+    line-height: 1.6;
+  }
+
+  .shell {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 72px 24px 90px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid #6ea8ff;
+    outline-offset: 3px;
+  }
+
+  .kicker {
+    margin: 0 0 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7f8da5;
+  }
+
+  h1 {
+    margin: 0 0 18px;
+    font-size: clamp(34px, 5vw, 50px);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+  }
+
+  .lede {
+    margin: 0 0 52px;
+    max-width: 60ch;
+    font-size: 17px;
+    color: #aab6c9;
+  }
+
+  .options {
+    list-style: none;
+    margin: 0 0 48px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 20px;
+  }
+
+  .options a {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 26px 24px 24px;
+    background: #151b26;
+    border: 1px solid #26303f;
+    border-radius: 12px;
+    text-decoration: none;
+    transition:
+      border-color 0.16s ease,
+      transform 0.16s ease;
+  }
+
+  .options a:hover {
+    border-color: #6ea8ff;
+    transform: translateY(-3px);
+  }
+
+  .swatches {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .swatches span {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  }
+
+  .options h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .line {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: #6ea8ff;
+  }
+
+  .detail {
+    margin: 0 0 18px;
+    font-size: 14px;
+    color: #aab6c9;
+  }
+
+  .type {
+    margin: 0 0 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #7f8da5;
+  }
+
+  .go {
+    margin-top: auto;
+    font-size: 14px;
+    font-weight: 500;
+    color: #e8ecf4;
+  }
+
+  .back {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .back a {
+    color: #aab6c9;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+    }
+  }
+</style>

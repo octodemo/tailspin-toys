@@ -2,6 +2,7 @@ import csv
 import os
 import random
 from flask import Flask
+from sqlalchemy import select
 from models import db, Category, Game, Publisher
 from utils.database import get_connection_string
 
@@ -44,7 +45,9 @@ def create_games():
                 # Process category — query DB first for idempotency
                 category_name = row['Category']
                 if category_name not in categories:
-                    category = Category.query.filter_by(name=category_name).first()
+                    category = db.session.scalars(
+                        select(Category).filter_by(name=category_name)
+                    ).first()
                     if not category:
                         category_description = f"Collection of {category_name} games available for crowdfunding"
                         category = Category(
@@ -59,7 +62,9 @@ def create_games():
                 # Process publisher — query DB first for idempotency
                 publisher_name = row['Publisher']
                 if publisher_name not in publishers:
-                    publisher = Publisher.query.filter_by(name=publisher_name).first()
+                    publisher = db.session.scalars(
+                        select(Publisher).filter_by(name=publisher_name)
+                    ).first()
                     if not publisher:
                         publisher_description = f"{publisher_name} is a game publisher seeking funding for exciting new titles"
                         publisher = Publisher(
@@ -72,7 +77,9 @@ def create_games():
                     publishers[publisher_name] = publisher
                 
                 # Check if game already exists by title before creating
-                existing_game = Game.query.filter_by(title=row['Title']).first()
+                existing_game = db.session.scalars(
+                    select(Game).filter_by(title=row['Title'])
+                ).first()
                 if existing_game:
                     games_skipped += 1
                     continue

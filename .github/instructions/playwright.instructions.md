@@ -9,7 +9,7 @@ applyTo: '**/*.spec.ts'
 
 - **Locators**: Prioritize user-facing, role-based locators (`getByRole`, `getByLabel`, `getByText`, etc.) for resilience and accessibility. Use `test.step()` to group interactions and improve test readability and reporting.
 - **Timeouts**: Rely solely on Playwright's built-in auto-waiting mechanisms. NEVER use hard-coded waits such as `waitForTimeout`, increased default timeouts, or `waitForLoadState`.
-- **Assertions**: Use auto-retrying web-first assertions. These assertions start with the `await` keyword (e.g., `await expect(locator).toHaveText()`). NEVER use `expect(locator).toBeVisible()` unless specifically testing for visibility changes.
+- **Assertions**: Use auto-retrying web-first assertions. These assertions start with the `await` keyword (e.g., `await expect(locator).toHaveText()`). Prefer assertions that verify meaningful state — `toHaveText`, `toContainText`, `toHaveCount`, `toMatchAriaSnapshot`, `toHaveURL` — over a bare `toBeVisible()` when you actually care about content or structure. `toBeVisible()` is a valid auto-retrying assertion and is appropriate for genuine presence/visibility checks; just don't reach for it when a more specific assertion better expresses the intent.
 - **Clarity**: Use descriptive test and step titles that clearly state the intent. Add comments only to explain complex logic or non-obvious interactions.
 
 ## Test Structure
@@ -71,13 +71,16 @@ test.describe('Movie Search Feature', () => {
 });
 ```
 
-## Test Execution Strategy
+## Authoring & Iteration Strategy
 
-1. **Initial Run**: Execute tests with `npx playwright test --project=chromium`
-2. **Debug Failures**: Analyze test failures and identify root causes
-3. **Iterate**: Refine locators, assertions, or test logic as needed
-4. **Validate**: Ensure tests pass consistently and cover the intended functionality
-5. **Report**: Provide feedback on test results and any issues discovered
+> [!NOTE]
+> This file covers how specs should be written. To *run* the E2E suite, use the `quality-checks` skill — never invoke `npx playwright test` or `run-e2e-tests.sh` directly.
+
+1. **Run**: Execute the suite through the `quality-checks` skill.
+2. **Debug Failures**: Analyze test failures and identify root causes.
+3. **Iterate**: Refine locators, assertions, or test logic as needed, re-running through the skill.
+4. **Validate**: Ensure tests pass consistently and cover the intended functionality.
+5. **Report**: Provide feedback on test results and any issues discovered.
 
 ## Quality Checklist
 

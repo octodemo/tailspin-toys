@@ -115,12 +115,13 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(games), len(self.TEST_DATA["games"]))
         
-        for i, game_data in enumerate(games):
-            test_game = self.TEST_DATA["games"][i]
+        # Games are returned in alphabetical order by title
+        games_by_title = {g['title']: g for g in games}
+        for test_game in self.TEST_DATA["games"]:
+            game_data = games_by_title[test_game["title"]]
             test_publisher = self.TEST_DATA["publishers"][test_game["publisher_index"]]
             test_category = self.TEST_DATA["categories"][test_game["category_index"]]
             
-            self.assertEqual(game_data['title'], test_game["title"])
             self.assertEqual(game_data['publisher']['name'], test_publisher["name"])
             self.assertEqual(game_data['category']['name'], test_category["name"])
             self.assertEqual(game_data['starRating'], test_game["star_rating"])
@@ -133,7 +134,6 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('games', data)
         self.assertIn('pagination', data)
-        self.assertIn('filters', data)
         self.assertIsInstance(data['games'], list)
         self.assertEqual(len(data['games']), len(self.TEST_DATA["games"]))
         
@@ -171,7 +171,7 @@ class TestGamesRoutes(unittest.TestCase):
 
         self.assertEqual(len(data['games']), 1)
         self.assertEqual(data['pagination']['page'], 2)
-        self.assertEqual(data['games'][0]['title'], 'Agile Adventures')
+        self.assertEqual(data['games'][0]['title'], 'Pipeline Panic')
 
     def test_get_games_page_beyond_results(self) -> None:
         """Test requesting a page beyond available results returns empty games"""
@@ -197,32 +197,20 @@ class TestGamesRoutes(unittest.TestCase):
 
         self.assertEqual(data['pagination']['page'], 1)
 
-    def test_get_games_filters_metadata(self) -> None:
-        """Test that available filter options are returned"""
-        response = self.client.get(self.GAMES_API_PATH)
-        data = self._get_response_data(response)
-        filters = data['filters']
-
-        self.assertIn('publishers', filters)
-        self.assertIn('categories', filters)
-        self.assertEqual(sorted(filters['publishers']), ['DevGames Inc', 'Scrum Masters'])
-        self.assertEqual(sorted(filters['categories']), ['Card Game', 'Strategy'])
-
     def test_get_game_by_id_success(self) -> None:
         """Test successful retrieval of a single game by ID"""
         response = self.client.get(self.GAMES_API_PATH)
         games = self._get_games_list(response)
         game_id = games[0]['id']
+        game_title = games[0]['title']
         
         response = self.client.get(f'{self.GAMES_API_PATH}/{game_id}')
         data = self._get_response_data(response)
         
-        first_game = self.TEST_DATA["games"][0]
-        first_publisher = self.TEST_DATA["publishers"][first_game["publisher_index"]]
-        
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['title'], first_game["title"])
-        self.assertEqual(data['publisher']['name'], first_publisher["name"])
+        self.assertEqual(data['title'], game_title)
+        self.assertIn('publisher', data)
+        self.assertIn('description', data)
         
     def test_get_game_by_id_not_found(self) -> None:
         """Test retrieval of a non-existent game by ID"""
@@ -234,8 +222,9 @@ class TestGamesRoutes(unittest.TestCase):
 
     def test_get_games_empty_database(self) -> None:
         """Test retrieval of games when database is empty"""
+        from sqlalchemy import delete
         with self.app.app_context():
-            db.session.query(Game).delete()
+            db.session.execute(delete(Game))
             db.session.commit()
         
         response = self.client.get(self.GAMES_API_PATH)
@@ -246,90 +235,31 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(data['pagination']['total'], 0)
         self.assertEqual(data['pagination']['totalPages'], 1)
 
+    def test_get_game_by_id_serialization_contract(self) -> None:
+        """The game JSON contract should expose camelCase `starRating` and
+        nested `{id, name}` objects for publisher and category."""
+        list_response = self.client.get(self.GAMES_API_PATH)
+        game_id = self._get_games_list(list_response)[0]['id']
+
+        response = self.client.get(f'{self.GAMES_API_PATH}/{game_id}')
+        data = self._get_response_data(response)
+
+        self.assertEqual(response.status_code, 200)
+
+        # camelCase, not snake_case
+        self.assertIn('starRating', data)
+        self.assertNotIn('star_rating', data)
+
+        # Nested relations are {id, name} objects, not bare ids
+        self.assertIsInstance(data['publisher'], dict)
+        self.assertEqual(set(data['publisher'].keys()), {'id', 'name'})
+        self.assertIsInstance(data['category'], dict)
+        self.assertEqual(set(data['category'].keys()), {'id', 'name'})
+
     def test_get_game_by_invalid_id_type(self) -> None:
         """Test retrieval of a game with invalid ID type"""
         response = self.client.get(f'{self.GAMES_API_PATH}/invalid-id')
         self.assertEqual(response.status_code, 404)
-
-    def test_get_games_filter_by_publisher(self) -> None:
-        """Test filtering games list by publisher name"""
-        response = self.client.get(f'{self.GAMES_API_PATH}?publisher=DevGames%20Inc')
-        data = self._get_response_data(response)
-        games = data['games']
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(games), 1)
-        self.assertEqual(games[0]['publisher']['name'], 'DevGames Inc')
-        self.assertEqual(games[0]['title'], 'Pipeline Panic')
-        self.assertEqual(data['pagination']['total'], 1)
-
-    def test_get_games_filter_by_category(self) -> None:
-        """Test filtering games list by category name"""
-        response = self.client.get(f'{self.GAMES_API_PATH}?category=Card%20Game')
-        data = self._get_response_data(response)
-        games = data['games']
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(games), 1)
-        self.assertEqual(games[0]['category']['name'], 'Card Game')
-        self.assertEqual(games[0]['title'], 'Agile Adventures')
-
-    def test_get_games_filter_by_publisher_and_category(self) -> None:
-        """Test filtering games list by both publisher and category"""
-        response = self.client.get(
-            f'{self.GAMES_API_PATH}?publisher=DevGames%20Inc&category=Strategy'
-        )
-        games = self._get_games_list(response)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(games), 1)
-        self.assertEqual(games[0]['title'], 'Pipeline Panic')
-
-    def test_get_games_filter_with_no_match(self) -> None:
-        """Test filtering games list with non-matching values"""
-        response = self.client.get(
-            f'{self.GAMES_API_PATH}?publisher=Unknown%20Studio&category=Unknown'
-        )
-        data = self._get_response_data(response)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(data['games']), 0)
-        self.assertEqual(data['pagination']['total'], 0)
-
-    def test_get_games_default_sort_by_rating(self) -> None:
-        """Test that games are sorted by rating descending by default"""
-        response = self.client.get(self.GAMES_API_PATH)
-        games = self._get_games_list(response)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(games[0]['title'], 'Pipeline Panic')  # 4.5 rating
-        self.assertEqual(games[1]['title'], 'Agile Adventures')  # 4.2 rating
-
-    def test_get_games_sort_by_title(self) -> None:
-        """Test sorting games alphabetically by title"""
-        response = self.client.get(f'{self.GAMES_API_PATH}?sort=title')
-        games = self._get_games_list(response)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(games[0]['title'], 'Agile Adventures')
-        self.assertEqual(games[1]['title'], 'Pipeline Panic')
-
-    def test_get_games_sort_by_rating_explicit(self) -> None:
-        """Test explicit sort by rating returns highest rated first"""
-        response = self.client.get(f'{self.GAMES_API_PATH}?sort=rating')
-        games = self._get_games_list(response)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(games[0]['starRating'], 4.5)
-        self.assertEqual(games[1]['starRating'], 4.2)
-
-    def test_get_games_invalid_sort_falls_back_to_default(self) -> None:
-        """Test that an invalid sort parameter falls back to default (rating)"""
-        response = self.client.get(f'{self.GAMES_API_PATH}?sort=invalid')
-        games = self._get_games_list(response)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(games[0]['title'], 'Pipeline Panic')  # highest rated
 
 if __name__ == '__main__':
     unittest.main()

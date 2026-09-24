@@ -196,5 +196,50 @@ class TestModels(unittest.TestCase):
             
             self.assertIn("Description cannot be empty", str(context.exception))
 
+    def test_publisher_to_dict_includes_game_count(self) -> None:
+        """Publisher.to_dict() should report the count of related games."""
+        with self.app.app_context():
+            publisher = Publisher(**self.TEST_DATA["valid_publisher"])
+            category = Category(**self.TEST_DATA["valid_category"])
+            db.session.add_all([publisher, category])
+            db.session.commit()
+
+            # No games yet — count should be 0
+            self.assertEqual(publisher.to_dict()["game_count"], 0)
+
+            # Add two games to this publisher
+            for i in range(2):
+                db.session.add(Game(
+                    title=f"Game {i}",
+                    description="A long enough description for tests",
+                    publisher=publisher,
+                    category=category,
+                    star_rating=4.0,
+                ))
+            db.session.commit()
+
+            self.assertEqual(publisher.to_dict()["game_count"], 2)
+
+    def test_category_to_dict_includes_game_count(self) -> None:
+        """Category.to_dict() should report the count of related games."""
+        with self.app.app_context():
+            publisher = Publisher(**self.TEST_DATA["valid_publisher"])
+            category = Category(**self.TEST_DATA["valid_category"])
+            db.session.add_all([publisher, category])
+            db.session.commit()
+
+            self.assertEqual(category.to_dict()["game_count"], 0)
+
+            db.session.add(Game(
+                title="Lone Game",
+                description="A long enough description for tests",
+                publisher=publisher,
+                category=category,
+                star_rating=4.0,
+            ))
+            db.session.commit()
+
+            self.assertEqual(category.to_dict()["game_count"], 1)
+
 if __name__ == '__main__':
     unittest.main()

@@ -7,7 +7,7 @@
 		"dockerfile": "Dockerfile"
 	},
 	"features": {
-		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/devcontainers/features/node:2": {},
 		"ghcr.io/schlich/devcontainer-features/playwright:0": {}
 	},
 	"postCreateCommand": "./scripts/setup-env.sh",

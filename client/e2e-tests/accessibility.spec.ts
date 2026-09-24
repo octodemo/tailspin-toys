@@ -56,7 +56,7 @@ test.describe('Accessibility Tests', () => {
     });
 
     await test.step('Verify menu items are reachable', async () => {
-      const homeLink = menu.getByRole('menuitem', { name: /home/i });
+      const homeLink = menu.getByRole('link', { name: /home/i });
       // Focus may already be on the first menu item after opening
       if (!await homeLink.evaluate(el => el === document.activeElement)) {
         for (let i = 0; i < 10; i++) {
@@ -66,7 +66,7 @@ test.describe('Accessibility Tests', () => {
       }
       await expect(homeLink).toBeFocused();
 
-      const aboutLink = menu.getByRole('menuitem', { name: /about/i });
+      const aboutLink = menu.getByRole('link', { name: /about/i });
       for (let i = 0; i < 10; i++) {
         await page.keyboard.press('Tab');
         if (await aboutLink.evaluate(el => el === document.activeElement)) break;

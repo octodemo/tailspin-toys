@@ -1,0 +1,170 @@
+---
+import PreviewLayout from '../../layouts/PreviewLayout.astro';
+import { formatCurrency, getPreviewGames } from '../../lib/preview';
+
+export const prerender = false;
+const games = await getPreviewGames();
+---
+
+<PreviewLayout
+  title="The Tabletop"
+  description="A tactile tabletop direction for the Tailspin Toys catalog."
+  theme="tabletop"
+>
+  <section class="tabletop-hero">
+    <p class="kicker">Direction 01 / Tactile catalog</p>
+    <h1>Pull up a chair.</h1>
+    <p>Every campaign is treated like a game box waiting to be opened.</p>
+    <p class="illustrative">Brass pips and funding totals are <strong>illustrative</strong>.</p>
+  </section>
+
+  <section class="game-shelf" aria-label="Live game catalog" data-testid="preview-catalog">
+    {games.map((game) => (
+      <article class="game-box" data-testid="preview-game-card">
+        <div class="box-lid">
+          <p class="category">{game.category?.name ?? 'Independent game'}</p>
+          <h2>{game.title}</h2>
+          <p>{game.description}</p>
+          <span class="publisher">{game.publisher?.name ?? 'Tailspin workshop'}</span>
+        </div>
+        <div class="funding">
+          <div class="pips" role="img" aria-label={`${game.funding.progress}% funded`}>
+            {[20, 40, 60, 80, 100].map((pip) => <span class:list={{ filled: game.funding.progress >= pip }}></span>)}
+          </div>
+          <p><strong>{formatCurrency(game.funding.pledged)}</strong> pledged</p>
+          <p>{game.funding.backers.toLocaleString()} backers · {game.funding.progress}% of {formatCurrency(game.funding.goal)}</p>
+        </div>
+      </article>
+    ))}
+  </section>
+</PreviewLayout>
+
+<style>
+  :global(html[data-preview-theme='tabletop']) {
+    background: #183d32;
+    color: #f4ead5;
+  }
+
+  :global(html[data-preview-theme='tabletop'] .preview-header) {
+    background: #102d25;
+    color: #f4ead5;
+    border-color: #9d8055;
+  }
+
+  .tabletop-hero {
+    padding: clamp(3rem, 8vw, 7rem) clamp(1rem, 6vw, 5rem);
+    background:
+      radial-gradient(circle at 20% 10%, rgb(255 255 255 / 7%), transparent 32rem),
+      repeating-linear-gradient(115deg, transparent 0 4px, rgb(0 0 0 / 3%) 5px 6px);
+  }
+
+  .kicker,
+  .publisher {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0.5rem 0;
+    font-family: Rockwell, 'Roboto Slab', Georgia, serif;
+    font-size: clamp(3rem, 9vw, 7.5rem);
+    line-height: 0.95;
+  }
+
+  .tabletop-hero > p:not(.kicker, .illustrative) {
+    max-width: 42rem;
+    font-family: Georgia, serif;
+    font-size: 1.3rem;
+  }
+
+  .illustrative {
+    display: inline-block;
+    margin-top: 1.25rem;
+    padding: 0.6rem 0.8rem;
+    color: #2c2115;
+    background: #e8dcc4;
+  }
+
+  .game-shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    padding: clamp(2rem, 6vw, 5rem);
+  }
+
+  .game-box {
+    color: #2c2115;
+    filter: drop-shadow(0.8rem 1rem 0 rgb(8 28 22 / 45%));
+    transform: rotate(var(--tilt, -0.4deg));
+    transition: transform 180ms ease;
+  }
+
+  .game-box:nth-child(even) {
+    --tilt: 0.6deg;
+  }
+
+  .game-box:hover {
+    transform: rotate(0) translateY(-0.35rem);
+  }
+
+  .box-lid {
+    min-height: 20rem;
+    padding: 1.5rem;
+    background: #e8dcc4;
+    border: 0.7rem solid #c2ab83;
+    box-shadow: inset 0 0 0 2px #79633f;
+  }
+
+  .category {
+    color: #6d2d21;
+    font-weight: 800;
+  }
+
+  h2 {
+    margin: 2rem 0 1rem;
+    font-family: Rockwell, 'Roboto Slab', Georgia, serif;
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .box-lid > p {
+    line-height: 1.5;
+  }
+
+  .publisher {
+    display: block;
+    margin-top: 2rem;
+  }
+
+  .funding {
+    padding: 1rem 1.25rem;
+    background: #d3bd98;
+    border: solid #92764d;
+    border-width: 0 0.7rem 0.7rem;
+  }
+
+  .funding p {
+    margin: 0.35rem 0 0;
+    font-size: 0.8rem;
+  }
+
+  .pips {
+    display: flex;
+    gap: 0.45rem;
+  }
+
+  .pips span {
+    width: 1rem;
+    height: 1rem;
+    background: #8d795b;
+    border: 2px solid #6b5638;
+    border-radius: 50%;
+  }
+
+  .pips .filled {
+    background: #bd8a3b;
+    box-shadow: inset 0 0 0 2px #e8c778;
+  }
+</style>

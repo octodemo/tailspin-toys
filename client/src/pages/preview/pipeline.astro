@@ -1,0 +1,230 @@
+---
+import PreviewLayout from '../../layouts/PreviewLayout.astro';
+import { formatCurrency, getPreviewGames, type FundingStage } from '../../lib/preview';
+
+export const prerender = false;
+const games = await getPreviewGames();
+const stages: FundingStage[] = ['Concept', 'Prototype', 'Production'];
+---
+
+<PreviewLayout
+  title="The Pipeline"
+  description="A technical campaign pipeline direction for the Tailspin Toys catalog."
+  theme="pipeline"
+>
+  <section class="pipeline-hero">
+    <div>
+      <p class="kicker">Direction 02 / Campaign operations</p>
+      <h1>From commit<br />to cardboard.</h1>
+    </div>
+    <div class="hero-copy">
+      <p>Follow every developer-themed game as it advances toward the factory floor.</p>
+      <p class="illustrative">Stages and funding metrics are <strong>illustrative</strong>.</p>
+    </div>
+  </section>
+
+  <section class="pipeline" aria-label="Live game catalog by campaign stage" data-testid="preview-catalog">
+    {stages.map((stage, stageIndex) => (
+      <div class="stage">
+        <header>
+          <span class="stage-index">0{stageIndex + 1}</span>
+          <h2>{stage}</h2>
+          <span>{games.filter((game) => game.funding.stage === stage).length} campaigns</span>
+        </header>
+        <div class="stage-rail">
+          {games.filter((game) => game.funding.stage === stage).map((game) => (
+            <article data-testid="preview-game-card">
+              <div class="node" aria-hidden="true"></div>
+              <p class="meta">CAM-{String(game.id).padStart(3, '0')} · {game.category?.name ?? 'Uncategorized'}</p>
+              <h3>{game.title}</h3>
+              <p>{game.description}</p>
+              <dl>
+                <div><dt>Progress</dt><dd>{game.funding.progress}%</dd></div>
+                <div><dt>Pledged</dt><dd>{formatCurrency(game.funding.pledged)}</dd></div>
+                <div><dt>Backers</dt><dd>{game.funding.backers.toLocaleString()}</dd></div>
+              </dl>
+              <div
+                class="progress"
+                role="progressbar"
+                aria-label="Campaign funding"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow={Math.min(game.funding.progress, 100)}
+                aria-valuetext={`${game.funding.progress}% funded`}
+              >
+                <span style={`width:${Math.min(game.funding.progress, 100)}%`}></span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    ))}
+  </section>
+</PreviewLayout>
+
+<style>
+  :global(html[data-preview-theme='pipeline']) {
+    background: #f3f6f8;
+    color: #102a43;
+  }
+
+  :global(html[data-preview-theme='pipeline'] .preview-header) {
+    background: #ffffff;
+    border-color: #bcccdc;
+  }
+
+  .pipeline-hero {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 3rem;
+    align-items: end;
+    padding: clamp(3rem, 8vw, 7rem) clamp(1rem, 6vw, 5rem);
+    border-bottom: 1px solid #9fb3c8;
+  }
+
+  .kicker,
+  .meta,
+  dt,
+  .stage-index {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 1rem 0 0;
+    font-size: clamp(3rem, 8vw, 7rem);
+    letter-spacing: -0.06em;
+    line-height: 0.88;
+  }
+
+  .hero-copy {
+    max-width: 31rem;
+    font-size: 1.15rem;
+    line-height: 1.6;
+  }
+
+  .illustrative {
+    padding: 0.75rem;
+    color: #035c57;
+    background: #ccfbf1;
+    border-left: 3px solid #0d9488;
+    font-size: 0.9rem;
+  }
+
+  .pipeline {
+    padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 6vw, 5rem);
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.35fr) minmax(0, 1fr);
+    gap: 2rem;
+    padding: 2rem 0 3.5rem;
+  }
+
+  .stage > header {
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+  }
+
+  .stage h2 {
+    margin: 0.35rem 0;
+    font-size: 1.8rem;
+  }
+
+  .stage > header > span:last-child {
+    color: #486581;
+    font-size: 0.85rem;
+  }
+
+  .stage-rail {
+    position: relative;
+    display: grid;
+    gap: 1.25rem;
+    padding-left: 2rem;
+    border-left: 2px solid #0d9488;
+  }
+
+  article {
+    position: relative;
+    padding: 1.4rem;
+    background: #ffffff;
+    border: 1px solid #bcccdc;
+    box-shadow: 0 0.5rem 1.5rem rgb(16 42 67 / 6%);
+  }
+
+  .node {
+    position: absolute;
+    top: 1.5rem;
+    left: -2.55rem;
+    width: 1rem;
+    height: 1rem;
+    background: #f3f6f8;
+    border: 3px solid #0d9488;
+    border-radius: 50%;
+  }
+
+  .meta {
+    color: #486581;
+  }
+
+  h3 {
+    margin: 0.5rem 0;
+    font-size: 1.45rem;
+  }
+
+  article > p:not(.meta) {
+    color: #334e68;
+    line-height: 1.55;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0 1rem;
+  }
+
+  dl div {
+    min-width: 0;
+  }
+
+  dt {
+    color: #486581;
+  }
+
+  dd {
+    margin: 0.25rem 0 0;
+    font-weight: 800;
+  }
+
+  .progress {
+    height: 0.35rem;
+    overflow: hidden;
+    background: #d9e2ec;
+  }
+
+  .progress span {
+    display: block;
+    height: 100%;
+    background: #0d9488;
+  }
+
+  @media (max-width: 48rem) {
+    .pipeline-hero,
+    .stage {
+      grid-template-columns: 1fr;
+    }
+
+    .stage > header {
+      position: static;
+    }
+
+    dl {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

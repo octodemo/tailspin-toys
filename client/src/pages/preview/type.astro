@@ -1,0 +1,222 @@
+---
+import PreviewLayout from '../../layouts/PreviewLayout.astro';
+import { getPreviewGames } from '../../lib/preview';
+
+export const prerender = false;
+const games = await getPreviewGames();
+const specimens = [
+  { className: 'slab', name: 'Tabletop Slab', stack: 'Rockwell, Roboto Slab, Georgia, serif' },
+  { className: 'technical', name: 'Pipeline Sans', stack: 'Arial, Helvetica Neue, system sans' },
+  { className: 'arcade', name: 'Arcade Condensed', stack: 'Impact, Haettenschweiler, Arial Narrow' },
+  { className: 'editorial', name: 'Campaign Editorial', stack: 'Georgia, Times New Roman, serif' },
+];
+---
+
+<PreviewLayout
+  title="Type specimens"
+  description="Display typography specimens using titles from the live Tailspin Toys catalog."
+  theme="type"
+>
+  <section class="type-hero">
+    <p>Direction 04 / Type study</p>
+    <h1>Real titles.<br /><em>Different voices.</em></h1>
+    <div>
+      <p>Four display systems tested against the live catalog, from compact labels to unruly campaign names.</p>
+      <p class="illustrative">The catalog is live. Any funding context referenced by the preview set is <strong>illustrative</strong>.</p>
+    </div>
+  </section>
+
+  <section class="specimens" aria-label="Typeface specimens" data-testid="preview-catalog">
+    {specimens.map((specimen, specimenIndex) => (
+      <article class={specimen.className}>
+        <header>
+          <span>0{specimenIndex + 1}</span>
+          <h2>{specimen.name}</h2>
+          <code>{specimen.stack}</code>
+        </header>
+        <div class="title-grid">
+          {games.map((game, gameIndex) => (
+            <div class:list={{ primary: gameIndex === 0 }} data-testid="preview-game-card">
+              <p class="sample-title">{game.title}</p>
+              <p class="sample-meta">
+                {game.category?.name ?? 'Independent'} / {game.publisher?.name ?? 'Tailspin workshop'}
+              </p>
+              {gameIndex === 0 && <p class="sample-body">{game.description}</p>}
+            </div>
+          ))}
+        </div>
+      </article>
+    ))}
+  </section>
+</PreviewLayout>
+
+<style>
+  :global(html[data-preview-theme='type']) {
+    background: #f2eadf;
+    color: #29221f;
+  }
+
+  :global(html[data-preview-theme='type'] .preview-header) {
+    background: #f2eadf;
+    border-color: #29221f;
+  }
+
+  .type-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.5fr);
+    gap: 3rem;
+    align-items: end;
+    padding: clamp(3rem, 8vw, 7rem) clamp(1rem, 6vw, 5rem);
+  }
+
+  .type-hero > p {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: Georgia, serif;
+    font-size: clamp(3rem, 9vw, 8rem);
+    font-weight: 400;
+    letter-spacing: -0.06em;
+    line-height: 0.88;
+  }
+
+  h1 em {
+    color: #c24b32;
+    font-weight: 400;
+  }
+
+  .type-hero > div {
+    line-height: 1.6;
+  }
+
+  .illustrative {
+    padding-top: 1rem;
+    border-top: 1px solid #29221f;
+    font-size: 0.8rem;
+  }
+
+  .specimens {
+    border-top: 1px solid #29221f;
+  }
+
+  article {
+    padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 6vw, 5rem);
+    border-bottom: 1px solid #29221f;
+  }
+
+  article > header {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: baseline;
+    margin-bottom: 3rem;
+    font-family: ui-monospace, monospace;
+  }
+
+  article h2 {
+    margin: 0;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  code {
+    font-size: 0.7rem;
+  }
+
+  .title-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .primary {
+    grid-column: 1 / -1;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid currentColor;
+  }
+
+  .sample-title {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    line-height: 0.98;
+  }
+
+  .primary .sample-title {
+    font-size: clamp(3.5rem, 10vw, 9rem);
+  }
+
+  .sample-meta {
+    font-family: ui-monospace, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sample-body {
+    max-width: 48rem;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .slab .sample-title {
+    font-family: Rockwell, 'Roboto Slab', Georgia, serif;
+    font-weight: 800;
+  }
+
+  .technical {
+    background: #dfe9e5;
+  }
+
+  .technical .sample-title {
+    font-family: Arial, 'Helvetica Neue', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.06em;
+  }
+
+  .arcade {
+    color: #fff5fb;
+    background: #29221f;
+  }
+
+  .arcade .sample-title {
+    color: #f67554;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .editorial .sample-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+  }
+
+  @media (max-width: 44rem) {
+    .type-hero,
+    .title-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .primary {
+      grid-column: auto;
+    }
+
+    article > header {
+      grid-template-columns: 2rem 1fr;
+    }
+
+    article code {
+      grid-column: 2;
+      overflow-wrap: anywhere;
+    }
+  }
+</style>

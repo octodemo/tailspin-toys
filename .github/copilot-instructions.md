@@ -18,11 +18,12 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 #### Testing guidelines
 
+- **Always run tests and lint through the `quality-checks` skill — never invoke `run-server-tests.sh`, `run-e2e-tests.sh`, or `run-lint.sh` directly.** The skill wraps environment setup, ordering, and troubleshooting. (Starting the app for manual validation is not a quality check — call `scripts/start-app.sh` directly for that.)
 - Run Python tests to ensure backend functionality, and Playwright tests to ensure e2e and frontend functionality
 - Run ESLint to check frontend code quality before committing
 - Review the existing tests to ensure we're not duplicating efforts
 - Test code should be of the same quality as the rest of the project, and follow DRY principles
-- For frontend changes, run builds in the client directory to verify build success and the end-to-end tests, to ensure everything works correctly
+- For frontend changes, verify the build in the `client` directory (`npm run build`) directly, and run the end-to-end tests through the `quality-checks` skill, to ensure everything works correctly
 - When making API changes, update and run the corresponding tests to ensure everything works correctly
 
 #### Project guidelines
@@ -51,7 +52,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ### Styling
 
-- Use Tailwind CSS utility classes exclusively - see `tailwindcss.instructions.md`
+- Use Tailwind CSS utility classes exclusively - see `style.instructions.md`
 - Dark theme colors: slate palette (`bg-slate-800`, `text-slate-100`, etc.)
 - Rounded corners and modern UI patterns
 - Follow modern UI/UX principles with clean, accessible interfaces
@@ -64,14 +65,11 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ## Scripts
 
-- Several scripts exist in the `scripts` folder
-- Always use available scripts to perform tasks rather than performing operations manually
-- Existing scripts:
-    - `scripts/setup-env.sh`: Performs installation of all Python and Node dependencies
-    - `scripts/run-server-tests.sh`: Calls setup-env, then runs all Python tests
-    - `scripts/run-e2e-tests.sh`: Runs Playwright E2E tests for frontend
-    - `scripts/run-lint.sh`: Runs ESLint on the frontend codebase
-    - `scripts/start-app.sh`: Calls setup-env, then starts both backend and frontend servers
+- **Skills take precedence over scripts.** Before invoking any script directly, check whether a skill covers the task. If one does, load and follow that skill — it may wrap the script with required setup, ordering, or troubleshooting steps.
+- Helper scripts live in the `scripts` folder. Use provided scripts rather than relying on a hard-coded list.
+- Only fall back to calling a script directly when no skill applies.
+- Always prefer an existing script over performing the operation manually.
+- `scripts/setup-env.sh` is the single canonical installer for Python, Node, and Playwright browser dependencies. It is idempotent (uses sha256 markers) and supports `--check [scope]`, `--scope [scope]` (limit what gets installed; one of `server|client|app|e2e|all`), `--force`, and `--with-system-deps`. Runner scripts (`start-app.sh`, `run-server-tests.sh`, `run-e2e-tests.sh`) call `setup-env.sh --check` to validate prerequisites and exit with a remediation message when anything is missing — they do not install anything themselves.
 
 ## Repository Structure
 

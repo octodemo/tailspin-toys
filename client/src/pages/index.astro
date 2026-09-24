@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import GameList from '../components/GameList.svelte';
+import RecentGamesBreadcrumb from '../components/RecentGamesBreadcrumb.svelte';
 ---
 
 <Layout title="Tailspin Toys - Crowdfunding your new favorite game!">
@@ -9,7 +10,15 @@ import GameList from '../components/GameList.svelte';
       <h1 class="text-4xl font-bold mb-4 text-slate-100">Welcome to Tailspin Toys</h1>
       <p class="text-xl text-slate-300">Find your next game! And maybe even back one! Explore our collection!</p>
     </div>
-    
-    <GameList client:load />
+
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-4">
+      <aside class="order-1 lg:order-2 lg:col-span-1">
+        <RecentGamesBreadcrumb client:load />
+      </aside>
+
+      <div class="order-2 lg:order-1 lg:col-span-3">
+        <GameList client:load />
+      </div>
+    </div>
   </div>
 </Layout>

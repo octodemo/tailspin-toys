@@ -1,6 +1,6 @@
 ---
 description: 'Tailwind CSS v4 styling patterns and dark theme guidelines'
-applyTo: '**/*.css'
+applyTo: '**/*.{astro,svelte,css}'
 ---
 
 # Tailwind CSS Instructions

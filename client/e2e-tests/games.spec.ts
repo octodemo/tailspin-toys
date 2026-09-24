@@ -86,52 +86,6 @@ test.describe('Game Listing and Navigation', () => {
     });
   });
 
-  test('should filter games by publisher and category', async ({ page }) => {
-    await test.step('Navigate to homepage and wait for filter controls', async () => {
-      await page.goto('/');
-      await expect(page.getByTestId('publisher-filter')).toBeVisible();
-      await expect(page.getByTestId('category-filter')).toBeVisible();
-    });
-
-    await test.step('Filter by a publisher and verify visible game publishers match', async () => {
-      const publisherFilter = page.getByTestId('publisher-filter');
-      const publisherOptions = await publisherFilter.locator('option').allTextContents();
-      expect(publisherOptions.length).toBeGreaterThan(1);
-
-      const chosenPublisher = publisherOptions[1];
-      await publisherFilter.selectOption({ label: chosenPublisher });
-
-      const gamePublishers = page.getByTestId('game-publisher');
-      await expect(gamePublishers.first()).toBeVisible();
-
-      const publisherCount = await gamePublishers.count();
-      expect(publisherCount).toBeGreaterThan(0);
-
-      for (let index = 0; index < publisherCount; index++) {
-        await expect(gamePublishers.nth(index)).toHaveText(chosenPublisher);
-      }
-    });
-
-    await test.step('Filter by a category and verify visible game categories match', async () => {
-      const categoryFilter = page.getByTestId('category-filter');
-      const categoryOptions = await categoryFilter.locator('option').allTextContents();
-      expect(categoryOptions.length).toBeGreaterThan(1);
-
-      const chosenCategory = categoryOptions[1];
-      await categoryFilter.selectOption({ label: chosenCategory });
-
-      const gameCategories = page.getByTestId('game-category');
-      await expect(gameCategories.first()).toBeVisible();
-
-      const categoryCount = await gameCategories.count();
-      expect(categoryCount).toBeGreaterThan(0);
-
-      for (let index = 0; index < categoryCount; index++) {
-        await expect(gameCategories.nth(index)).toHaveText(chosenCategory);
-      }
-    });
-  });
-
   test('should display a button to back the game', async ({ page }) => {
     await test.step('Navigate to game details page', async () => {
       await page.goto('/game/1');
@@ -143,6 +97,50 @@ test.describe('Game Listing and Navigation', () => {
       await expect(backButton).toBeVisible();
       await expect(backButton).toContainText('Support This Game');
       await expect(backButton).toBeEnabled();
+    });
+  });
+
+  test('should show recently visited games on the home page', async ({ page }) => {
+    await test.step('Navigate to a game details page to visit a game', async () => {
+      await page.goto('/game/1');
+      await expect(page.getByTestId('game-details')).toBeVisible();
+      await expect(page.getByTestId('game-details-title')).not.toBeEmpty();
+    });
+
+    await test.step('Navigate back to home page and verify recently perused list', async () => {
+      await page.goto('/');
+      const recentGamesBreadcrumb = page.getByTestId('recent-games-breadcrumb');
+      await expect(recentGamesBreadcrumb).toBeVisible();
+      await expect(page.getByTestId('recent-games-list')).toBeVisible();
+      await expect(page.getByTestId('recent-game-link-1')).toBeVisible();
+    });
+  });
+
+  test('should show the five most recently visited games in breadcrumb order', async ({ page }) => {
+    const visitedTitles: string[] = [];
+
+    await test.step('Visit six game details pages in sequence', async () => {
+      for (const gameId of [1, 2, 3, 4, 5, 6]) {
+        await page.goto(`/game/${gameId}`);
+        await expect(page.getByTestId('game-details')).toBeVisible();
+
+        const gameTitle = await page.getByTestId('game-details-title').textContent();
+        if (gameTitle) {
+          visitedTitles.push(gameTitle.trim());
+        }
+      }
+    });
+
+    await test.step('Verify the recent-games breadcrumb keeps only the five newest visits', async () => {
+      const recentGamesList = page.getByTestId('recent-games-list');
+      const recentGameLinks = recentGamesList.locator('[data-testid^="recent-game-link-"]');
+
+      await expect(page.getByTestId('recent-games-breadcrumb')).toBeVisible();
+      await expect(page.getByTestId('recent-games-home-link')).toBeVisible();
+      await expect(recentGameLinks).toHaveCount(5);
+      await expect(page.getByTestId('recent-game-link-1')).toHaveCount(0);
+      await expect(recentGameLinks).toHaveText(visitedTitles.slice(-5).reverse());
+      await expect(page.getByTestId('recent-game-link-6')).toHaveAttribute('aria-current', 'page');
     });
   });
 

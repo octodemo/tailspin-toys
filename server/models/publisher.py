@@ -1,18 +1,21 @@
-from typing import Any
-from sqlalchemy import func
+from typing import Any, List, Optional, TYPE_CHECKING
+from sqlalchemy import String, Text, func, select
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from . import db
 from .base import BaseModel
-from sqlalchemy.orm import validates, relationship
+
+if TYPE_CHECKING:
+    from .game import Game
 
 class Publisher(BaseModel):
     __tablename__ = 'publishers'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    description = db.Column(db.Text)
-    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+
     # One-to-many relationship: one publisher has many games
-    games = relationship("Game", back_populates="publisher")
+    games: Mapped[List["Game"]] = relationship(back_populates="publisher")
 
     @validates('name')
     def validate_name(self, key, name):
@@ -27,9 +30,10 @@ class Publisher(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         from .game import Game
+        count_stmt = select(func.count(Game.id)).where(Game.publisher_id == self.id)
         return {
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'game_count': db.session.query(func.count(Game.id)).filter(Game.publisher_id == self.id).scalar() or 0
+            'game_count': db.session.scalar(count_stmt) or 0
         }

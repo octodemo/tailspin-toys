@@ -20,6 +20,12 @@ Pass `--force` to reinstall everything, or `--with-system-deps` to also install 
 
 Then navigate to the [website](http://localhost:4321) to see the site!
 
+### Design previews
+
+Temporary design studies are available at `/preview`. The chooser links to tabletop, campaign pipeline,
+arcade leaderboard, and typography directions. Each route server-renders the live game catalog; funding
+figures and campaign stages are illustrative and derived deterministically from game IDs.
+
 ## Running tests
 
 ```bash

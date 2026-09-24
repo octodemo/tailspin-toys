@@ -1,0 +1,136 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  theme?: string;
+}
+
+const { title, description, theme = 'preview' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-preview-theme={theme}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | Tailspin Toys Preview</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#preview-content">Skip to preview content</a>
+    <header class="preview-header">
+      <a href="/preview" class="preview-brand" data-testid="preview-home-link">Tailspin Toys / Design Lab</a>
+      <nav aria-label="Preview directions">
+        <a href="/preview/tabletop" data-testid="preview-nav-tabletop">Tabletop</a>
+        <a href="/preview/pipeline" data-testid="preview-nav-pipeline">Pipeline</a>
+        <a href="/preview/arcade" data-testid="preview-nav-arcade">Arcade</a>
+        <a href="/preview/type" data-testid="preview-nav-type">Type</a>
+      </nav>
+    </header>
+    <main id="preview-content">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light dark;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  a:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 4px;
+  }
+
+  .skip-link {
+    position: fixed;
+    z-index: 100;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    background: #ffffff;
+    color: #111827;
+    transform: translateY(-160%);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1rem clamp(1rem, 4vw, 4rem);
+    border-bottom: 1px solid currentColor;
+  }
+
+  .preview-brand {
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .preview-header nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .preview-header nav a {
+    padding: 0.45rem 0.8rem;
+    background: color-mix(in srgb, currentColor 5%, transparent);
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    transition:
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .preview-header nav a:hover {
+    background: color-mix(in srgb, currentColor 14%, transparent);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 40rem) {
+    .preview-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+</style>

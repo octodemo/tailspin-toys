@@ -39,6 +39,55 @@ The frontend uses ESLint to enforce code quality across TypeScript, Astro, and S
 
 ESLint is also run automatically in CI on pull requests to `main`.
 
+## Admin catalog management
+
+Administrators can add, edit, and archive games from the browser at [/admin](http://localhost:4321/admin), reachable from the **Admin sign in** entry in the header menu. The admin area covers:
+
+- Creating a game with a title, description, optional 0–5 star rating, and a publisher and category picked from existing records
+- Editing any field of an existing game
+- Archiving a game, which hides it from the public catalog while keeping the record
+- Restoring an archived game via the **Show archived games** toggle
+
+### Authentication
+
+Admin access is protected by a single shared password held in the session cookie. Two environment variables configure it:
+
+| Variable | Purpose | Development fallback |
+| --- | --- | --- |
+| `ADMIN_PASSWORD` | Password required to sign in at `/admin` | `tailspin-admin` |
+| `FLASK_SECRET_KEY` | Signs the admin session cookie | `dev-only-insecure-secret-key` |
+
+Both fall back to development-only defaults so a fresh clone runs without configuration, and the server logs a warning when it does. **Set both variables before deploying.**
+
+```bash
+export ADMIN_PASSWORD='choose-a-strong-password'
+export FLASK_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+./scripts/start-app.sh
+```
+
+### Admin API endpoints
+
+All write endpoints require an authenticated session and return `401` otherwise.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/api/login` | Sign in with `{"password": "..."}` |
+| `POST` | `/api/logout` | End the admin session |
+| `GET` | `/api/session` | Report `{"authenticated": bool}` |
+| `POST` | `/api/games` | Create a game |
+| `PUT` | `/api/games/<id>` | Update a game |
+| `DELETE` | `/api/games/<id>` | Archive a game (soft delete) |
+| `POST` | `/api/games/<id>/restore` | Restore an archived game |
+| `GET` | `/api/games?includeArchived=true` | List games including archived ones |
+| `GET` | `/api/publishers` | List publishers (public, used by admin dropdowns) |
+| `GET` | `/api/categories` | List categories (public, used by admin dropdowns) |
+
+### Database schema updates
+
+The project has no migration framework — tables are created by `db.create_all()`, which never alters an existing table. `server/utils/migrations.py` fills that gap: `ensure_schema()` runs at startup and adds any missing columns (such as the `is_archived` flag behind archiving) to databases created before the column existed. It is idempotent, so existing `data/tailspin-toys.db` files are upgraded in place rather than needing to be deleted.
+
+When adding a column to a model, add the matching `ALTER TABLE` statement to `_ADDED_COLUMNS` in that file.
+
 ## Copilot Agents & Skills
 
 This project ships two Copilot customizations to assist with quality assurance:

@@ -30,7 +30,12 @@ class Category(BaseModel):
         
     def to_dict(self) -> dict[str, Any]:
         from .game import Game
-        count_stmt = select(func.count(Game.id)).where(Game.category_id == self.id)
+        # Archived games are hidden from the catalog, so exclude them from counts.
+        count_stmt = (
+            select(func.count(Game.id))
+            .where(Game.category_id == self.id)
+            .where(Game.is_archived.is_(False))
+        )
         return {
             'id': self.id,
             'name': self.name,

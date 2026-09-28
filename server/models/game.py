@@ -1,5 +1,5 @@
 from typing import Any, Optional, TYPE_CHECKING
-from sqlalchemy import ForeignKey, String, Text, Float
+from sqlalchemy import Boolean, ForeignKey, String, Text, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from .base import BaseModel
 
@@ -14,6 +14,11 @@ class Game(BaseModel):
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     star_rating: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
+    # Archived games are hidden from the public catalog but remain restorable
+    is_archived: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default='0'
+    )
 
     # Foreign keys for one-to-many relationships
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
@@ -30,7 +35,20 @@ class Game(BaseModel):
     @validates('description')
     def validate_description(self, key, description):
         return self.validate_string_length('Description', description, min_length=10)
-    
+
+    @validates('star_rating')
+    def validate_star_rating(self, key: str, star_rating: Any) -> Optional[float]:
+        if star_rating is None:
+            return None
+
+        if isinstance(star_rating, bool) or not isinstance(star_rating, (int, float)):
+            raise ValueError('Star rating must be a number between 0 and 5')
+
+        if not 0 <= star_rating <= 5:
+            raise ValueError('Star rating must be between 0 and 5')
+
+        return float(star_rating)
+
     def __repr__(self) -> str:
         return f'<Game {self.title}, ID: {self.id}>'
 
@@ -41,5 +59,6 @@ class Game(BaseModel):
             'description': self.description,
             'publisher': {'id': self.publisher.id, 'name': self.publisher.name} if self.publisher else None,
             'category': {'id': self.category.id, 'name': self.category.name} if self.category else None,
-            'starRating': self.star_rating  # Changed from star_rating to starRating
+            'starRating': self.star_rating,  # Changed from star_rating to starRating
+            'isArchived': self.is_archived,
         }

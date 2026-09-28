@@ -111,6 +111,106 @@ class TestModels(unittest.TestCase):
             self.assertEqual(game.description, self.TEST_DATA["valid_game"]["description"])
             self.assertEqual(game.star_rating, self.TEST_DATA["valid_game"]["star_rating"])
 
+    def _create_publisher_and_category(self) -> tuple[Publisher, Category]:
+        """Create the publisher and category a game requires."""
+        publisher = Publisher(**self.TEST_DATA["valid_publisher"])
+        category = Category(**self.TEST_DATA["valid_category"])
+        db.session.add_all([publisher, category])
+        db.session.commit()
+
+        return publisher, category
+
+    def _create_valid_game(self, **overrides: Any) -> Game:
+        """Create and persist a valid game, applying any field overrides."""
+        publisher, category = self._create_publisher_and_category()
+
+        fields: Dict[str, Any] = {
+            "title": self.TEST_DATA["valid_game"]["title"],
+            "description": self.TEST_DATA["valid_game"]["description"],
+            "star_rating": self.TEST_DATA["valid_game"]["star_rating"],
+        }
+        fields.update(overrides)
+
+        game = Game(**fields, publisher=publisher, category=category)
+        db.session.add(game)
+        db.session.commit()
+
+        return game
+
+    def test_game_is_not_archived_by_default(self) -> None:
+        """A newly created game should be live rather than archived"""
+        with self.app.app_context():
+            game = self._create_valid_game()
+
+            self.assertFalse(game.is_archived)
+
+    def test_game_can_be_archived(self) -> None:
+        """Setting the archived flag should persist"""
+        with self.app.app_context():
+            game = self._create_valid_game()
+
+            game.is_archived = True
+            db.session.commit()
+
+            self.assertTrue(db.session.get(Game, game.id).is_archived)
+
+    def test_game_to_dict_exposes_is_archived(self) -> None:
+        """The serialized game should expose the archived state as camelCase"""
+        with self.app.app_context():
+            game = self._create_valid_game()
+
+            self.assertIn('isArchived', game.to_dict())
+            self.assertFalse(game.to_dict()['isArchived'])
+
+    def test_game_star_rating_above_maximum_rejected(self) -> None:
+        """A star rating above 5 should be rejected"""
+        with self.app.app_context():
+            with self.assertRaises(ValueError) as context:
+                self._create_valid_game(star_rating=5.5)
+
+            self.assertIn("Star rating must be between 0 and 5", str(context.exception))
+
+    def test_game_star_rating_below_minimum_rejected(self) -> None:
+        """A negative star rating should be rejected"""
+        with self.app.app_context():
+            with self.assertRaises(ValueError) as context:
+                self._create_valid_game(star_rating=-1)
+
+            self.assertIn("Star rating must be between 0 and 5", str(context.exception))
+
+    def test_game_star_rating_non_numeric_rejected(self) -> None:
+        """A non-numeric star rating should be rejected"""
+        with self.app.app_context():
+            with self.assertRaises(ValueError) as context:
+                self._create_valid_game(star_rating="excellent")
+
+            self.assertIn("Star rating must be a number", str(context.exception))
+
+    def test_game_star_rating_boundaries_allowed(self) -> None:
+        """The 0 and 5 boundary values should both be accepted"""
+        with self.app.app_context():
+            publisher, category = self._create_publisher_and_category()
+
+            for rating in (0, 5):
+                game = Game(
+                    title=f"Boundary {rating}",
+                    description=self.TEST_DATA["valid_game"]["description"],
+                    publisher=publisher,
+                    category=category,
+                    star_rating=rating,
+                )
+                db.session.add(game)
+                db.session.commit()
+
+                self.assertEqual(game.star_rating, float(rating))
+
+    def test_game_star_rating_optional(self) -> None:
+        """A game without a star rating should still be valid"""
+        with self.app.app_context():
+            game = self._create_valid_game(star_rating=None)
+
+            self.assertIsNone(game.star_rating)
+
     def test_publisher_name_too_short(self) -> None:
         """Test that publisher name validation rejects names that are too short"""
         with self.app.app_context():

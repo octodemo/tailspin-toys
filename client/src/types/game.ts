@@ -9,6 +9,8 @@
 export interface Publisher {
     id: number;
     name: string;
+    description?: string | null;
+    game_count?: number;
 }
 
 /**
@@ -17,6 +19,8 @@ export interface Publisher {
 export interface Category {
     id: number;
     name: string;
+    description?: string | null;
+    game_count?: number;
 }
 
 /**
@@ -29,6 +33,39 @@ export interface Game {
     publisher: Publisher | null;
     category: Category | null;
     starRating: number | null;
+    isArchived: boolean;
+}
+
+/**
+ * Payload sent to the API when creating or updating a game
+ */
+export interface GameInput {
+    title: string;
+    description: string;
+    publisherId: number;
+    categoryId: number;
+    starRating: number | null;
+}
+
+/**
+ * Admin authentication state reported by the API
+ */
+export interface AdminSession {
+    authenticated: boolean;
+}
+
+/**
+ * Response wrapper for the publisher lookup endpoint
+ */
+export interface PublishersResponse {
+    publishers: Publisher[];
+}
+
+/**
+ * Response wrapper for the category lookup endpoint
+ */
+export interface CategoriesResponse {
+    categories: Category[];
 }
 
 /**

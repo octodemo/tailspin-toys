@@ -75,18 +75,26 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 - `server/`: Flask backend code
   - `models/`: SQLAlchemy ORM models
-  - `routes/`: API endpoints organized by resource
+  - `routes/`: API endpoints organized by resource (games, auth, publishers, categories)
   - `tests/`: Unit tests for the API
-  - `utils/`: Utility functions and helpers
+  - `utils/`: Utility functions and helpers (including `auth.py` for admin auth and `migrations.py` for schema updates)
 - `client/`: Astro/Svelte frontend code
   - `src/components/`: Reusable Svelte components
   - `src/layouts/`: Astro layout templates
-  - `src/pages/`: Astro page routes
+  - `src/pages/`: Astro page routes (including `/admin` for catalog management)
     - `src/pages/api/`: Streaming API proxy (catch-all endpoint)
   - `src/styles/`: CSS and Tailwind configuration
   - `src/types/`: TypeScript interfaces (Game, Publisher, Category)
   - `src/config/`: Centralized API configuration
-  - `e2e-tests/`: Playwright E2E tests (home, games, accessibility, api-proxy)
+  - `e2e-tests/`: Playwright E2E tests (home, games, accessibility, api-proxy, admin)
 - `scripts/`: Development and deployment scripts
 - `data/`: Database files
 - `README.md`: Project documentation
+
+## Admin and authentication
+
+- Admin write endpoints (`POST`/`PUT`/`DELETE` on games) are protected by the `admin_required` decorator in `server/utils/auth.py`, which returns `401` for unauthenticated callers
+- Authentication is a single shared password from the `ADMIN_PASSWORD` env var, tracked in Flask's signed session cookie (`FLASK_SECRET_KEY`). Both have development-only fallbacks — never rely on them in production
+- Deleting a game is a **soft delete**: it sets `is_archived` on the model. Public catalog reads must always filter archived games out, and archived games are only visible to authenticated admins
+- The project has no Alembic. When adding a column to a model, also add the `ALTER TABLE` statement to `_ADDED_COLUMNS` in `server/utils/migrations.py` so existing local databases are upgraded by `ensure_schema()` at startup
+- The Astro API proxy must send `duplex: 'half'` when forwarding a request body, otherwise every write request fails with a 502

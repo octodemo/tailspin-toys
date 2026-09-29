@@ -1,0 +1,813 @@
+---
+import { fetchGames, fundingFor, formatCurrency } from '../../utils/preview-data';
+import {
+  TYPE_FONTS_HREF,
+  TYPE_OPTIONS,
+  resolveTypeId,
+  typeOptionCss,
+} from '../../utils/preview-type';
+
+const games = await fetchGames();
+const [lead, ...rest] = games;
+const leadFunding = lead ? fundingFor(lead) : null;
+
+const activeType = resolveTypeId(Astro.url.searchParams.get('type'));
+const optionCss = typeOptionCss();
+---
+
+<!doctype html>
+<html lang="en" data-type={activeType}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Tabletop concept - Tailspin Toys</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href={TYPE_FONTS_HREF} rel="stylesheet" />
+    <style set:html={optionCss}></style>
+  </head>
+  <body>
+    <a class="skip" href="#catalog">Skip to catalog</a>
+
+    <div class="tester">
+      <div class="shell tester-inner">
+        <span class="tester-label">Display face</span>
+        <div class="tester-options" role="group" aria-label="Choose a display typeface">
+          {TYPE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              class="tester-btn"
+              data-set-type={option.id}
+              aria-pressed={option.id === activeType ? 'true' : 'false'}
+            >
+              {option.name}
+            </button>
+          ))}
+        </div>
+        <a class="tester-link" href="/preview/type">Compare specimens</a>
+      </div>
+    </div>
+
+    <header class="masthead">
+      <div class="shell masthead-inner">
+        <a class="wordmark" href="/preview">Tailspin<span>Toys</span></a>
+        <nav class="masthead-nav" aria-label="Main navigation">
+          <a href="#catalog">Catalog</a>
+          <a href="#catalog">Publishers</a>
+          <a href="/preview">Back to previews</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      {lead && leadFunding && (
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="shell hero-inner">
+            <div class="hero-copy">
+              <p class="imprint">
+                <span class="imprint-mark">{lead.publisher?.name?.charAt(0) ?? 'T'}</span>
+                {lead.publisher?.name} &middot; {lead.category?.name} &middot; 2 to 5 players
+              </p>
+              <h1 id="hero-title">{lead.title}</h1>
+              <p class="hero-blurb">{lead.description}</p>
+
+              <div class="pips" role="img" aria-label={`${leadFunding.percent} percent funded`}>
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <span class:list={['pip', { filled: index * 10 < leadFunding.percent }]}></span>
+                ))}
+                <span class="pips-label">{leadFunding.percent}% funded</span>
+              </div>
+
+              <dl class="ledger">
+                <div>
+                  <dt>Pledged</dt>
+                  <dd>{formatCurrency(leadFunding.pledged)}</dd>
+                </div>
+                <div>
+                  <dt>Backers</dt>
+                  <dd>{leadFunding.backers.toLocaleString('en-US')}</dd>
+                </div>
+                <div>
+                  <dt>Days left</dt>
+                  <dd>{leadFunding.daysLeft}</dd>
+                </div>
+              </dl>
+
+              <div class="hero-actions">
+                <a class="btn-primary" href={`/game/${lead.id}`}>Back this game</a>
+                <a class="btn-quiet" href={`/game/${lead.id}`}>Read the rulebook</a>
+              </div>
+            </div>
+
+            <div class="box-lid" aria-hidden="true">
+              <div class="box-face">
+                <p class="box-publisher">{lead.publisher?.name}</p>
+                <div class="box-art">
+                  {Array.from({ length: 24 }).map((_, index) => (
+                    <span class:list={['tile', { hot: index % 7 === 3, warm: index % 5 === 0 }]}></span>
+                  ))}
+                </div>
+                <p class="box-title">{lead.title}</p>
+                <p class="box-meta">{lead.category?.name}</p>
+                <div class="box-dice">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="box-spine"></div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section class="catalog" id="catalog" aria-labelledby="catalog-title">
+        <div class="shell">
+          <div class="catalog-head">
+            <h2 id="catalog-title">On the table</h2>
+            <p>Every title below is mid-campaign. Pledge now and your copy ships from the first print run.</p>
+          </div>
+
+          <ul class="shelf">
+            {rest.map((game) => {
+              const funding = fundingFor(game);
+              return (
+                <li class="boxed">
+                  <a href={`/game/${game.id}`}>
+                    <div class="boxed-lid">
+                      <span class="boxed-publisher">{game.publisher?.name}</span>
+                      <span class="boxed-title">{game.title}</span>
+                      <span class="boxed-category">{game.category?.name}</span>
+                    </div>
+                    <div class="boxed-body">
+                      <p class="boxed-blurb">{game.description}</p>
+                      <div class="pips small" role="img" aria-label={`${funding.percent} percent funded`}>
+                        {Array.from({ length: 10 }).map((_, index) => (
+                          <span class:list={['pip', { filled: index * 10 < funding.percent }]}></span>
+                        ))}
+                      </div>
+                      <p class="boxed-funding">
+                        <strong>{funding.percent}% funded</strong>
+                        <span>{funding.backers.toLocaleString('en-US')} backers</span>
+                      </p>
+                    </div>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="shell">
+        <p>Design concept &middot; funding figures are illustrative</p>
+      </div>
+    </footer>
+
+    <script>
+      // Swap the display face in place so faces can be compared without a reload.
+      const root = document.documentElement;
+      const buttons = document.querySelectorAll<HTMLButtonElement>('[data-set-type]');
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const next = button.dataset.setType;
+          if (!next) return;
+
+          root.dataset.type = next;
+          buttons.forEach((other) => {
+            other.setAttribute('aria-pressed', String(other === button));
+          });
+
+          // Keep the URL shareable without adding a history entry per click.
+          const url = new URL(window.location.href);
+          url.searchParams.set('type', next);
+          window.history.replaceState({}, '', url);
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  /* Zero-specificity defaults so the [data-type] rules above always win when
+     both target <html>. A plain :root selector would tie and take precedence. */
+  :where(:root) {
+    --felt: #1d3b32;
+    --felt-deep: #16302a;
+    --card: #ece0c8;
+    --card-edge: #d6c5a4;
+    --ink: #191410;
+    --ink-soft: #544a3e;
+    --brass: #b98c2f;
+    --stamp: #a8412c;
+
+    /* Defaults; the html[data-type="..."] rules override these per face. */
+    --display: 'Big Shoulders Display', sans-serif;
+    --display-weight: 800;
+    --display-scale: 1.06;
+    --display-tracking: 0.012em;
+    --display-variation: normal;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--felt);
+    /* Woven felt: two offset dot grids read as fabric rather than a flat fill. */
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.035) 1px, transparent 0),
+      radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.16) 1px, transparent 0);
+    background-size: 6px 6px, 6px 6px;
+    background-position: 0 0, 3px 3px;
+    color: var(--card);
+    font-family: 'Karla', system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .skip {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .skip:focus {
+    left: 24px;
+    top: 16px;
+    z-index: 20;
+    background: var(--card);
+    color: var(--ink);
+    padding: 10px 16px;
+    border-radius: 2px;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--brass);
+    outline-offset: 3px;
+  }
+
+  /* ---------- type tester (scaffolding, not part of the design) ---------- */
+
+  .tester {
+    background: #0f221d;
+    border-bottom: 1px solid rgba(236, 224, 200, 0.18);
+    padding: 10px 0;
+  }
+
+  .tester-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .tester-label,
+  .tester-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(236, 224, 200, 0.75);
+  }
+
+  .tester-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tester-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 6px 11px;
+    border-radius: 3px;
+    border: 1px solid rgba(236, 224, 200, 0.28);
+    background: transparent;
+    color: rgba(236, 224, 200, 0.85);
+    cursor: pointer;
+  }
+
+  .tester-btn:hover {
+    border-color: var(--brass);
+    color: var(--card);
+  }
+
+  .tester-btn[aria-pressed='true'] {
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #1a1509;
+    font-weight: 700;
+  }
+
+  .tester-link {
+    margin-left: auto;
+    text-decoration: none;
+    border-bottom: 1px solid var(--brass);
+    padding-bottom: 2px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 1px solid rgba(236, 224, 200, 0.16);
+    background: var(--felt-deep);
+  }
+
+  .masthead-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .wordmark {
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-variation-settings: var(--display-variation);
+    font-size: calc(30px * var(--display-scale));
+    letter-spacing: var(--display-tracking);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .wordmark span {
+    color: var(--brass);
+  }
+
+  .masthead-nav {
+    display: flex;
+    gap: 26px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .masthead-nav a {
+    text-decoration: none;
+    padding-bottom: 3px;
+    border-bottom: 1px solid transparent;
+    color: rgba(236, 224, 200, 0.78);
+  }
+
+  .masthead-nav a:hover {
+    color: var(--card);
+    border-bottom-color: var(--brass);
+  }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    padding: 72px 0 84px;
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 64px;
+    align-items: center;
+  }
+
+  .imprint {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(236, 224, 200, 0.75);
+  }
+
+  /* Publisher imprint block, the way a real board game box credits its studio. */
+  .imprint-mark {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    background: var(--brass);
+    color: var(--ink);
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-variation-settings: var(--display-variation);
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  .hero h1 {
+    margin: 0 0 20px;
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-variation-settings: var(--display-variation);
+    font-size: calc(clamp(46px, 7vw, 82px) * var(--display-scale));
+    line-height: 0.94;
+    letter-spacing: var(--display-tracking);
+    text-transform: uppercase;
+  }
+
+  .hero-blurb {
+    margin: 0 0 30px;
+    max-width: 46ch;
+    color: rgba(236, 224, 200, 0.85);
+  }
+
+  .pips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 26px;
+  }
+
+  /* Funding as a row of wooden game pieces instead of a progress bar. */
+  .pip {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: rgba(236, 224, 200, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  }
+
+  .pip.filled {
+    background: var(--brass);
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.28);
+  }
+
+  .pips-label {
+    margin-left: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #d9a83f;
+  }
+
+  .pips.small {
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .pips.small .pip {
+    width: 9px;
+    height: 9px;
+    background: rgba(25, 20, 16, 0.16);
+  }
+
+  .ledger {
+    display: flex;
+    gap: 40px;
+    margin: 0 0 34px;
+    padding: 20px 0;
+    border-top: 1px solid rgba(236, 224, 200, 0.18);
+    border-bottom: 1px solid rgba(236, 224, 200, 0.18);
+  }
+
+  .ledger dt {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(236, 224, 200, 0.7);
+  }
+
+  .ledger dd {
+    margin: 4px 0 0;
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-variation-settings: var(--display-variation);
+    font-size: calc(30px * var(--display-scale));
+    letter-spacing: var(--display-tracking);
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 15px 30px;
+    background: #983a26;
+    color: #fdf7ea;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    border-radius: 2px;
+    box-shadow: 0 3px 0 #6d2617;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #6d2617;
+  }
+
+  .btn-quiet {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(236, 224, 200, 0.88);
+    text-decoration: none;
+    border-bottom: 1px solid var(--brass);
+    padding-bottom: 3px;
+  }
+
+  /* ---------- the box ---------- */
+
+  .box-lid {
+    position: relative;
+    transform: rotate(-2.5deg);
+  }
+
+  .box-face {
+    position: relative;
+    padding: 40px 34px 34px;
+    background: linear-gradient(160deg, #f3e9d4 0%, var(--card) 55%, var(--card-edge) 100%);
+    color: var(--ink);
+    border-radius: 4px;
+    box-shadow:
+      0 26px 44px rgba(0, 0, 0, 0.42),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+      inset 0 0 0 9px rgba(255, 255, 255, 0.4);
+    min-height: 350px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .box-publisher {
+    margin: 0 0 26px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* Stand-in cover art: a board path of tiles, the way a route-building game
+     shows its track on the lid. */
+  .box-art {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    margin: 0 0 auto;
+    padding-bottom: 30px;
+  }
+
+  .box-art .tile {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: rgba(25, 20, 16, 0.09);
+  }
+
+  .box-art .tile.warm {
+    background: rgba(185, 140, 47, 0.55);
+  }
+
+  .box-art .tile.hot {
+    background: rgba(152, 58, 38, 0.7);
+  }
+
+  .box-title {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-variation-settings: var(--display-variation);
+    font-size: calc(clamp(34px, 4.4vw, 52px) * var(--display-scale));
+    letter-spacing: var(--display-tracking);
+    line-height: 0.92;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .box-meta {
+    margin: 12px 0 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8f3623;
+  }
+
+  .box-dice {
+    display: flex;
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  .box-dice span {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: var(--ink);
+    box-shadow: inset -3px -3px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  .box-dice span:nth-child(2) {
+    background: #983a26;
+  }
+
+  .box-dice span:nth-child(3) {
+    background: var(--brass);
+  }
+
+  .box-spine {
+    position: absolute;
+    inset: 14px -12px -12px 14px;
+    background: var(--card-edge);
+    border-radius: 4px;
+    z-index: -1;
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.32);
+  }
+
+  /* ---------- catalog ---------- */
+
+  .catalog {
+    padding: 24px 0 90px;
+  }
+
+  .catalog-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 32px;
+    padding-bottom: 22px;
+    margin-bottom: 34px;
+    border-bottom: 2px solid rgba(236, 224, 200, 0.2);
+    flex-wrap: wrap;
+  }
+
+  .catalog-head h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-variation-settings: var(--display-variation);
+    font-size: calc(38px * var(--display-scale));
+    letter-spacing: var(--display-tracking);
+    text-transform: uppercase;
+  }
+
+  .catalog-head p {
+    margin: 0;
+    max-width: 44ch;
+    font-size: 14px;
+    color: rgba(236, 224, 200, 0.78);
+  }
+
+  .shelf {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+    gap: 30px;
+  }
+
+  .boxed a {
+    display: block;
+    text-decoration: none;
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.3);
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .boxed a:hover {
+    transform: translateY(-5px) rotate(-0.6deg);
+    box-shadow: 0 20px 34px rgba(0, 0, 0, 0.4);
+  }
+
+  .boxed-lid {
+    display: block;
+    padding: 22px 22px 20px;
+    background: linear-gradient(155deg, #f3e9d4, var(--card-edge));
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .boxed-publisher {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .boxed-title {
+    display: block;
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-variation-settings: var(--display-variation);
+    font-size: calc(23px * var(--display-scale));
+    line-height: 1;
+    letter-spacing: var(--display-tracking);
+    text-transform: uppercase;
+  }
+
+  .boxed-category {
+    display: block;
+    margin-top: 9px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8f3623;
+  }
+
+  .boxed-body {
+    padding: 20px 22px 24px;
+  }
+
+  .boxed-blurb {
+    margin: 0 0 16px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .boxed-funding {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .boxed-funding strong {
+    color: var(--ink);
+  }
+
+  /* ---------- footer ---------- */
+
+  .footer {
+    padding: 26px 0 40px;
+    border-top: 1px solid rgba(236, 224, 200, 0.16);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(236, 224, 200, 0.7);
+  }
+
+  .footer p {
+    margin: 0;
+  }
+
+  @media (max-width: 880px) {
+    .hero-inner {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 48px;
+    }
+
+    .box-lid {
+      order: -1;
+      transform: none;
+    }
+
+    .ledger {
+      gap: 26px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>

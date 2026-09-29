@@ -1,0 +1,565 @@
+---
+import { fetchGames, fundingFor, formatCurrency } from '../../utils/preview-data';
+import type { Game } from '../../types/game';
+
+const games = await fetchGames();
+
+// Funding stage is a genuine sequence, so it earns the pipeline treatment.
+const STAGES = ['Concept', 'Prototype', 'Production'] as const;
+
+const byStage = STAGES.map((stage) => ({
+  stage,
+  games: games.filter((game: Game) => fundingFor(game).stage === stage),
+}));
+
+const totalPledged = games.reduce((sum, game) => sum + fundingFor(game).pledged, 0);
+const totalBackers = games.reduce((sum, game) => sum + fundingFor(game).backers, 0);
+const shipping = byStage.find((group) => group.stage === 'Production')?.games.length ?? 0;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Pipeline concept - Tailspin Toys</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <a class="skip" href="#pipeline">Skip to campaigns</a>
+
+    <header class="bar">
+      <div class="shell bar-inner">
+        <a class="mark" href="/preview">
+          <span class="mark-glyph" aria-hidden="true"></span>
+          Tailspin Toys
+        </a>
+        <nav class="bar-nav" aria-label="Main navigation">
+          <a href="#pipeline">Campaigns</a>
+          <a href="#pipeline">Studios</a>
+          <a href="/preview">Back to previews</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="shell intro-inner">
+          <div>
+            <p class="eyebrow">Crowdfunding for developer-made tabletop games</p>
+            <h1>
+              Every campaign,<br />
+              <em>from concept to shipped.</em>
+            </h1>
+            <p class="lede">
+              Back a game early and follow it through the build. We publish each campaign's stage,
+              so you always know whether you are funding an idea, a prototype, or a print run.
+            </p>
+          </div>
+
+          <dl class="stats">
+            <div>
+              <dt>Pledged to date</dt>
+              <dd>{formatCurrency(totalPledged)}</dd>
+            </div>
+            <div>
+              <dt>Backers</dt>
+              <dd>{totalBackers.toLocaleString('en-US')}</dd>
+            </div>
+            <div>
+              <dt>In production</dt>
+              <dd>{shipping} <span>of {games.length}</span></dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="pipeline" id="pipeline">
+        <div class="shell">
+          {byStage.map((group) => (
+            <section class="stage" aria-labelledby={`stage-${group.stage}`}>
+              <div class="stage-head">
+                <span class="node" aria-hidden="true"></span>
+                <h2 id={`stage-${group.stage}`}>{group.stage}</h2>
+                <span class="count">{group.games.length} {group.games.length === 1 ? 'campaign' : 'campaigns'}</span>
+                <p class="stage-note">
+                  {group.stage === 'Concept' && 'Design is settled, art and tooling are not. Under 60% funded.'}
+                  {group.stage === 'Prototype' && 'Playtest copies exist. Funded past 60%, closing on goal.'}
+                  {group.stage === 'Production' && 'Goal met. At the printer, shipping to backers.'}
+                </p>
+              </div>
+
+              <ul class="runs">
+                {group.games.map((game) => {
+                  const funding = fundingFor(game);
+                  return (
+                    <li>
+                      <a class="run" href={`/game/${game.id}`}>
+                        <div class="run-main">
+                          <p class="run-studio">{game.publisher?.name}</p>
+                          <h3>{game.title}</h3>
+                          <p class="run-blurb">{game.description}</p>
+                          <p class="run-tags">
+                            <span class="tag">{game.category?.name}</span>
+                            {game.starRating !== null && (
+                              <span class="tag rating">{game.starRating.toFixed(1)} / 5</span>
+                            )}
+                          </p>
+                        </div>
+
+                        <div class="run-meter">
+                          <div class="meter-top">
+                            <span class="pct">{funding.percent}%</span>
+                            <span class="of">of {formatCurrency(funding.goal)}</span>
+                          </div>
+                          <div class="track">
+                            <div
+                              class:list={['fill', { over: funding.percent >= 100 }]}
+                              style={`width: ${Math.min(funding.percent, 100)}%`}
+                            >
+                            </div>
+                          </div>
+                          <p class="meter-foot">
+                            <span>{funding.backers.toLocaleString('en-US')} backers</span>
+                            <span>{funding.daysLeft}d left</span>
+                          </p>
+                        </div>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="shell">
+        <p>Design concept &middot; funding figures are illustrative</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --paper: #f6f5f1;
+    --paper-raised: #ffffff;
+    --rule: #dddbd3;
+    --ink: #17171c;
+    --ink-mid: #55555f;
+    --indigo: #2f2fa8;
+    --amber: #8a5a06;
+    --green: #1f6b45;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .skip {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .skip:focus {
+    left: 24px;
+    top: 14px;
+    z-index: 20;
+    background: var(--indigo);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 4px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 3px;
+  }
+
+  /* ---------- bar ---------- */
+
+  .bar {
+    background: var(--paper-raised);
+    border-bottom: 1px solid var(--rule);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 15px 24px;
+    flex-wrap: wrap;
+  }
+
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  /* Two stacked bars: a build queue reduced to its smallest possible mark. */
+  .mark-glyph {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    background:
+      linear-gradient(to bottom, var(--indigo) 0 45%, transparent 45% 55%, var(--amber) 55% 100%);
+  }
+
+  .bar-nav {
+    display: flex;
+    gap: 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+
+  .bar-nav a {
+    text-decoration: none;
+    color: var(--ink-mid);
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+  }
+
+  .bar-nav a:hover {
+    color: var(--indigo);
+    border-bottom-color: var(--indigo);
+  }
+
+  /* ---------- intro ---------- */
+
+  .intro {
+    padding: 76px 0 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .intro-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+    gap: 60px;
+    align-items: end;
+  }
+
+  .eyebrow {
+    margin: 0 0 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--indigo);
+  }
+
+  .intro h1 {
+    margin: 0 0 22px;
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-size: clamp(40px, 5.6vw, 62px);
+    font-weight: 700;
+    line-height: 1.03;
+    letter-spacing: -0.02em;
+  }
+
+  .intro h1 em {
+    font-style: normal;
+    color: var(--indigo);
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 52ch;
+    font-size: 17px;
+    color: var(--ink-mid);
+  }
+
+  .stats {
+    display: grid;
+    gap: 20px;
+    margin: 0;
+    padding-left: 32px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .stats dt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+  }
+
+  .stats dd {
+    margin: 3px 0 0;
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .stats dd span {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--ink-mid);
+  }
+
+  /* ---------- pipeline ---------- */
+
+  .pipeline {
+    padding: 8px 0 90px;
+  }
+
+  .stage {
+    position: relative;
+    padding: 46px 0 10px 0;
+  }
+
+  /* The rail: a continuous line linking stages, cut short on the last group. */
+  .stage::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 56px;
+    bottom: -10px;
+    width: 1px;
+    background: var(--rule);
+  }
+
+  .stage:last-child::before {
+    bottom: auto;
+    height: 0;
+  }
+
+  .stage-head {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+
+  .node {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 3px var(--indigo);
+  }
+
+  .stage-head h2 {
+    margin: 0;
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-mid);
+  }
+
+  .stage-note {
+    grid-column: 2 / -1;
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink-mid);
+  }
+
+  .runs {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 34px;
+    display: grid;
+    gap: 14px;
+  }
+
+  .run {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 232px;
+    gap: 34px;
+    align-items: center;
+    padding: 22px 24px;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    text-decoration: none;
+    transition:
+      border-color 0.16s ease,
+      box-shadow 0.16s ease;
+  }
+
+  .run:hover {
+    border-color: var(--indigo);
+    box-shadow: 0 6px 18px rgba(23, 23, 28, 0.08);
+  }
+
+  .run-studio {
+    margin: 0 0 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+  }
+
+  .run h3 {
+    margin: 0 0 8px;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .run-blurb {
+    margin: 0 0 14px;
+    max-width: 60ch;
+    font-size: 14px;
+    color: var(--ink-mid);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .run-tags {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: #eeeef6;
+    color: var(--indigo);
+  }
+
+  .tag.rating {
+    background: #f4eee1;
+    color: var(--amber);
+  }
+
+  .meter-top {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+
+  .pct {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .of {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mid);
+  }
+
+  .track {
+    height: 6px;
+    border-radius: 3px;
+    background: #e7e6e0;
+    overflow: hidden;
+  }
+
+  .fill {
+    height: 100%;
+    background: var(--indigo);
+  }
+
+  .fill.over {
+    background: var(--green);
+  }
+
+  .meter-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 9px 0 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mid);
+  }
+
+  /* ---------- foot ---------- */
+
+  .foot {
+    padding: 24px 0 40px;
+    border-top: 1px solid var(--rule);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-mid);
+  }
+
+  .foot p {
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .intro-inner {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+    }
+
+    .stats {
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      padding-left: 0;
+      border-left: 0;
+      padding-top: 24px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .run {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>

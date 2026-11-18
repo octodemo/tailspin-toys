@@ -166,7 +166,7 @@ Matches the `role="status"` / `aria-live="polite"` pattern in `ui.instructions.m
 Per `style.instructions.md`, styling is Tailwind-only. Apply visible focus rings as utilities on every interactive element:
 
 ```svelte
-<button class="focus:ring-2 focus:ring-blue-500 focus:outline-none">Action</button>
+<button class="focus:ring-2 focus:ring-blue-500 focus:outline-none" data-testid="custom-control">Action</button>
 ```
 
 Never strip focus styling (no `focus:outline-none` *without* a ring replacement).

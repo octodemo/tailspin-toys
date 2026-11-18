@@ -40,7 +40,6 @@ Refer to technology-specific instruction files:
 
 ### Design Consistency
 
-- Dark theme throughout the application
 - Modern, clean UI with rounded corners and smooth transitions
 - Consistent spacing and visual hierarchy
 - Responsive design that works on mobile, tablet, and desktop

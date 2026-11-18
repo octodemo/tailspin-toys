@@ -49,7 +49,6 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 ### Styling
 
 - Use Tailwind CSS utility classes exclusively - see `style.instructions.md`
-- Rounded corners and modern UI patterns
 - Follow modern UI/UX principles with clean, accessible interfaces
 
 ### GitHub Actions workflows

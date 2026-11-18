@@ -133,7 +133,7 @@ cd client && npx playwright test e2e-tests/games.spec.ts
 **Symptom**: Tests pass locally but fail in CI (or vice versa).
 
 - **Node version mismatch**: Verify the dependency `engines` fields in `client/package-lock.json`; CI uses the current Node LTS release.
-- **Python version mismatch**: CI uses Python 3.11. Check `server/requirements.txt` for version-pinned packages.
+- **Python version mismatch**: Check `server/requirements.txt` for version-pinned packages.
 - **Missing environment variables**: CI sets `API_SERVER_URL`. Locally, defaults to `http://localhost:5100`.
 - **Database state**: CI always starts with a clean database. Locally, stale `data/*.db` files can cause conflicts — delete them and restart.
 

@@ -159,7 +159,7 @@ cd client && npx playwright test e2e-tests/games.spec.ts
 ## Pre-Commit Checklist
 
 1. Run backend tests: `./scripts/run-server-tests.sh`
-2. Run lint (if any frontend files changed): `./scripts/run-lint.sh`
+2. Run lint: `./scripts/run-lint.sh`
 3. Run E2E tests (if UI changed): `./scripts/run-e2e-tests.sh`
 4. Verify new functionality has appropriate test coverage
 5. Confirm no tests were broken, skipped, or disabled

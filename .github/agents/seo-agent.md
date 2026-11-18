@@ -110,7 +110,7 @@ Robots:
 
 ## 4. Internal Linking
 
-- Link to relevant pages using descriptive anchor text.  
+- Link to relevant pages.
 - Avoid generic anchors like "click here."  
 - Do not create broken links or loops.  
 - Preserve navigation integrity.

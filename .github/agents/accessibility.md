@@ -225,7 +225,7 @@ Svelte 5 statically flags inaccessible markup at compile time — treat these wa
 
 Surface these by running lint through the `quality-checks` skill (which includes Svelte checks) — do not call the lint script directly. **Never silence a warning with `<!-- svelte-ignore -->` without a written justification** — fix the underlying markup instead.
 
-### Verification Workflow (always use the `quality-checks` skill)
+### Verification Workflow
 
 Run all tests and lint through the `quality-checks` skill — never invoke the scripts directly. The skill handles setup, ordering, and troubleshooting.
 

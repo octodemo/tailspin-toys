@@ -19,7 +19,6 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 #### Testing guidelines
 
 - **Always run tests and lint through the `quality-checks` skill — never invoke `run-server-tests.sh`, `run-e2e-tests.sh`, or `run-lint.sh` directly.** The skill wraps environment setup, ordering, and troubleshooting. (Starting the app for manual validation is not a quality check — call `scripts/start-app.sh` directly for that.)
-- Run Python tests to ensure backend functionality, and Playwright tests to ensure e2e and frontend functionality
 - Run ESLint to check frontend code quality before committing
 - Review the existing tests to ensure we're not duplicating efforts
 - Test code should be of the same quality as the rest of the project, and follow DRY principles

@@ -61,7 +61,6 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 - **Skills take precedence over scripts.** Before invoking any script directly, check whether a skill covers the task. If one does, load and follow that skill — it may wrap the script with required setup, ordering, or troubleshooting steps.
 - Helper scripts live in the `scripts` folder. Use provided scripts rather than relying on a hard-coded list.
-- Only fall back to calling a script directly when no skill applies.
 - Always prefer an existing script over performing the operation manually.
 - `scripts/setup-env.sh` is the single canonical installer for Python, Node, and Playwright browser dependencies. It is idempotent (uses sha256 markers) and supports `--check [scope]`, `--scope [scope]` (limit what gets installed; one of `server|client|app|e2e|all`), `--force`, and `--with-system-deps`. Runner scripts (`start-app.sh`, `run-server-tests.sh`, `run-e2e-tests.sh`) call `setup-env.sh --check` to validate prerequisites and exit with a remediation message when anything is missing — they do not install anything themselves.
 

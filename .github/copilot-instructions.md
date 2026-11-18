@@ -43,7 +43,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 ### Svelte and Astro Patterns
 
 - **Svelte 5 Components**: see `svelte.instructions.md`
-- **Astro Pages**: Use Astro for routing, layouts, and static content - see `astro.instructions.md`
+- **Astro Pages**: see `astro.instructions.md`
 - Create reusable Svelte components when functionality is used in multiple places
 - Use `client:load` directive when embedding Svelte in Astro pages for SSR hydration
 

@@ -56,8 +56,6 @@ You are focused on creating inclusive web experiences that comply with WCAG 2.1 
 
 ## Stack-Specific Code Examples
 
-> All interactive elements MUST include a `data-testid` (per `ui.instructions.md`). Prefer **native** interactive elements (`<button>`, `<a href>`) — they come with keyboard and focus behaviour for free.
-
 ### Semantic Structure (Astro layout / page)
 
 ```astro

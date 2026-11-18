@@ -98,13 +98,10 @@ Use client directives to control hydration:
 ```astro
 ---
 import GameList from '../components/GameList.svelte';
-const API_SERVER_URL = process.env.API_SERVER_URL || 'http://localhost:5100';
-const response = await fetch(`${API_SERVER_URL}/api/games`);
-const games = await response.json();
 ---
 
 <Layout>
-  <GameList client:load {games} />
+  <GameList client:load />
 </Layout>
 ```
 
@@ -123,4 +120,3 @@ Server endpoints handle API proxying. The catch-all endpoint at `src/pages/api/[
 - Keep Astro components for static content and routing
 - Use Svelte for interactivity and client-side state
 - Minimize client-side JavaScript by leveraging SSR data fetching in Astro frontmatter
-- Import and use global CSS styles from layouts

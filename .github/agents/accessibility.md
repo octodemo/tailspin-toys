@@ -56,8 +56,6 @@ You are focused on creating inclusive web experiences that comply with WCAG 2.1 
 
 ## Stack-Specific Code Examples
 
-> All interactive elements MUST include a `data-testid` (per `ui.instructions.md`). Prefer **native** interactive elements (`<button>`, `<a href>`) — they come with keyboard and focus behaviour for free.
-
 ### Semantic Structure (Astro layout / page)
 
 ```astro
@@ -158,7 +156,6 @@ Matches the `role="status"` / `aria-live="polite"` pattern in `ui.instructions.m
 
 - Use native HTML first (`<button>` over `<div role="button">`); only add ARIA when native semantics are insufficient
 - Common landmarks: `navigation`, `search`, `main`, `complementary`, `banner`, `contentinfo`
-- Site navigation uses plain `<nav>` + `<a>`/`<button>` (no `role="menu"`); reserve `role="menu"` / `role="menuitem"` (with full keyboard semantics and Escape-to-dismiss) for true application-style menus, per `ui.instructions.md`
 - Reference visible text with `aria-labelledby`; supplement with `aria-describedby`
 - Mark decorative SVGs/icons `aria-hidden="true"` (as `GameCard.svelte` does)
 
@@ -169,7 +166,7 @@ Matches the `role="status"` / `aria-live="polite"` pattern in `ui.instructions.m
 Per `style.instructions.md`, styling is Tailwind-only. Apply visible focus rings as utilities on every interactive element:
 
 ```svelte
-<button class="focus:ring-2 focus:ring-blue-500 focus:outline-none">Action</button>
+<button class="focus:ring-2 focus:ring-blue-500 focus:outline-none" data-testid="custom-control">Action</button>
 ```
 
 Never strip focus styling (no `focus:outline-none` *without* a ring replacement).
@@ -202,7 +199,7 @@ Use runes and event attributes — no `document.getElementById` / `addEventListe
 
 {#if open}
   <div bind:this={dialog} role="dialog" aria-modal="true" onkeydown={onKeydown} data-testid="dialog">
-    <button onclick={() => (open = false)} aria-label="Close" class="focus:ring-2 focus:ring-blue-500 focus:outline-none">×</button>
+    <button onclick={() => (open = false)} aria-label="Close" class="focus:ring-2 focus:ring-blue-500 focus:outline-none" data-testid="custom-control">×</button>
   </div>
 {/if}
 ```
@@ -228,9 +225,7 @@ Svelte 5 statically flags inaccessible markup at compile time — treat these wa
 
 Surface these by running lint through the `quality-checks` skill (which includes Svelte checks) — do not call the lint script directly. **Never silence a warning with `<!-- svelte-ignore -->` without a written justification** — fix the underlying markup instead.
 
-### Verification Workflow (always use the `quality-checks` skill)
-
-Run all tests and lint through the `quality-checks` skill — never invoke the scripts directly. The skill handles setup, ordering, and troubleshooting.
+### Verification Workflow
 
 1. Lint — ESLint + Svelte a11y warnings on `client/`
 2. E2E — Playwright, including the accessibility specs

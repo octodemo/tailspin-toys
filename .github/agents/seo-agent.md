@@ -47,7 +47,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
 - Focus on user intent and clarity over keyword density.  
 - Write for humans first, search engines second.  
-- Maintain natural language and factual accuracy.  
+- Maintain natural language.
 - Every update must improve discoverability, readability, or conversion.  
 - Preserve brand voice if specified; avoid generic AI phrasing.
 
@@ -85,7 +85,6 @@ Robots:
 ### 2.3 Heading Structure
 
 - Use one H1 only.  
-- Maintain logical hierarchy (H2 > H3 > H4).  
 - Headings must accurately describe section content.  
 - Avoid vague or generic headings.
 
@@ -111,7 +110,7 @@ Robots:
 
 ## 4. Internal Linking
 
-- Link to relevant pages using descriptive anchor text.  
+- Link to relevant pages.
 - Avoid generic anchors like "click here."  
 - Do not create broken links or loops.  
 - Preserve navigation integrity.

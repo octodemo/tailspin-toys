@@ -64,8 +64,7 @@ allowed-tools:
 ```
 
 - Ensure Python 3.11+ is available: `python3 --version`
-- Ensure Node 18+ is available: `node --version`
-- If `venv` is missing: `python3 -m venv venv && source venv/bin/activate && pip install -r server/requirements.txt`
+- Ensure Node `^20.19.0 || ^22.13.0 || >=24` is available: `node --version`
 
 ---
 
@@ -89,9 +88,8 @@ Then re-run the failing script.
 
 1. **Read the full traceback** — the first frame usually identifies the root cause.
 2. **In-memory database**: Tests use `sqlite:///:memory:` — schema is recreated per test class via `setUp`/`tearDown`. If a model change isn't reflected, ensure `db.create_all()` is called in `setUp`.
-3. **Missing fixtures**: Each test class seeds its own data via `_seed_test_data()`. If a test expects data that isn't seeded, add it there.
-4. **Import errors**: Verify the model or blueprint is registered in `server/app.py`.
-5. **Type errors**: All Python functions require type hints — check `mypy`-style annotations.
+3. **Import errors**: Verify the model or blueprint is registered in `server/app.py`.
+4. **Type errors**: All Python functions require type hints — check `mypy`-style annotations.
 
 Run a single test class for faster iteration:
 
@@ -134,8 +132,8 @@ cd client && npx playwright test e2e-tests/games.spec.ts
 
 **Symptom**: Tests pass locally but fail in CI (or vice versa).
 
-- **Node version mismatch**: Verify `.nvmrc` or `package.json` `engines` field; CI uses the current Node LTS release.
-- **Python version mismatch**: CI uses Python 3.11. Check `server/requirements.txt` for version-pinned packages.
+- **Node version mismatch**: Verify the dependency `engines` fields in `client/package-lock.json`; CI uses the current Node LTS release.
+- **Python version mismatch**: Check `server/requirements.txt` for version-pinned packages.
 - **Missing environment variables**: CI sets `API_SERVER_URL`. Locally, defaults to `http://localhost:5100`.
 - **Database state**: CI always starts with a clean database. Locally, stale `data/*.db` files can cause conflicts — delete them and restart.
 
@@ -161,7 +159,7 @@ cd client && npx playwright test e2e-tests/games.spec.ts
 ## Pre-Commit Checklist
 
 1. Run backend tests: `./scripts/run-server-tests.sh`
-2. Run lint (if any frontend files changed): `./scripts/run-lint.sh`
-3. Run E2E tests (if UI changed): `./scripts/run-e2e-tests.sh`
+2. Run lint: `./scripts/run-lint.sh`
+3. Run E2E tests: `./scripts/run-e2e-tests.sh`
 4. Verify new functionality has appropriate test coverage
 5. Confirm no tests were broken, skipped, or disabled

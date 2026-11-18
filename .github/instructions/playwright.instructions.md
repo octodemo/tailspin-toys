@@ -74,7 +74,7 @@ test.describe('Movie Search Feature', () => {
 ## Authoring & Iteration Strategy
 
 > [!NOTE]
-> This file covers how specs should be written. To *run* the E2E suite, use the `quality-checks` skill — never invoke `npx playwright test` or `run-e2e-tests.sh` directly.
+> This file covers how specs should be written.
 
 1. **Run**: Execute the suite through the `quality-checks` skill.
 2. **Debug Failures**: Analyze test failures and identify root causes.

@@ -64,7 +64,7 @@ allowed-tools:
 ```
 
 - Ensure Python 3.11+ is available: `python3 --version`
-- Ensure Node 18+ is available: `node --version`
+- Ensure Node `^20.19.0 || ^22.13.0 || >=24` is available: `node --version`
 - If `venv` is missing: `python3 -m venv venv && source venv/bin/activate && pip install -r server/requirements.txt`
 
 ---

@@ -33,7 +33,6 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 ### Code formatting requirements
 
 - When writing Python, you must use type hints for return values and function parameters.
-- Frontend code (TypeScript, Astro, Svelte) must pass ESLint checks (`scripts/run-lint.sh`)
 
 ### Python and Flask Patterns
 

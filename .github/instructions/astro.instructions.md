@@ -120,4 +120,3 @@ Server endpoints handle API proxying. The catch-all endpoint at `src/pages/api/[
 - Keep Astro components for static content and routing
 - Use Svelte for interactivity and client-side state
 - Minimize client-side JavaScript by leveraging SSR data fetching in Astro frontmatter
-- Import and use global CSS styles from layouts

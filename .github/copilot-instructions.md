@@ -21,7 +21,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - **Always run tests and lint through the `quality-checks` skill — never invoke `run-server-tests.sh`, `run-e2e-tests.sh`, or `run-lint.sh` directly.** The skill wraps environment setup, ordering, and troubleshooting. (Starting the app for manual validation is not a quality check — call `scripts/start-app.sh` directly for that.)
 - Review the existing tests to ensure we're not duplicating efforts
 - Test code should be of the same quality as the rest of the project, and follow DRY principles
-- For frontend changes, verify the build in the `client` directory (`npm run build`) directly, and run the end-to-end tests through the `quality-checks` skill, to ensure everything works correctly
+- For frontend changes, verify the build in the `client` directory (`npm run build`) directly.
 - When making API changes, update and run the corresponding tests to ensure everything works correctly
 
 #### Project guidelines

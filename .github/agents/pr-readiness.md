@@ -69,8 +69,6 @@ If any of these are unclear, ask the user before proceeding.
 
 ### Phase 4 — Run Verification Suite
 
-Run **all** checks through the `quality-checks` skill — never invoke the test, lint, or E2E scripts directly. The skill wraps environment setup, ordering, and the troubleshooting runbook:
-
 - Backend unit tests
 - Frontend lint (ESLint + Svelte a11y warnings)
 - Frontend E2E (Playwright)

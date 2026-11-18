@@ -52,7 +52,7 @@ All Svelte components MUST use Svelte 5 runes-based reactivity patterns:
 </script>
 
 <!-- Template with event attributes -->
-<div onclick={handler}>
+<div onclick={handler} data-testid="submit-button">
   {computed}
 </div>
 ```

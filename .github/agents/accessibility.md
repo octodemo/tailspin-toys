@@ -227,8 +227,6 @@ Surface these by running lint through the `quality-checks` skill (which includes
 
 ### Verification Workflow
 
-Run all tests and lint through the `quality-checks` skill — never invoke the scripts directly. The skill handles setup, ordering, and troubleshooting.
-
 1. Lint — ESLint + Svelte a11y warnings on `client/`
 2. E2E — Playwright, including the accessibility specs
 3. Use the Playwright MCP server to manually walk keyboard flows and capture `toMatchAriaSnapshot` evidence

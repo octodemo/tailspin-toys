@@ -7,8 +7,6 @@ applyTo: '**/*.{astro,svelte,css}'
 
 ## Tailwind CSS v4 Configuration
 
-This project uses Tailwind CSS v4.1.14 via the `@tailwindcss/vite` plugin.
-
 ### Global CSS Setup
 
 - Import Tailwind in `global.css`: `@import "tailwindcss";`

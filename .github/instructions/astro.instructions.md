@@ -98,13 +98,10 @@ Use client directives to control hydration:
 ```astro
 ---
 import GameList from '../components/GameList.svelte';
-const API_SERVER_URL = process.env.API_SERVER_URL || 'http://localhost:5100';
-const response = await fetch(`${API_SERVER_URL}/api/games`);
-const games = await response.json();
 ---
 
 <Layout>
-  <GameList client:load {games} />
+  <GameList client:load />
 </Layout>
 ```
 

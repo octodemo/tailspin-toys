@@ -47,7 +47,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
 - Focus on user intent and clarity over keyword density.  
 - Write for humans first, search engines second.  
-- Maintain natural language and factual accuracy.  
+- Maintain natural language.
 - Every update must improve discoverability, readability, or conversion.  
 - Preserve brand voice if specified; avoid generic AI phrasing.
 

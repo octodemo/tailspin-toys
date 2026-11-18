@@ -85,7 +85,6 @@ Robots:
 ### 2.3 Heading Structure
 
 - Use one H1 only.  
-- Maintain logical hierarchy (H2 > H3 > H4).  
 - Headings must accurately describe section content.  
 - Avoid vague or generic headings.
 

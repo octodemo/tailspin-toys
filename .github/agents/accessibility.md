@@ -199,7 +199,7 @@ Use runes and event attributes — no `document.getElementById` / `addEventListe
 
 {#if open}
   <div bind:this={dialog} role="dialog" aria-modal="true" onkeydown={onKeydown} data-testid="dialog">
-    <button onclick={() => (open = false)} aria-label="Close" class="focus:ring-2 focus:ring-blue-500 focus:outline-none">×</button>
+    <button onclick={() => (open = false)} aria-label="Close" class="focus:ring-2 focus:ring-blue-500 focus:outline-none" data-testid="custom-control">×</button>
   </div>
 {/if}
 ```

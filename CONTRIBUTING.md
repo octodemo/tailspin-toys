@@ -17,7 +17,7 @@ Please note that this project is released with a [Contributor Code of Conduct][c
 Before you can run and test the application locally, you'll need to install:
 
 - **Python 3.10+** - [Download](https://www.python.org/downloads/) | [Homebrew](https://formulae.brew.sh/formula/python@3.11)
-- **Node.js 18+** - [Download](https://nodejs.org/) | [Homebrew](https://formulae.brew.sh/formula/node)
+- **Node.js `^20.19.0 || ^22.13.0 || >=24`** - [Download](https://nodejs.org/) | [Homebrew](https://formulae.brew.sh/formula/node)
 - **Git** - [Download](https://git-scm.com/downloads) | [Homebrew](https://formulae.brew.sh/formula/git)
 
 ### Setting Up Your Development Environment

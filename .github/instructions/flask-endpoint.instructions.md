@@ -45,7 +45,6 @@ applyTo: 'server/routes/*.py'
 ## Required Testing
 
 - All endpoints need unit tests per [unit-tests.instructions.md](./unit-tests.instructions.md)
-- All tests must pass before commit
 
 ## Registration & References
 

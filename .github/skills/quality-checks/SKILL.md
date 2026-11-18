@@ -88,9 +88,8 @@ Then re-run the failing script.
 
 1. **Read the full traceback** — the first frame usually identifies the root cause.
 2. **In-memory database**: Tests use `sqlite:///:memory:` — schema is recreated per test class via `setUp`/`tearDown`. If a model change isn't reflected, ensure `db.create_all()` is called in `setUp`.
-3. **Missing fixtures**: Each test class seeds its own data via `_seed_test_data()`. If a test expects data that isn't seeded, add it there.
-4. **Import errors**: Verify the model or blueprint is registered in `server/app.py`.
-5. **Type errors**: All Python functions require type hints — check `mypy`-style annotations.
+3. **Import errors**: Verify the model or blueprint is registered in `server/app.py`.
+4. **Type errors**: All Python functions require type hints — check `mypy`-style annotations.
 
 Run a single test class for faster iteration:
 
